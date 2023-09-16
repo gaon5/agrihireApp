@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 import math
 import bcrypt
 import re
-from app import app, check_permissions, get_cursor
+from app import app, check_permissions, select_sql
 
 
 @app.route('/')
