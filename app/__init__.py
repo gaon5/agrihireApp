@@ -3,14 +3,18 @@ from datetime import date, datetime, timedelta
 import mysql.connector
 from app import config
 import math
-import bcrypt
 import re
 import uuid
+from flask_apscheduler import APScheduler
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config.from_object(config)
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400
 app.secret_key = 'aHn6Zb7MstRxC8vEoF2zG3B9wQjKl5YD'
+scheduler = APScheduler()
+scheduler.init_app(app)
+bcrypt = Bcrypt(app)
 
 db_conn = None
 connection = None
