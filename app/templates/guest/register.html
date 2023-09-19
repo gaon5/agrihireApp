@@ -12,7 +12,37 @@
 
 
 {% block body %}
-
+    <form action="{{ url_for('register') }}" method="post">
+        <label for="email"></label>
+        <input type="text" name="email" id="email" placeholder="Email Address" value="{{ request.form['email'] }}" required>
+        <label for="password"></label>
+        <input type="password" name="password" id="password" placeholder="New Password" required>
+        <label for="confirm_password"></label>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm New Password" required>
+        <label for="given_name"></label>
+        <input type="text" name="given_name" id="given_name" placeholder="Given Name" required>
+        <label for="surname"></label>
+        <input type="text" name="surname" id="surname" placeholder="Surname" required>
+        <label for="title"></label>
+        <select name="title" id="title" required>
+            <option value="" {% if not request.form['title'] %}selected="selected"{% endif %} disabled>Choose Title</option>
+            {% for title in titles %}
+                <option value="{{ title[0] }}" {% if request.form['title_id'] == title[0] %}selected="selected"{% endif %}>{{ title[1] }}</option>
+            {% endfor %}
+        </select>
+        <label for="question"></label>
+        <select name="question" id="question" required>
+            <option selected="selected" disabled>Choose A Security Question</option>
+            {% for question in questions %}
+                <option value="{{ question[0] }}">{{ question[1] }}</option>
+            {% endfor %}
+        </select>
+        <label for="answer"></label>
+        <input type="text" id="answer" name="answer" placeholder="Your Answer" required>
+        {{ msg }}
+        <button type="submit">Create</button>
+    </form>
+    <a href="{{ url_for('login') }}">Back to Login</a>
 {% endblock %}
 
 

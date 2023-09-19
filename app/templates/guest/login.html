@@ -12,7 +12,17 @@
 
 
 {% block body %}
-
+    <form action="{{ url_for('login') }}" method="post">
+        <label for="email_v" id="email"></label>
+        <input type="text" name="email" id="email_v" placeholder="Email Address" value="{{ request.form['email'] }}" required>
+        <label for="password_v" id="password"></label>
+        <input type="password" name="password" id="password_v" placeholder="Password" required>
+        <a href="{{ url_for('reset_password') }}">Forget your password?</a>
+        {{ msg }}
+        <button type="submit">Sign in</button>
+        <p>Don't have an account?</p>
+        <spqn><a href="{{ url_for('register') }}">Sign up now</a></spqn>
+    </form>
 {% endblock %}
 
 

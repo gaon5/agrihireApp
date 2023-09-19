@@ -93,7 +93,7 @@ def upload_image(file):
     return image_url
 
 
-def select_sql(sql, values=None, fetch=1):
+def operate_sql(sql, values=None, fetch=1):
     """
     Execute an SQL query and return the query result.
 
@@ -115,13 +115,13 @@ def select_sql(sql, values=None, fetch=1):
 
     Examples:
     # Execute a simple query
-    result = select_sql("SELECT * FROM users WHERE age > %s", (18,))
+    result = operate_sql("SELECT * FROM users WHERE age > %s", (18,))
 
     # Execute a query and fetch a single row
-    user = select_sql("SELECT * FROM users WHERE username = %s", ("john_doe",), fetch=0)
+    user = operate_sql("SELECT * FROM users WHERE username = %s", ("john_doe",), fetch=0)
 
     # Execute a query and fetch all results
-    all_users = select_sql("SELECT * FROM users")
+    all_users = operate_sql("SELECT * FROM users")
     """
     temp = None
     try:
@@ -141,5 +141,10 @@ def select_sql(sql, values=None, fetch=1):
         cursor.close()
     return temp
 
+
+region_list = operate_sql("""SELECT * FROM `region`;""")
+title_list = operate_sql("""SELECT * FROM `title`;""")
+city_list = operate_sql("""SELECT * FROM `city`;""")
+question_list = operate_sql("""SELECT * FROM `security_question`;""")
 
 from app import admin, member, root, guest
