@@ -1,7 +1,6 @@
 from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 import math
-import bcrypt
 import re
 from app import app, check_permissions, operate_sql, bcrypt, scheduler, region_list, title_list, city_list, question_list
 
@@ -24,19 +23,20 @@ def index():
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     msg = ''
+    today = datetime.today().date()
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-        account = operate_sql("""SELECT user_id,is_admin,is_customer,is_staff,is_root,password FROM user_account WHERE email=%s;""", (email,), fetch=0)
+        account = operate_sql("""SELECT user_id,is_admin,is_customer,is_staff,password FROM user_account WHERE email=%s;""", (email,), fetch=0)
         if account is not None:
-            if bcrypt.check_password_hash(account[5], password):
+            if bcrypt.check_password_hash(account[4], password):
                 # Login successful
+                operate_sql("""UPDATE user_account SET last_login_date=%s WHERE user_id=%s""", (today, account[0]))
                 session['loggedIn'] = True
                 session['user_id'] = account[0]
                 session['is_admin'] = account[1]
                 session['is_customer'] = account[2]
                 session['is_staff'] = account[3]
-                session['is_root'] = account[4]
                 msg = 'Login successful'
                 return render_template('guest/jump.html', goUrl='/', msg=msg)
         # username or password error
@@ -52,7 +52,6 @@ def logout():
     session.pop('is_admin', None)
     session.pop('is_customer', None)
     session.pop('is_staff', None)
-    session.pop('is_root', None)
     return redirect(url_for('index'))
 
 
@@ -81,13 +80,12 @@ def register():
         user_id = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0)
         value = (user_id[0], title, given_name, surname, question, answer)
         operate_sql("""INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) VALUES (%s,%s,%s,%s,%s,%s,1);""", value)
-        account = operate_sql("""SELECT user_id,is_admin,is_customer,is_staff,is_root FROM user_account WHERE user_id=%s;""", (user_id[0],), fetch=0)
+        account = operate_sql("""SELECT user_id,is_admin,is_customer,is_staff FROM user_account WHERE user_id=%s;""", (user_id[0],), fetch=0)
         session['loggedIn'] = True
         session['user_id'] = account[0]
         session['is_admin'] = account[1]
         session['is_customer'] = account[2]
         session['is_staff'] = account[3]
-        session['is_root'] = account[4]
         msg = 'Registration success!'
         return render_template('guest/jump.html', goUrl='/', msg=msg)
     return render_template('guest/register.html', titles=title_list, questions=question_list)

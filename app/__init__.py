@@ -18,6 +18,8 @@ bcrypt = Bcrypt(app)
 
 db_conn = None
 connection = None
+category_list = ['Landscaping']
+sub_category_list = ['Lawn-Mowers']
 
 
 def get_cursor():
@@ -38,10 +40,9 @@ def check_permissions():
 
     Returns:
     - An integer representing the user's permission level:
-        - 4 for root users.
         - 3 for admin users.
-        - 2 for instructor users.
-        - 1 for member users.
+        - 2 for staff users.
+        - 1 for customer users.
         - 0 for users with no specific role.
 
     This function examines session variables to determine a user's permissions.
@@ -52,17 +53,14 @@ def check_permissions():
     # Check user's permissions and assign a permission level
     permission_level = check_permissions()
     """
-    is_member = session['is_member']
-    is_instructor = session['is_instructor']
+    is_customer = session['is_customer']
+    is_staff = session['is_staff']
     is_admin = session['is_admin']
-    is_root = session['is_root']
-    if is_root == 1:
-        return 4
-    elif is_admin == 1:
+    if is_admin == 1:
         return 3
-    elif is_instructor == 1:
+    elif is_staff == 1:
         return 2
-    elif is_member == 1:
+    elif is_customer == 1:
         return 1
     else:
         return 0
@@ -147,4 +145,4 @@ title_list = operate_sql("""SELECT * FROM `title`;""")
 city_list = operate_sql("""SELECT * FROM `city`;""")
 question_list = operate_sql("""SELECT * FROM `security_question`;""")
 
-from app import admin, member, root, guest
+from app import admin, customer, guest

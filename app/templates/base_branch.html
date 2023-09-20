@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block branch %}
+    <div class="container mt-5">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="/">Home</a></li>
+            {% for breadcrumb in breadcrumbs %}
+                {% if loop.last %}
+                    <li class="breadcrumb-item active">{{ breadcrumb.text }}</li>
+                {% else %}
+                    <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
