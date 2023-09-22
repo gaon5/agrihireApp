@@ -120,3 +120,36 @@ def set_password(password, user_id):
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     operate_sql("""UPDATE user_account SET password=%s WHERE user_id=%s;""", (hashed_password, user_id,))
 
+
+def get_all_product():
+    sql = """SELECT * FROM product AS p LEFT JOIN product_img pi on p.product_id = pi.product_id WHERE pi.priority=1;"""
+    product = operate_sql(sql)
+    return product
+
+
+def get_product_by_category(category_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                LEFT JOIN classify c on p.product_id = c.product_id
+                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
+                WHERE sc.category_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (category_id,))
+    return product
+
+
+def get_product_by_sub(sub_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                LEFT JOIN classify c on p.product_id = c.product_id
+                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
+                WHERE sc.sub_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (sub_id,))
+    return product
+
+
+def get_product_by_id(product_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                WHERE p.product_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (product_id,), fetch=0)
+    return product

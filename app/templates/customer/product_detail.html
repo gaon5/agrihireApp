@@ -12,6 +12,7 @@
 
 
 {% block body %}
+    {{ product }}
     <form action="/product_detail/{{ detail_id }}" method="post">
         <input type="text" id="select_date" name="select_date" placeholder="Select Date..">
         <input type="text" id="days" name="days" placeholder="Select Date..">

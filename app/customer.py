@@ -16,6 +16,7 @@ def products(category, sub):
             category_id = next((key for key, value in sql_function.category.items() if value['name'] == category), None)
             if sub:
                 if sub in sql_function.category[category_id]['subcategories']:
+                    sub_id = next((item['sub_id'] for item in sql_function.sub_category_list if item['name'] == sub), None)
                     breadcrumbs.append({"text": str(sub).replace("-", " "), "url": "/products/" + str(category) + "/" + str(sub)})
                 else:
                     msg = "Sorry, we can't find the page you're looking for!."
@@ -23,8 +24,14 @@ def products(category, sub):
         else:
             msg = "Sorry, we can't find the page you're looking for!."
             return render_template('guest/jump.html', goUrl='/', msg=msg)
-
-    return render_template('customer/products.html', breadcrumbs=breadcrumbs)
+    if category:
+        if sub:
+            products = sql_function.get_product_by_sub(sub_id)
+        else:
+            products = sql_function.get_product_by_category(category_id)
+    else:
+        products = sql_function.get_all_product()
+    return render_template('customer/products.html', breadcrumbs=breadcrumbs, products=products)
 
 
 @app.route('/products/<category>/<sub>/detail', defaults={'detail_id': None})
@@ -49,6 +56,7 @@ def product_detail(category, sub, detail_id):
         return render_template('guest/jump.html', goUrl='/', msg=msg)
     breadcrumbs.append({"text": "Detail", "url": ""})
 
+    product = sql_function.get_product_by_id(detail_id)
     if request.method == 'POST':
         select_date = request.form.get('select_date')
         days = request.form.get('days')
@@ -61,4 +69,4 @@ def product_detail(category, sub, detail_id):
             end_date = datetime.strptime(end_date_str, "%d %b %Y")
             days = (start_date - end_date).days
             print(days)
-    return render_template('customer/product_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs)
+    return render_template('customer/product_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, product=product)
