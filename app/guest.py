@@ -4,6 +4,7 @@ import math
 import re
 from app import app, check_permissions, scheduler, bcrypt, sql_function
 
+
 @app.route('/my_task')
 @scheduler.task('interval', id='my_task', seconds=60)
 def my_task():
@@ -22,7 +23,7 @@ def index():
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     msg = ''
-
+    breadcrumbs = [{"text": "Login", "url": "/login/"}]
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -40,7 +41,7 @@ def login():
                 return render_template('guest/jump.html', goUrl='/', msg=msg)
         # username or password error
         msg = 'username or password error.'
-    return render_template('guest/login.html', msg=msg)
+    return render_template('guest/login.html', msg=msg, breadcrumbs=breadcrumbs)
 
 
 @app.route('/logout')
@@ -57,7 +58,7 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     msg = ''
-    today = datetime.today().date()
+    breadcrumbs = [{"text": "Register", "url": "/register"}]
     if request.method == 'POST':
         # Get data
         email = request.form.get('email')
@@ -71,7 +72,7 @@ def register():
         if account:
             # Email already exists
             msg = 'Email already exists!'
-            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list)
+            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
         # Insert account data into database
         account = sql_function.register_account(email, password, title, given_name, surname, question, answer)
         session['loggedIn'] = True
@@ -81,22 +82,23 @@ def register():
         session['is_staff'] = account['is_staff']
         msg = 'Registration success!'
         return render_template('guest/jump.html', goUrl='/', msg=msg)
-    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list)
+    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     msg = ''
+    breadcrumbs = [{"text": "Reset Password", "url": "/reset_password"}]
     email = request.args.get('email')
     if email:
         account = sql_function.get_account(email)
         if not account:
             msg = "Didn't have this account!"
-            return render_template('guest/reset_password.html', msg=msg)
+            return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
         else:
             session['user_id'] = account['user_id']
             question = sql_function.get_customer_question(account['user_id'])
-            return render_template('guest/answer.html', question=question)
+            return render_template('guest/answer.html', question=question, breadcrumbs=breadcrumbs)
     if request.method == 'POST':
         # Get data
         user_id = session['user_id']
@@ -106,25 +108,27 @@ def reset_password():
             return redirect(url_for('change_password'))
         else:
             msg = "The answer is incorrect!"
-        return render_template('guest/answer.html', question=question, msg=msg)
-    return render_template('guest/reset_password.html', msg=msg)
+        return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
+    return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
 
 
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     user_id = session['user_id']
+    breadcrumbs = [{"text": "Change Password", "url": "/change_password"}]
     if request.method == 'POST':
         session.pop('user_id', None)
         password = request.form.get('password')
         user_id = request.form.get('user_id')
         sql_function.set_password(password, user_id)
         return redirect(url_for('login'))
-    return render_template('guest/change_password.html', user_id=user_id)
+    return render_template('guest/change_password.html', user_id=user_id, breadcrumbs=breadcrumbs)
 
 
 @app.route('/change_information', methods=['GET', 'POST'])
 def change_information():
-    return render_template('guest/change_information.html')
+    breadcrumbs = [{"text": "Change Information", "url": "/change_information"}]
+    return render_template('guest/change_information.html', breadcrumbs=breadcrumbs)
 
 
 # @app.errorhandler(Exception)

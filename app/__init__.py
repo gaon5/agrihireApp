@@ -16,9 +16,6 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 bcrypt = Bcrypt(app)
 
-category_list = ['Landscaping']
-sub_category_list = ['Lawn-Mowers']
-
 
 def check_permissions():
     """

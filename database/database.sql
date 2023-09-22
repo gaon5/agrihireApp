@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `admin` (
 
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE IF NOT EXISTS `category` (
-  `category_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `priority` int(11) DEFAULT NULL,
   PRIMARY KEY (`category_id`)
@@ -211,7 +211,7 @@ INSERT INTO `city` (`city_id`, `region_id`, `city`) VALUES
 
 DROP TABLE IF EXISTS `classify`;
 CREATE TABLE IF NOT EXISTS `classify` (
-  `classify_id` int(11) NOT NULL,
+  `classify_id` int(11) NOT NULL AUTO_INCREMENT,
   `sub_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   PRIMARY KEY (`classify_id`),
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `customer` (
 
 DROP TABLE IF EXISTS `equipment_maintenance`;
 CREATE TABLE IF NOT EXISTS `equipment_maintenance` (
-  `maintenance_id` int(11) NOT NULL,
+  `maintenance_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `maintenance_date` date NOT NULL,
   `maintenance_type_id` int(11) NOT NULL,
@@ -277,7 +277,7 @@ CREATE TABLE IF NOT EXISTS `equipment_maintenance` (
 
 DROP TABLE IF EXISTS `equipment_rental_status`;
 CREATE TABLE IF NOT EXISTS `equipment_rental_status` (
-  `rental_status_id` int(11) NOT NULL,
+  `rental_status_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `customer_id` int(11) NOT NULL,
   `rental_start_date` date NOT NULL,
@@ -299,7 +299,7 @@ CREATE TABLE IF NOT EXISTS `equipment_rental_status` (
 
 DROP TABLE IF EXISTS `event_type`;
 CREATE TABLE IF NOT EXISTS `event_type` (
-  `event_type_id` int(11) NOT NULL,
+  `event_type_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`event_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS `event_type` (
 
 DROP TABLE IF EXISTS `hire_log`;
 CREATE TABLE IF NOT EXISTS `hire_log` (
-  `log_id` int(11) NOT NULL,
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
   `staff_id` int(11) NOT NULL,
   `datetime` datetime NOT NULL,
   `event_type_id` int(11) NOT NULL,
@@ -332,7 +332,7 @@ CREATE TABLE IF NOT EXISTS `hire_log` (
 
 DROP TABLE IF EXISTS `maintenance_status`;
 CREATE TABLE IF NOT EXISTS `maintenance_status` (
-  `maintenance_status_id` int(11) NOT NULL,
+  `maintenance_status_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`maintenance_status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -345,7 +345,7 @@ CREATE TABLE IF NOT EXISTS `maintenance_status` (
 
 DROP TABLE IF EXISTS `maintenance_type`;
 CREATE TABLE IF NOT EXISTS `maintenance_type` (
-  `maintenance_type_id` int(11) NOT NULL,
+  `maintenance_type_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`maintenance_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `maintenance_type` (
 
 DROP TABLE IF EXISTS `order_item`;
 CREATE TABLE IF NOT EXISTS `order_item` (
-  `order_item_id` int(11) NOT NULL,
+  `order_item_id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `count` int(11) DEFAULT '1',
@@ -376,7 +376,7 @@ CREATE TABLE IF NOT EXISTS `order_item` (
 
 DROP TABLE IF EXISTS `order_list`;
 CREATE TABLE IF NOT EXISTS `order_list` (
-  `order_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
   `status_id` int(11) NOT NULL,
   `datetime` datetime NOT NULL,
@@ -394,7 +394,7 @@ CREATE TABLE IF NOT EXISTS `order_list` (
 
 DROP TABLE IF EXISTS `order_status`;
 CREATE TABLE IF NOT EXISTS `order_status` (
-  `status_id` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -407,7 +407,7 @@ CREATE TABLE IF NOT EXISTS `order_status` (
 
 DROP TABLE IF EXISTS `payment`;
 CREATE TABLE IF NOT EXISTS `payment` (
-  `payment_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) NOT NULL,
   `status_id` int(11) NOT NULL,
   `payment_type_id` int(11) NOT NULL,
@@ -426,7 +426,7 @@ CREATE TABLE IF NOT EXISTS `payment` (
 
 DROP TABLE IF EXISTS `payment_status`;
 CREATE TABLE IF NOT EXISTS `payment_status` (
-  `status_id` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
   `status_name` varchar(255) NOT NULL,
   PRIMARY KEY (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -439,7 +439,7 @@ CREATE TABLE IF NOT EXISTS `payment_status` (
 
 DROP TABLE IF EXISTS `payment_type`;
 CREATE TABLE IF NOT EXISTS `payment_type` (
-  `payment_type_id` int(11) NOT NULL,
+  `payment_type_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`payment_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -452,7 +452,7 @@ CREATE TABLE IF NOT EXISTS `payment_type` (
 
 DROP TABLE IF EXISTS `product`;
 CREATE TABLE IF NOT EXISTS `product` (
-  `product_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `count` int(11) DEFAULT '0',
@@ -475,7 +475,7 @@ CREATE TABLE IF NOT EXISTS `product` (
 
 DROP TABLE IF EXISTS `product_img`;
 CREATE TABLE IF NOT EXISTS `product_img` (
-  `image_id` int(11) NOT NULL,
+  `image_id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) NOT NULL,
   `image_url` varchar(255) NOT NULL,
   PRIMARY KEY (`image_id`),
@@ -525,7 +525,7 @@ INSERT INTO `region` (`region_id`, `region`) VALUES
 
 DROP TABLE IF EXISTS `rental_status`;
 CREATE TABLE IF NOT EXISTS `rental_status` (
-  `rental_status_id` int(11) NOT NULL,
+  `rental_status_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`rental_status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -567,7 +567,7 @@ INSERT INTO `security_question` (`question_id`, `question`) VALUES
 
 DROP TABLE IF EXISTS `shopping_cart`;
 CREATE TABLE IF NOT EXISTS `shopping_cart` (
-  `shopping_id` int(11) NOT NULL,
+  `shopping_id` int(11) NOT NULL AUTO_INCREMENT,
   `customer_id` int(11) NOT NULL,
   PRIMARY KEY (`shopping_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -580,7 +580,7 @@ CREATE TABLE IF NOT EXISTS `shopping_cart` (
 
 DROP TABLE IF EXISTS `shopping_cart_item`;
 CREATE TABLE IF NOT EXISTS `shopping_cart_item` (
-  `cart_item_id` int(11) NOT NULL,
+  `cart_item_id` int(11) NOT NULL AUTO_INCREMENT,
   `shopping_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `count` int(11) DEFAULT '1',
@@ -618,7 +618,7 @@ CREATE TABLE IF NOT EXISTS `staff` (
 
 DROP TABLE IF EXISTS `sub_category`;
 CREATE TABLE IF NOT EXISTS `sub_category` (
-  `sub_id` int(11) NOT NULL,
+  `sub_id` int(11) NOT NULL AUTO_INCREMENT,
   `category_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`sub_id`),

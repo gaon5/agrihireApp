@@ -72,6 +72,13 @@ region_list = operate_sql("""SELECT * FROM `region`;""")
 title_list = operate_sql("""SELECT * FROM `title`;""")
 city_list = operate_sql("""SELECT * FROM `city`;""")
 question_list = operate_sql("""SELECT * FROM `security_question`;""")
+category_list = operate_sql("""SELECT * FROM `category`;""")
+sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
+
+category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
+for sub in sub_category_list:
+    categories = category[sub['category_id']]
+    categories['subcategories'].append(sub['name'])
 
 
 def get_account(email):
