@@ -125,10 +125,22 @@ def change_password():
     return render_template('guest/change_password.html', user_id=user_id, breadcrumbs=breadcrumbs)
 
 
-@app.route('/change_information', methods=['GET', 'POST'])
-def change_information():
-    breadcrumbs = [{"text": "Change Information", "url": "/change_information"}]
-    return render_template('guest/change_information.html', breadcrumbs=breadcrumbs)
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}]
+    # First determine whether to log in, then determine the user type, and then return different panels according to the type.
+    return render_template('admin/dashboard.html', breadcrumbs=breadcrumbs)
+    return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
+    return redirect(url_for('index'))
+
+
+@app.route('/edit_detail', methods=['GET', 'POST'])
+def edit_detail():
+    breadcrumbs = [{"text": "Edit My Detail", "url": "/edit_detail"}]
+    # First determine whether to log in, then determine the user type, and then query the database based on the type.
+    return render_template('admin/edit_detail.html', breadcrumbs=breadcrumbs)
+    return render_template('staff/edit_detail.html', breadcrumbs=breadcrumbs)
+    return render_template('customer/edit_detail.html', breadcrumbs=breadcrumbs)
 
 
 # @app.errorhandler(Exception)

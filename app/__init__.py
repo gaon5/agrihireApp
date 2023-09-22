@@ -74,4 +74,4 @@ def upload_image(file):
     return image_url
 
 
-from app import admin, customer, guest
+from app import admin, customer, guest, staff
