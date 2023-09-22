@@ -27,14 +27,14 @@
         <select name="title" id="title" required>
             <option value="" {% if not request.form['title'] %}selected="selected"{% endif %} disabled>Choose Title</option>
             {% for title in titles %}
-                <option value="{{ title[0] }}" {% if request.form['title_id'] == title[0] %}selected="selected"{% endif %}>{{ title[1] }}</option>
+                <option value="{{ title['title_id'] }}" {% if request.form['title_id'] == title['title_id'] %}selected="selected"{% endif %}>{{ title['title'] }}</option>
             {% endfor %}
         </select>
         <label for="question"></label>
         <select name="question" id="question" required>
             <option selected="selected" disabled>Choose A Security Question</option>
             {% for question in questions %}
-                <option value="{{ question[0] }}">{{ question[1] }}</option>
+                <option value="{{ question['question_id'] }}">{{ question['question'] }}</option>
             {% endfor %}
         </select>
         <label for="answer"></label>

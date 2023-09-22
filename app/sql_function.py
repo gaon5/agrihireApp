@@ -1,0 +1,115 @@
+import mysql.connector
+from app import config, bcrypt
+from datetime import date, datetime, timedelta
+
+db_conn = None
+connection = None
+
+
+def get_cursor():
+    global db_conn
+    global connection
+    connection = mysql.connector.connect(user=config.dbuser,
+                                         password=config.dbpass,
+                                         host=config.dbhost,
+                                         database=config.dbname,
+                                         autocommit=True)
+    db_conn = connection.cursor(dictionary=True)
+    return db_conn
+
+
+def operate_sql(sql, values=None, fetch=1, close=1):
+    """
+    Execute an SQL query and return the query result.
+
+    Args:
+    - sql (str): The SQL query to execute.
+    - values (tuple, optional): Parameter values for the SQL query to replace placeholders (optional).
+    - fetch (int, optional): Specify the number of rows to retrieve in the query result.
+      1 means retrieve a single row (default), 0 means retrieve a single row but do not fetch it,
+      None means retrieve all rows (optional).
+
+    Returns:
+    - The query result, which can be a single row, multiple rows, or None, depending on the fetch parameter.
+
+    Notes:
+    - This function executes an SQL query and optionally replaces placeholders in the query with parameter values.
+    - If the query starts with "SELECT," you can retrieve the query result based on the value of the fetch parameter.
+    - If a MySQL database error occurs, it will be caught and printed as an exception.
+    - Regardless of the outcome, the function will close the database cursor.
+
+    Examples:
+    # Execute a simple query
+    result = operate_sql("SELECT * FROM users WHERE age > %s", (18,))
+
+    # Execute a query and fetch a single row
+    user = operate_sql("SELECT * FROM users WHERE username = %s", ("john_doe",), fetch=0)
+
+    # Execute a query and fetch all results
+    all_users = operate_sql("SELECT * FROM users")
+    """
+    temp = None
+    try:
+        cursor = get_cursor()
+        if values:
+            cursor.execute(sql, values)
+        else:
+            cursor.execute(sql)
+        if sql.startswith("SELECT"):
+            if fetch:
+                temp = cursor.fetchall()
+            else:
+                temp = cursor.fetchone()
+    except mysql.connector.Error as e:
+        print("MySQL error:", e)
+    finally:
+        if close:
+            cursor.close()
+    return temp
+
+
+region_list = operate_sql("""SELECT * FROM `region`;""")
+title_list = operate_sql("""SELECT * FROM `title`;""")
+city_list = operate_sql("""SELECT * FROM `city`;""")
+question_list = operate_sql("""SELECT * FROM `security_question`;""")
+
+
+def get_account(email):
+    sql = """SELECT * FROM user_account 
+                WHERE email=%s;"""
+    account = operate_sql(sql, (email,), fetch=0)
+    return account
+
+
+def set_last_login_date(user_id):
+    today = datetime.today().date()
+    sql = """UPDATE user_account 
+                SET last_login_date=%s 
+                WHERE user_id=%s"""
+    operate_sql(sql, (today, user_id,))
+
+
+def register_account(email, password, title, given_name, surname, question, answer):
+    today = datetime.today().date()
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    sql = """INSERT INTO user_account (email, password, is_customer, register_date, last_login_date) 
+                VALUES (%s, %s, 1, %s, %s);"""
+    operate_sql(sql, (email, hashed_password, today, today), close=0)
+    account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
+    sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) 
+                VALUES (%s,%s,%s,%s,%s,%s,1);"""
+    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer), close=0)
+    account = get_account(email)
+    return account
+
+
+def get_customer_question(user_id):
+    question = operate_sql("""SELECT sq.question_id,sq.question,c.answer FROM customer AS c 
+                    LEFT OUTER JOIN security_question sq on sq.question_id = c.question_id WHERE user_id=%s;""", (user_id,), fetch=0)
+    return question
+
+
+def set_password(password, user_id):
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    operate_sql("""UPDATE user_account SET password=%s WHERE user_id=%s;""", (hashed_password, user_id,))
+

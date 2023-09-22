@@ -16,22 +16,8 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 bcrypt = Bcrypt(app)
 
-db_conn = None
-connection = None
 category_list = ['Landscaping']
 sub_category_list = ['Lawn-Mowers']
-
-
-def get_cursor():
-    global db_conn
-    global connection
-    connection = mysql.connector.connect(user=config.dbuser,
-                                         password=config.dbpass,
-                                         host=config.dbhost,
-                                         database=config.dbname,
-                                         autocommit=True)
-    db_conn = connection.cursor()
-    return db_conn
 
 
 def check_permissions():
@@ -90,59 +76,5 @@ def upload_image(file):
     image_url = url_for('static', filename=f'image/upload_image/{file_name}')
     return image_url
 
-
-def operate_sql(sql, values=None, fetch=1):
-    """
-    Execute an SQL query and return the query result.
-
-    Args:
-    - sql (str): The SQL query to execute.
-    - values (tuple, optional): Parameter values for the SQL query to replace placeholders (optional).
-    - fetch (int, optional): Specify the number of rows to retrieve in the query result.
-      1 means retrieve a single row (default), 0 means retrieve a single row but do not fetch it,
-      None means retrieve all rows (optional).
-
-    Returns:
-    - The query result, which can be a single row, multiple rows, or None, depending on the fetch parameter.
-
-    Notes:
-    - This function executes an SQL query and optionally replaces placeholders in the query with parameter values.
-    - If the query starts with "SELECT," you can retrieve the query result based on the value of the fetch parameter.
-    - If a MySQL database error occurs, it will be caught and printed as an exception.
-    - Regardless of the outcome, the function will close the database cursor.
-
-    Examples:
-    # Execute a simple query
-    result = operate_sql("SELECT * FROM users WHERE age > %s", (18,))
-
-    # Execute a query and fetch a single row
-    user = operate_sql("SELECT * FROM users WHERE username = %s", ("john_doe",), fetch=0)
-
-    # Execute a query and fetch all results
-    all_users = operate_sql("SELECT * FROM users")
-    """
-    temp = None
-    try:
-        cursor = get_cursor()
-        if values:
-            cursor.execute(sql, values)
-        else:
-            cursor.execute(sql)
-        if sql.startswith("SELECT"):
-            if fetch:
-                temp = cursor.fetchall()
-            else:
-                temp = cursor.fetchone()
-    except mysql.connector.Error as e:
-        print("MySQL error:", e)
-    finally:
-        cursor.close()
-    return temp
-
-
-region_list = operate_sql("""SELECT * FROM `region`;""")
-title_list = operate_sql("""SELECT * FROM `title`;""")
-city_list = operate_sql("""SELECT * FROM `city`;""")
-question_list = operate_sql("""SELECT * FROM `security_question`;""")
 
 from app import admin, customer, guest
