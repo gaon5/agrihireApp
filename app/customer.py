@@ -70,3 +70,8 @@ def product_detail(category, sub, detail_id):
             days = (start_date - end_date).days
             print(days)
     return render_template('customer/product_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, product=product)
+
+# route for update information
+@app.route('/customer_update_personal_info', methods=['GET','POST'])
+def customer_update_personal_info():
+    return render_template('customer/update_personal_info.html')

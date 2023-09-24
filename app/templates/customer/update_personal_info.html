@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+
+{% endblock %}
+
+
+{% block body %}
+    <div class="container py-5" style="min-height: 800px;">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="{{ url_for('customer_update_personal_info') }}" method="post">
+                            <div class="input-group mb-3">
+                                <label for="title" class="input-group-text">
+                                    <i class="fa-brands fa-redhat"></i>
+                                </label>
+                                <select class="form-control" name="title" id="title" required>
+                                    <option value="" selected="selected" disabled>Choose Title</option>
+                                    <option value="1" >1</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="first_name" class="input-group-text">
+                                    <i class="fa-regular fa-id-card"></i>
+                                </label>
+                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" required>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="surname" class="input-group-text">
+                                    <i class="fa-solid fa-signature"></i>
+                                </label>
+                                <input type="text" class="form-control" name="surname" id="surname" placeholder="Surname" required>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="email" class="input-group-text">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </label>
+                                <input type="email" class="form-control" name="email" id="email" placeholder="Email Address" required>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="phone" class="input-group-text">
+                                    <i class="fa-solid fa-phone"></i>
+                                </label>
+                                <input type="text" class="form-control" name="phone" id="phone" placeholder="Phone Number" required>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="birth_date" class="input-group-text">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </label>
+                                <input type="date" class="form-control" name="birth_date" id="birth_date" min="1900-01-01" max="2004-12-31" placeholder="Date of Birth" required>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="region" class="input-group-text">
+                                    <i class="fa-solid fa-mountain"></i>
+                                </label>
+                                <select class="form-control" name="region" id="region" required>
+                                    <option value="" selected="selected" disabled>Choose Region</option>
+                                    <option value="1" >1</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="city" class="input-group-text">
+                                    <i class="fa-solid fa-city"></i>
+                                </label>
+                                <select class="form-control" name="city" id="city" required>
+                                    <option value="" selected="selected" disabled>Choose City</option>
+                                    <option value="1" >1</option>
+                                </select>
+                            </div>
+                            <div class="input-group mb-3">
+                                <label for="street" class="input-group-text">
+                                    <i class="fa-solid fa-house"></i>
+                                </label>
+                                <input type="text" class="form-control" name="street" id="street" placeholder="Street Name" required>
+                            </div>
+                            <div class="msg">{{ msg }}</div>
+                            <div class="d-grid gap-2">
+                                <input type="submit" class="btn btn-warning" value="Update">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+
+{% endblock %}
