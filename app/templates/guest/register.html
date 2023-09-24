@@ -1,51 +1,163 @@
 {% extends "base.html" %}
 
-
 {% block mytitle %}
 
 {% endblock %}
 
-
 {% block mycss %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
 
+    <style>
+        .form-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+          /* Style for the tips */
+          .tip-text {
+            font-size: 12px;
+           
+            color: #5c5a5aa2; /* Red color for error */
+            margin-top: 5px;
+        }
+
+           /* Style for the icon */
+           .icon {
+            font-size: 18px;
+            margin-right: 5px;
+        }
+
+        .small-checkbox .form-check-input {
+        width: 18px; /* Adjust the width as needed */
+        height: 18px; /* Adjust the height as needed */
+    }
+
+        .small-checkbox .form-check-label {
+            font-size: 14px; /* Adjust the font size as needed */
+        }
+    </style>
 {% endblock %}
-
 
 {% block body %}
-    <form action="{{ url_for('register') }}" method="post">
-        <label for="email"></label>
-        <input type="text" name="email" id="email" placeholder="Email Address" value="{{ request.form['email'] }}" required>
-        <label for="password"></label>
-        <input type="password" name="password" id="password" placeholder="New Password" required>
-        <label for="confirm_password"></label>
-        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm New Password" required>
-        <label for="given_name"></label>
-        <input type="text" name="given_name" id="given_name" placeholder="Given Name" required>
-        <label for="surname"></label>
-        <input type="text" name="surname" id="surname" placeholder="Surname" required>
-        <label for="title"></label>
-        <select name="title" id="title" required>
-            <option value="" {% if not request.form['title'] %}selected="selected"{% endif %} disabled>Choose Title</option>
-            {% for title in titles %}
-                <option value="{{ title['title_id'] }}" {% if request.form['title_id'] == title['title_id'] %}selected="selected"{% endif %}>{{ title['title'] }}</option>
-            {% endfor %}
-        </select>
-        <label for="question"></label>
-        <select name="question" id="question" required>
-            <option selected="selected" disabled>Choose A Security Question</option>
-            {% for question in questions %}
-                <option value="{{ question['question_id'] }}">{{ question['question'] }}</option>
-            {% endfor %}
-        </select>
-        <label for="answer"></label>
-        <input type="text" id="answer" name="answer" placeholder="Your Answer" required>
-        {{ msg }}
-        <button type="submit">Create</button>
-    </form>
-    <a href="{{ url_for('login') }}">Back to Login</a>
+<div class="container">
+    <div class="form-section">
+        <h2 class="mb-4">Trade Account User Sign Up</h2>
+        <form class="mt-4" action="{{ url_for('login') }}" method="post">
+        
+    
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address<span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" value="{{ request.form['email'] }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">New Password<span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+    
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Confirm New Password<span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                <div id="password-strength" class="tip-text">Password has to be at least 8 characters in length and contain at least 3 of the following 4 types of characters: lower case letters, upper case letters, numbers, special characters</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="given_name" class="form-label">Given Name<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="given_name" name="given_name" placeholder="Enter your given name" required>
+            </div>
+            <div class="mb-3">
+                <label for="surname" class="form-label">Surname<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="surname" name="surname" placeholder="Enter your surname" required>
+                <div id="name-char-limit"  class="tip-text"><i class="bi bi-exclamation-triangle icon"></i>The name fields can only accept 30 characters combined (characters left: <span id="char-count">30</span>)</div>
+            </div>
+           
+            <div class="mb-3">
+                <label for="title" class="form-label">Title<span class="text-danger">*</span></label>
+                <select class="form-select" id="title" name="title" required>
+                    <option value="" {% if not request.form['title'] %}selected="selected"{% endif %} disabled>Choose Title</option>
+                    {% for title in titles %}
+                        <option value="{{ title['title_id'] }}" {% if request.form['title_id'] == title['title_id'] %}selected="selected"{% endif %}>{{ title['title'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="question" class="form-label">Security Question<span class="text-danger">*</span></label>
+                <select class="form-select" id="question" name="question" required>
+                    <option selected="selected" disabled>Choose A Security Question</option>
+                    {% for question in questions %}
+                        <option value="{{ question['question_id'] }}">{{ question['question'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="answer" class="form-label">Your Answer<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="answer" name="answer" placeholder="Enter your answer" required>
+            </div>
+            {{ msg }}
+            <div class="mb-3 form-check form-check-inline small-checkbox">
+                <input type="checkbox" class="form-check-input" id="agreeCheckbox" required>
+                <label class="form-check-label" for="agreeCheckbox">Yes, I agree to receive exclusive offers, updates, and promotions from Hirepool.</label>
+            </div>
+            
+            <div class="mb-3 form-check form-check-inline small-checkbox">
+                <input type="checkbox" class="form-check-input" id="readAgreementCheckbox" required>
+                <label class="form-check-label" for="readAgreementCheckbox">I have read and agree to the <a href="#termsAndConditions">Terms and Conditions</a> of the Online Booking Request.</label>
+            </div>
+            <button type="submit" class="btn btn-danger">REQUEST TO SIGN UP</button>
+        </form>
+    </div>
+    <p class="mt-3"><a href="{{ url_for('login') }}">Back to Login</a></p>
+</div>
+          
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
 
-
 {% block myjs %}
-
+<script>
+    const givenName = document.getElementById('given_name');
+    const surname = document.getElementById('surname');
+    const charCount = document.getElementById('char-count');
+    const nameCharLimit = document.getElementById('name-char-limit');
+    
+    givenName.addEventListener('input', updateCharCount);
+    surname.addEventListener('input', updateCharCount);
+    
+    function updateCharCount() {
+        const combinedLength = givenName.value.length + surname.value.length;
+        const charactersLeft = 30 - combinedLength;
+        charCount.innerText = charactersLeft;
+        if (charactersLeft >= 0) {
+            nameCharLimit.classList.remove('text-danger');
+            nameCharLimit.innerText = `The name fields can only accept 30 characters combined (characters left: ${charactersLeft})`;
+        } else {
+            nameCharLimit.classList.add('text-danger');
+            nameCharLimit.innerText = `Character limit exceeded! (characters over: ${Math.abs(charactersLeft)})`;
+        }
+    }
+    
+    const password = document.getElementById('password');
+    const passwordStrength = document.getElementById('password-strength');
+    
+    password.addEventListener('input', checkPasswordStrength);
+    
+    function checkPasswordStrength() {
+        const passwordValue = password.value;
+        const lowerCase = /[a-z]/.test(passwordValue);
+        const upperCase = /[A-Z]/.test(passwordValue);
+        const numbers = /\d/.test(passwordValue);
+        const specialChars = /[!@#$%^&*]/.test(passwordValue);
+        
+        const conditionsMet = [lowerCase, upperCase, numbers, specialChars].filter(Boolean).length;
+        
+        if (passwordValue.length >= 8 && conditionsMet >= 3) {
+            passwordStrength.classList.remove('text-danger');
+            passwordStrength.innerText = 'Password meets the requirements.';
+        } else {
+            passwordStrength.classList.add('text-danger');
+            passwordStrength.innerText = 'Password has to be at least 8 characters in length and contain at least 3 of the following 4 types of characters: lower case letters, upper case letters, numbers, special characters';
+        }
+    }
+</script>
 {% endblock %}
