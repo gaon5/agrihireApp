@@ -7,7 +7,15 @@
 
 
 {% block mycss %}
-
+<style>
+    .bg-container {
+        background-image: url('static/image/background2.jpg'); /* 替换为您的图像URL */
+        background-size: cover; /* 背景图像覆盖整个元素 */
+        background-position: center; /* 背景图像居中 */
+        color: #EECD5C; /* 设置文本颜色为白色，或者您喜欢的其他颜色 */
+        padding: 20px; /* 添加一些内边距 */
+    }
+</style>
 {% endblock %}
 
 
@@ -48,10 +56,44 @@
     <!-- 可以继续添加更多的段落或其他HTML元素 -->
 </div>
 
+<div class="container mt-5 bg-container">
+    <h2 class="mb-4">About Us</h2>  
+    <p>
+        Welcome to Darfield Outdoor Hire. We are professional equipment hire company, with more than 500 different types of outdoor equipment for hire such as landscaping tools, trailers, earthmoving machinery, building tools and farm equipment.
+    </p>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+                <i class="mb-2" style="font-size: 2em;">🛒</i>
+                <h5>Step 1: Browse</h5>
+                <p>Explore our wide variety of outdoor equipment available for hire.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+                <i class="mb-2" style="font-size: 2em;">📄</i>
+                <h5>Step 2: Select</h5>
+                <p>Choose the equipment that best suits your needs and add it to your cart.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex flex-column align-items-center">
+                <i class="mb-2" style="font-size: 2em;">🚚</i>
+                <h5>Step 3: Hire</h5>
+                <p>Complete the hiring process and get the equipment delivered to your location.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 {% endblock %}
 
 
 {% block myjs %}
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 
 <script>
     $(document).ready(function(){
