@@ -162,7 +162,7 @@ def get_customer_details(user_id):
     details = operate_sql(sql, (user_id,), fetch=0)
     return details
 
-def check_customer_email(email):
+def check_email(email):
     sql = """SELECT user_id, email FROM `user_account`
                 WHERE email=%s;"""
     result = operate_sql(sql, (email,), fetch=0)

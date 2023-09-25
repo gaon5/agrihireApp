@@ -93,7 +93,7 @@ def customer_update_personal_info():
         city = int(request.form.get('city'))
         street_name = request.form.get('street_name')
         user_id = int(request.form.get('user_id'))
-        email_result = sql_function.check_customer_email(email)
+        email_result = sql_function.check_email(email)
         if int(email_result['user_id']) != user_id:
             error_msg = "Email entered is already in use. Please enter another email address."
         else:
