@@ -7,7 +7,7 @@
 
 
 {% block mycss %}
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 {% endblock %}
 
 
@@ -15,73 +15,93 @@
     <div class="container py-5" style="min-height: 800px;">
         <div class="row justify-content-center">
             <div class="col-md-8">
+                <h2 style="text-align: center;">Update Personal Information</h2>
+                <br>
+                <h5 style="text-align: center;">Click the fields to change details</h5>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ url_for('customer_update_personal_info') }}" method="post">
+                        <form action="{{ url_for('customer_update_personal_info') }}" method="post" id="myForm" onsubmit="return validateForm()">
                             <div class="input-group mb-3">
                                 <label for="title" class="input-group-text">
-                                    <i class="fa-brands fa-redhat"></i>
+                                    Title <span style="color:red">*</span>
                                 </label>
                                 <select class="form-control" name="title" id="title" required>
                                     <option value="" selected="selected" disabled>Choose Title</option>
-                                    <option value="1" >1</option>
+                                    {% for title in title_list %}
+                                        <option value="{{ title.title_id }}" >{{ title.title }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="input-group mb-3">
                                 <label for="first_name" class="input-group-text">
-                                    <i class="fa-regular fa-id-card"></i>
+                                    First Name <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" required>
+                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" value="{{ details_list.first_name }}" required>
                             </div>
+                            <p id="first_name_msg" style="color: red"></p>
                             <div class="input-group mb-3">
-                                <label for="surname" class="input-group-text">
-                                    <i class="fa-solid fa-signature"></i>
+                                <label for="last_name" class="input-group-text">
+                                    Last Name <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="surname" id="surname" placeholder="Surname" required>
+                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last Name" value="{{ details_list.last_name }}" required>
                             </div>
+                            <p id="last_name_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="email" class="input-group-text">
-                                    <i class="fa-solid fa-envelope"></i>
+                                    Email <span style="color:red">*</span>
                                 </label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="Email Address" required>
+                                <input type="email" class="form-control" name="email" id="email" placeholder="Email Address" value="{{ details_list.email }}" required>
                             </div>
+                            <p id="email_msg" style="color: red"></p>
                             <div class="input-group mb-3">
-                                <label for="phone" class="input-group-text">
-                                    <i class="fa-solid fa-phone"></i>
+                                <label for="phone_number" class="input-group-text">
+                                    Phone Number <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="phone" id="phone" placeholder="Phone Number" required>
+                                <input type="text" class="form-control" name="phone_number" id="phone_number" placeholder="Phone Number" value="{{ details_list.phone_number }}" required>
                             </div>
+                            <p id="phone_number_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="birth_date" class="input-group-text">
-                                    <i class="fa-solid fa-calendar-days"></i>
+                                    Date of Birth <span style="color:red">*</span>
                                 </label>
-                                <input type="date" class="form-control" name="birth_date" id="birth_date" min="1900-01-01" max="2004-12-31" placeholder="Date of Birth" required>
+                                <input type="text" class="form-control" name="birth_date" id="birth_date" placeholder="Date of Birth" value="{{ details_list.birth_date }}" required>
                             </div>
                             <div class="input-group mb-3">
                                 <label for="region" class="input-group-text">
-                                    <i class="fa-solid fa-mountain"></i>
+                                    Region <span style="color:red">*</span>
                                 </label>
-                                <select class="form-control" name="region" id="region" required>
+                                <select class="form-control" name="region" id="region" onchange="update_region()" required>
                                     <option value="" selected="selected" disabled>Choose Region</option>
-                                    <option value="1" >1</option>
+                                    {% for region in region_list %}
+                                        <option value="{{ region.region_id }}" >{{ region.region }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             <div class="input-group mb-3">
                                 <label for="city" class="input-group-text">
-                                    <i class="fa-solid fa-city"></i>
+                                    City <span style="color:red">*</span>
                                 </label>
                                 <select class="form-control" name="city" id="city" required>
                                     <option value="" selected="selected" disabled>Choose City</option>
-                                    <option value="1" >1</option>
                                 </select>
                             </div>
                             <div class="input-group mb-3">
-                                <label for="street" class="input-group-text">
-                                    <i class="fa-solid fa-house"></i>
+                                <label for="street_name" class="input-group-text">
+                                    Street <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="street" id="street" placeholder="Street Name" required>
+                                <input type="text" class="form-control" name="street_name" id="street_name" placeholder="Street Name" value="{{ details_list.street_name }}" required>
                             </div>
-                            <div class="msg">{{ msg }}</div>
+                            <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
+                            {% if error_msg %}
+                                <div class="alert alert-danger">
+                                    {{ error_msg }}
+                                </div>
+                            {% endif %}
+                            {% if msg %}
+                                <div class="alert alert-success">
+                                    {{ msg }}
+                                </div>
+                            {% endif %}
                             <div class="d-grid gap-2">
                                 <input type="submit" class="btn btn-warning" value="Update">
                             </div>
@@ -95,5 +115,91 @@
 
 
 {% block myjs %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    //birth date validation
+    flatpickr("#birth_date", {
+        minDate: "01 01 1900",
+        maxDate: "30 12 2004",
+        dateFormat: "d M Y",
+    });
 
+    //city list validation (based on region list)
+    const city_list = JSON.parse('{{ city_list|tojson }}');
+    const region = document.getElementById('region');
+    const city = document.getElementById('city');
+    region.value = {{ details_list.region_id }};
+    title.value = {{ details_list.title_id }};
+    for (const i in city_list) {
+        if (String(city_list[i].region_id) === region.value) {
+            const option = document.createElement('option');
+            option.value = city_list[i].city_id;
+            option.text = city_list[i].city;
+            city.appendChild(option);
+            }
+        }
+    city.value = {{ details_list.city_id }};
+
+    function update_region() {
+        city.innerHTML = '<option value="" disabled>---Choose city---</option>';
+        for (const i in city_list) {
+            if (String(city_list[i].region_id) === region.value) {
+                const option = document.createElement('option');
+                option.value = city_list[i].city_id;
+                option.text = city_list[i].city;
+                city.appendChild(option);
+            }
+        }
+    }
+
+    //validate name, email and phone number
+    const first_name_msg = document.getElementById('first_name_msg');
+    const last_name_msg = document.getElementById('last_name_msg');
+    const email_msg = document.getElementById('email_msg');
+    const phone_number_msg = document.getElementById('phone_number_msg');
+    const first_name = document.getElementById('first_name');
+    const last_name = document.getElementById('last_name')
+    const email = document.getElementById('email');
+    const phone_number = document.getElementById('phone_number');
+    
+    function validateForm() {
+        const namePattern = /^[a-zA-Z]+$/;
+        const phonePattern = /^\d{7,11}$/;
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        if (!namePattern.test(first_name.value)) {
+            first_name_msg.innerText = "First name should contain only letters.";
+            first_name.classList.add("is-invalid");
+            return false;
+        } else {
+            first_name.classList.remove("is-invalid");
+            first_name_msg.innerText = "";
+        }
+        if (!namePattern.test(last_name.value)) {
+            last_name_msg.innerText = "Last name should contain only letters.";
+            last_name.classList.add("is-invalid");
+            return false;
+        } else {
+            last_name.classList.remove("is-invalid");
+            last_name_msg.innerText = "";
+        }
+        if (!emailPattern.test(email.value)) {
+            email.classList.add("is-invalid");
+            email_msg.innerText = "Invalid email. Please enter the correct format (Example: nicholas123@gmail.com).";
+            return false;
+        } else {
+            email.classList.remove("is-invalid");
+            email_msg.innerText = "";
+        }
+        if (!phonePattern.test(phone_number.value)) {
+            phone_number.classList.add("is-invalid");
+            phone_number_msg.innerText = "Invalid phone number. Please enter 7 to 11 numbers only.";
+            return false;
+        } else {
+            phone_number.classList.remove("is-invalid");
+            phone_number_msg.innerText = "";
+        }
+        //submit form if only all validations are passed        
+        return true;
+    }
+</script>
 {% endblock %}

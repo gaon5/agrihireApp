@@ -74,4 +74,35 @@ def product_detail(category, sub, detail_id):
 # route for update information
 @app.route('/customer_update_personal_info', methods=['GET','POST'])
 def customer_update_personal_info():
-    return render_template('customer/update_personal_info.html')
+    # get user_id from session
+    # user_id = session["user_id"]
+    user_id = 1
+    # create message variables to display in templates
+    error_msg = ''
+    msg = ''
+    # update personal information if user submits the form
+    if request.method == 'POST':
+        first_name = request.form.get('first_name').capitalize()
+        last_name = request.form.get('last_name').capitalize()
+        # convert string into datetime object
+        birth_date = datetime.strptime(request.form.get('birth_date'),'%d %b %Y').strftime('%Y-%m-%d')
+        title = int(request.form.get('title'))
+        email = request.form.get('email')
+        phone_number = request.form.get('phone_number')
+        region = int(request.form.get('region'))
+        city = int(request.form.get('city'))
+        street_name = request.form.get('street_name')
+        user_id = int(request.form.get('user_id'))
+        email_result = sql_function.check_customer_email(email)
+        if int(email_result['user_id']) != user_id:
+            error_msg = "Email entered is already in use. Please enter another email address."
+        else:
+            sql_function.update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name,email,user_id)
+            msg = "Update successful"
+    # take latest details_list
+    details_list = sql_function.get_customer_details(user_id)
+    details_list['birth_date'] = details_list['birth_date'].strftime('%d %b %Y')
+    title_list = sql_function.title_list
+    region_list = sql_function.region_list
+    city_list = sql_function.city_list
+    return render_template('customer/update_personal_info.html', details_list=details_list, title_list=title_list, region_list=region_list, city_list=city_list, msg=msg, error_msg=error_msg)
