@@ -129,10 +129,14 @@ def change_password():
 def dashboard():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}]
     # First determine whether to log in, then determine the user type, and then return different panels according to the type.
-    return render_template('admin/dashboard.html', breadcrumbs=breadcrumbs)
-    return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
-    return redirect(url_for('index'))
-
+    if 'loggedIn' in session:
+        # First determine whether to log in, then determine the user type, and then return different panels according to the type.
+        if session['is_admin'] == 1:
+            return render_template('admin/dashboard.html', breadcrumbs=breadcrumbs)
+        elif session['is_staff'] == 1:
+            return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
+    else:    
+        return redirect(url_for('index'))
 
 @app.route('/edit_detail', methods=['GET', 'POST'])
 def edit_detail():
