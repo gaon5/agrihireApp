@@ -23,6 +23,39 @@
     .step-box:hover {
         transform: scale(1.1); /* 放大效果 */
     }
+
+    .custom-caption {
+        position: static;
+        padding: 20px;
+    }
+
+    .custom-caption {
+        position: static;
+        padding: 20px;
+        margin-left: 50px;
+        color: #4b4029; /* 设置字体颜色为白色，您可以根据需要更改颜色代码 */
+        font-family: 'Arial', sans-serif; /* 设置艺术字体，您可以根据需要更改字体 */
+    }
+
+    .custom-caption h5 {
+        font-size: 24px; /* 设置 h5 标签的字体大小 */
+        margin-bottom: 10px; /* 设置 h5 标签的底部外边距 */
+    }
+
+    .custom-caption h6 {
+        font-size: 20px; /* 设置 h6 标签的字体大小 */
+        margin-bottom: 10px; /* 设置 h6 标签的底部外边距 */
+    }
+
+    .custom-caption p {
+        font-size: 16px; /* 设置段落文字的字体大小 */
+    }
+
+    .carousel-item .row {
+        display: flex;
+        align-items: center; /* 垂直居中对齐 */
+        height: 80vh; /* 与图片高度保持一致 */
+    }
 </style>
 {% endblock %}
 
@@ -31,16 +64,58 @@
 <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner">
         <div class="carousel-item active">
-            <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}" style="width: 50%; height: 80vh; object-fit: cover;" alt="First slide">
+            <div class="row">
+                <div class="col-md-3 position-relative">
+                    <div class="custom-caption">
+                        <img src="{{ url_for('static', filename='image/STANDON MOWERS.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
+                        <h6>V-RIDE II</h6>
+                        <p>Featuring a comfortable operator platform with first-class suspension that minimizes fatigue, the V-Ride II™ delivers a natural, intuitive and smooth riding position the entire day. With unrivaled performance, stability and durability, this machine helps keep you in tip-top condition to get the job done day after day, year after year.</p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}" style="height: 80vh; object-fit: cover;" alt="First slide">
+                </div>
+            </div>
         </div>
         <div class="carousel-item">
-            <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}" style="width: 50%; height: 80vh; object-fit: cover;" alt="Second slide">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="custom-caption">
+                        <img src="{{ url_for('static', filename='image/ROUGH TERRAIN SCISSORS.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
+                        <p>A very popular class of Scissor Lift is the Rough Terrain or 'RT' class. Typical features of 'RT' scissor lifts are increased power, (provided by internal combustion engine, variations can be diesel, petrol, gas, or combinations of these). This is required to cope with increased wights & steeper grades of 18 degrees to 22 degrees that are generally associated with this class of scissor lift. Also utilized are high flotation & 'lugged' tyres, an even axle weight distribution, 4WD, increased ground clearance, & in many instances, an 'oscillating axle' to help keep all four wheels on the ground when travelling over rough terrain. Increased robustness & higher payloads are often typical characteristics of the 'RT' class Scissor Lift. However generally speaking, the higher a Scissor Lift can elevate, the less payload it will be capable of lifting.                        </p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
+                </div>
+            </div>
+        </div>
+        <!-- 同理，为其他的 carousel-item 也加入对应的文字描述和图片结构 -->
+        <div class="carousel-item">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="custom-caption">
+                        <img src="{{ url_for('static', filename='image/Tree Chainsaw.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
+                        <p>The STIHL MS 170 is an affordable Chainsaw with an excellent power-to-weight ratio that lets you tackle trees up to 14 inches (35 cm) in diameter. This Chainsaw has many of the same design features as the STIHL professional saws used by forestry workers, such as the Anti-Vibration system for more comfortable handling, and Ematic Chain Lubrication for less oil consumption and optimal lubrication. For these reasons, the MS 170 Chainsaw is an excellent choice for home users seeking a high quality and reliable Chainsaw at an entry-level price.</p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <img class="d-block w-100" src="{{ url_for('static', filename='image/tree_saws.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
+                </div>
+            </div>
         </div>
         <div class="carousel-item">
-            <img class="d-block w-100" src="{{ url_for('static', filename='image/Loaders.jpg') }}" style="width: 50%; height: 80vh; object-fit: cover;" alt="Third slide">
-        </div>
-        <div class="carousel-item">
-            <img class="d-block w-100" src="{{ url_for('static', filename='image/Tree_saws.jpg') }}" style="width: 50%; height: 80vh; object-fit: cover;" alt="Fourth slide">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="custom-caption">
+                        <img src="{{ url_for('static', filename='image/Wheel loader.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
+                        <p>Wheel loaders are normally seen in places like construction sites and excavation jobs. They use their huge bucket to move objects like dirt and rocks away from the job site to be placed into dump trucks to be taken away. Loaders can also move materials around the site if needed. </p>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <img class="d-block w-100" src="{{ url_for('static', filename='image/loaders.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
+                </div>
+            </div>
         </div>
     </div>
     <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
@@ -64,7 +139,7 @@
     <!-- 可以继续添加更多的段落或其他HTML元素 -->
 </div>
 
-<div class="container mt-5 bg-container">
+<div class="container mt-5 bg-container" id="about-us">
     <h2 class="mb-4">About Us</h2>  
     <p>
         Welcome to Darfield Outdoor Hire. We are professional equipment hire company, with more than 500 different types of outdoor equipment for hire such as landscaping tools, trailers, earthmoving machinery, building tools and farm equipment.
