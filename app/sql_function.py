@@ -153,3 +153,23 @@ def get_product_by_id(product_id):
                 WHERE p.product_id=%s AND pi.priority=1;"""
     product = operate_sql(sql, (product_id,), fetch=0)
     return product
+
+def stats_customers():
+    sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
+    customer_stat = operate_sql(sql)
+    return customer_stat
+
+def stats_staff():
+    sql = """SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;"""
+    staff_stat = operate_sql(sql)
+    return staff_stat
+
+def stats_equipment():
+    sql = """SELECT COUNT(product_id) FROM hire.product;"""
+    equipment_stat = operate_sql(sql)
+    return equipment_stat
+
+def stats_booking():
+    sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
+    booking_stat = operate_sql(sql)
+    return booking_stat

@@ -128,10 +128,23 @@ def change_password():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}]
-    # First determine whether to log in, then determine the user type, and then return different panels according to the type.
-    return render_template('admin/dashboard.html', breadcrumbs=breadcrumbs)
-    return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
-    return redirect(url_for('index'))
+    customer_stat = sql_function.stats_customers()
+    print(customer_stat[0]['COUNT(customer_id)'])
+    staff_stat = sql_function.stats_staff()
+    print(staff_stat[0]['COUNT(staff_id)'])
+    equipment_stat = sql_function.stats_equipment()
+    booking_stat = sql_function.stats_booking()
+    if customer_stat == 0 or staff_stat == 0 or equipment_stat == 0 or booking_stat == 0:
+        return 0
+    if 'loggedIn' in session:
+        # First determine whether to log in, then determine the user type, and then return different panels according to the type.
+        if session['is_admin'] == 1:
+            return render_template('admin/dashboard.html', breadcrumbs=breadcrumbs, customer_stat=customer_stat, staff_stat=staff_stat,
+                               equipment_stat=equipment_stat, booking_stat=booking_stat)
+        elif session['is_staff'] == 1:
+            return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
+    else:    
+        return redirect(url_for('index'))
 
 
 @app.route('/edit_detail', methods=['GET', 'POST'])
