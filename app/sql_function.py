@@ -68,12 +68,12 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     return temp
 
 
-region_list = operate_sql("""SELECT * FROM `region`;""")
-title_list = operate_sql("""SELECT * FROM `title`;""")
-city_list = operate_sql("""SELECT * FROM `city`;""")
-question_list = operate_sql("""SELECT * FROM `security_question`;""")
-category_list = operate_sql("""SELECT * FROM `category`;""")
-sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
+region_list = operate_sql("""SELECT * FROM `region`;""", close=0)
+title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
+city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
+question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
+category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
+sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
 
 category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
 for sub in sub_category_list:
@@ -121,35 +121,42 @@ def set_password(password, user_id):
     operate_sql("""UPDATE user_account SET password=%s WHERE user_id=%s;""", (hashed_password, user_id,))
 
 
-def get_all_product():
-    sql = """SELECT * FROM product AS p LEFT JOIN product_img pi on p.product_id = pi.product_id WHERE pi.priority=1;"""
-    product = operate_sql(sql)
-    return product
+def get_all_equipment():
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on c.sub_id = s.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE ei.priority=1;"""
+    equipment = operate_sql(sql)
+    return equipment
 
 
-def get_product_by_category(category_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                LEFT JOIN classify c on p.product_id = c.product_id
-                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
-                WHERE sc.category_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (category_id,))
-    return product
+def get_equipment_by_category(category_id):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE s.category_id=%s AND ei.priority=1;"""
+    equipment = operate_sql(sql, (category_id,))
+    return equipment
 
 
-def get_product_by_sub(sub_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                LEFT JOIN classify c on p.product_id = c.product_id
-                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
-                WHERE sc.sub_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (sub_id,))
-    return product
+def get_equipment_by_sub(sub_id):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE s.sub_id=%s AND ei.priority=1;"""
+    equipment = operate_sql(sql, (sub_id,))
+    return equipment
 
 
-def get_product_by_id(product_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                WHERE p.product_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (product_id,), fetch=0)
-    return product
+def get_equipment_by_id(equipment_id):
+    sql = """SELECT * FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE e.equipment_id=%s;"""
+    equipment = operate_sql(sql, (equipment_id,))
+    return equipment
