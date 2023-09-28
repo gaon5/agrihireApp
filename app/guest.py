@@ -128,11 +128,13 @@ def change_password():
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}]
+    # Number of customers in the system
     customer_stat = sql_function.stats_customers()
-    print(customer_stat[0]['COUNT(customer_id)'])
+    # Number of staff in the system
     staff_stat = sql_function.stats_staff()
-    print(staff_stat[0]['COUNT(staff_id)'])
+    # Number of equipment in the system
     equipment_stat = sql_function.stats_equipment()
+    # Number of bookings made in the system
     booking_stat = sql_function.stats_booking()
     if customer_stat == 0 or staff_stat == 0 or equipment_stat == 0 or booking_stat == 0:
         return 0

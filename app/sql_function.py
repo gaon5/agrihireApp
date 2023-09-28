@@ -165,7 +165,7 @@ def stats_staff():
     return staff_stat
 
 def stats_equipment():
-    sql = """SELECT COUNT(product_id) FROM hire.product;"""
+    sql = """SELECT COUNT(equipment_id) FROM hire.equipment;"""
     equipment_stat = operate_sql(sql)
     return equipment_stat
 
