@@ -39,7 +39,7 @@ def staff_update_personal_information():
 def staff_change_password():
     # get user_id from session
     # user_id = session["user_id"]
-    user_id = 3
+    user_id = 2
     # create message variables to display in templates
     error_msg = ""
     msg = ""
