@@ -54,78 +54,134 @@
     .carousel-item .row {
         display: flex;
         align-items: center; /* 垂直居中对齐 */
-        height: 80vh; /* 与图片高度保持一致 */
+        height: 50vh; /* 与图片高度保持一致 */
     }
+
+    .carousel-inner {
+    padding: 20px; /* 在容器的四周都添加20px的内边距 */
+    }
+
+    .nav-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 50vh; /* 使导航栏容器填满左侧区域 */
+    }
+
+    .nav-link {
+        border: 2px solid #eeeec3; /* 为每个链接添加边框 */
+        border-radius: 5px; /* 可选：为边框添加圆角 */
+        margin-bottom: 5px; /* 添加下外边距，使链接之间有间隔 */
+        padding-left: 50px; 
+        padding-right: 50px;
+        text-align: center; /* 文本居中 */
+    }
+
+    .nav-link:hover {
+        background-color: #eacd76; /* 鼠标悬停时的背景颜色 */
+    }
+
+    .nav-link.active {
+        background-color: #b29b5b; /* 激活链接的背景颜色 */
+        font-weight: bold; /* 激活链接的字体加粗 */
+    }
+
+    .slogan-text {
+    color: #eacd76; /* 您已经设定的颜色 */
+    text-align: left; /* 文字居中 */
+    font-weight: 700; /* 字体加粗 */
+    font-size: 30px;
+    font-family: 'Poppins', sans-serif;
+    }
+
+    .slogan-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* 或者您想要的任何高度 */
+}
+
 </style>
 {% endblock %}
 
 
 {% block body %}
-<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <div class="row">
-                <div class="col-md-3 position-relative">
-                    <div class="custom-caption">
-                        <img src="{{ url_for('static', filename='image/STANDON MOWERS.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
-                        <h6>V-RIDE II</h6>
-                        <p>Featuring a comfortable operator platform with first-class suspension that minimizes fatigue, the V-Ride II™ delivers a natural, intuitive and smooth riding position the entire day. With unrivaled performance, stability and durability, this machine helps keep you in tip-top condition to get the job done day after day, year after year.</p>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}" style="height: 80vh; object-fit: cover;" alt="First slide">
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="custom-caption">
-                        <img src="{{ url_for('static', filename='image/ROUGH TERRAIN SCISSORS.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
-                        <p>A very popular class of Scissor Lift is the Rough Terrain or 'RT' class. Typical features of 'RT' scissor lifts are increased power, (provided by internal combustion engine, variations can be diesel, petrol, gas, or combinations of these). This is required to cope with increased wights & steeper grades of 18 degrees to 22 degrees that are generally associated with this class of scissor lift. Also utilized are high flotation & 'lugged' tyres, an even axle weight distribution, 4WD, increased ground clearance, & in many instances, an 'oscillating axle' to help keep all four wheels on the ground when travelling over rough terrain. Increased robustness & higher payloads are often typical characteristics of the 'RT' class Scissor Lift. However generally speaking, the higher a Scissor Lift can elevate, the less payload it will be capable of lifting.                        </p>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
-                </div>
-            </div>
-        </div>
-        <!-- 同理，为其他的 carousel-item 也加入对应的文字描述和图片结构 -->
-        <div class="carousel-item">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="custom-caption">
-                        <img src="{{ url_for('static', filename='image/Tree Chainsaw.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
-                        <p>The STIHL MS 170 is an affordable Chainsaw with an excellent power-to-weight ratio that lets you tackle trees up to 14 inches (35 cm) in diameter. This Chainsaw has many of the same design features as the STIHL professional saws used by forestry workers, such as the Anti-Vibration system for more comfortable handling, and Ematic Chain Lubrication for less oil consumption and optimal lubrication. For these reasons, the MS 170 Chainsaw is an excellent choice for home users seeking a high quality and reliable Chainsaw at an entry-level price.</p>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <img class="d-block w-100" src="{{ url_for('static', filename='image/tree_saws.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="custom-caption">
-                        <img src="{{ url_for('static', filename='image/Wheel loader.jpg') }}" alt="standon mowers" style="width: 260px; height: auto;" class="centered-image">
-                        <p>Wheel loaders are normally seen in places like construction sites and excavation jobs. They use their huge bucket to move objects like dirt and rocks away from the job site to be placed into dump trucks to be taken away. Loaders can also move materials around the site if needed. </p>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <img class="d-block w-100" src="{{ url_for('static', filename='image/loaders.jpg') }}" style="height: 80vh; object-fit: cover;" alt="Second slide">
-                </div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="nav-container">
+            <div class="d-flex flex-column align-items-start">
+                <h5 style = "color:#1d1912">Equipment</h5>
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#" style = "color:#1d1912">Catalog1</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog2</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog3</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog4</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog5</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog6</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog7</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog8</a>
+                    <a class="nav-link" href="#" style = "color:#1d1912">Catalog9</a>
+
+                    <!-- 更多品类... -->
+                </nav>
             </div>
         </div>
     </div>
-    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-    </a>
-    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-    </a>
+    <div class="col-md-9">
+        <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active" style="background-color: #1d1912;">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}" style="height: 50vh; object-fit: cover;" alt="First slide">
+                        </div>
+                        <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <p class="slogan-text">It's Time To Makeover Your Lawn</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" style="background-color: #1d1912;">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}" style="height: 50vh; object-fit: cover;" alt="Second slide">
+                        </div>
+                        <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <p class="slogan-text">Are You Worried About Painting The Exterior Wall Of The Second Floor?</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" style="background-color: #1d1912;">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <img class="d-block w-100" src="{{ url_for('static', filename='image/tree_saws.jpg') }}" style="height: 50vh; object-fit: cover;" alt="Second slide">
+                        </div>
+                        <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <p class="slogan-text">We Have The Latest Tree Saws!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item" style="background-color: #1d1912;">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <img class="d-block w-100" src="{{ url_for('static', filename='image/loaders.jpg') }}" style="height: 50vh; object-fit: cover;" alt="Second slide">
+                        </div>
+                        <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <p class="slogan-text">It's A Chance To Play With Clay!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="container mt-5">  
