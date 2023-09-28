@@ -30,7 +30,7 @@
                                 {{ msg }}
                             </div>
                         {% endif %}
-                        <form action="{{ url_for('customer_update_personal_info') }}" method="post" id="myForm" onsubmit="return validateForm()">
+                        <form action="{{ url_for('staff_update_personal_information') }}" method="post" id="myForm" onsubmit="return validateForm()">
                             <div class="input-group mb-3">
                                 <label for="title" class="input-group-text">
                                     Title <span style="color:red">*</span>
@@ -70,37 +70,6 @@
                                 <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}" required>
                             </div>
                             <p id="phone_number_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="birth_date" class="input-group-text">
-                                    Date of Birth <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="birth_date" id="birth_date" value="{{ details_list.birth_date }}" required>
-                            </div>
-                            <div class="input-group mb-3">
-                                <label for="region" class="input-group-text">
-                                    Region <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="region" id="region" onchange="update_region()" required>
-                                    <option value="" selected="selected" disabled>Choose Region</option>
-                                    {% for region in region_list %}
-                                        <option value="{{ region.region_id }}" >{{ region.region }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="input-group mb-3">
-                                <label for="city" class="input-group-text">
-                                    City <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="city" id="city" required>
-                                    <option value="" selected="selected" disabled>Choose City</option>
-                                </select>
-                            </div>
-                            <div class="input-group mb-3">
-                                <label for="street_name" class="input-group-text">
-                                    Street <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="street_name" id="street_name" value="{{ details_list.street_name }}" required>
-                            </div>
                             <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
                             <div class="d-grid gap-2">
                                 <input type="submit" class="btn btn-warning" value="Update">
@@ -117,40 +86,8 @@
 {% block myjs %}
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
-    //birth date validation
-    flatpickr("#birth_date", {
-        minDate: "01 01 1900",
-        maxDate: "30 12 2004",
-        dateFormat: "d M Y",
-    });
-
-    //city list validation (based on region list)
-    const city_list = JSON.parse('{{ city_list|tojson }}');
-    const region = document.getElementById('region');
-    const city = document.getElementById('city');
-    region.value = {{ details_list.region_id }};
+    // set default value of title
     title.value = {{ details_list.title_id }};
-    for (const i in city_list) {
-        if (String(city_list[i].region_id) === region.value) {
-            const option = document.createElement('option');
-            option.value = city_list[i].city_id;
-            option.text = city_list[i].city;
-            city.appendChild(option);
-            }
-        }
-    city.value = {{ details_list.city_id }};
-
-    function update_region() {
-        city.innerHTML = '<option value="" disabled>---Choose city---</option>';
-        for (const i in city_list) {
-            if (String(city_list[i].region_id) === region.value) {
-                const option = document.createElement('option');
-                option.value = city_list[i].city_id;
-                option.text = city_list[i].city;
-                city.appendChild(option);
-            }
-        }
-    }
 
     //validate name, email and phone number
     const first_name_msg = document.getElementById('first_name_msg');
