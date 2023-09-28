@@ -11,6 +11,12 @@ from app import app, check_permissions, sql_function
 def equipments(category, sub):
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}]
     sub_id = category_id = None
+    page = request.args.get('page')
+    if not page:
+        sql_page = 0
+    else:
+        page = int(page)
+        sql_page = (page - 1) * 12
     if category:
         if any(categories['name'] == category for categories in sql_function.category.values()):
             breadcrumbs.append({"text": str(category).replace("-", " "), "url": "/equipments/" + str(category)})
@@ -27,15 +33,12 @@ def equipments(category, sub):
             return render_template('guest/jump.html', goUrl='/', msg=msg)
     if category_id:
         if sub_id:
-            sql_equipments = sql_function.get_equipment_by_sub(sub_id)
+            sql_equipments, count = sql_function.get_equipment_by_sub(sub_id, sql_page)
         else:
-            sql_equipments = sql_function.get_equipment_by_category(category_id)
+            sql_equipments, count = sql_function.get_equipment_by_category(category_id, sql_page)
     else:
-        sql_equipments = sql_function.get_all_equipment()
-    category_list = []
-    for i in sql_function.category_list:
-        category_list.append({'category_id': i['category_id'], 'name': i['name'].replace("-", " ")})
-    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=category_list)
+        sql_equipments, count = sql_function.get_all_equipment(sql_page)
+    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list, count=count)
 
 
 @app.route('/equipments/<category>/<sub>/detail', defaults={'detail_id': None})

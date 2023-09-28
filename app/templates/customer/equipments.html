@@ -82,7 +82,7 @@
                         <li style="margin: 20px 0;">
                             <div>
                                 <input type="radio" id="{{ category.category_id }}" style="display: none">
-                                <label class="label_style" for="{{ category.category_id }}">{{ category.name }}</label>
+                                <label class="label_style" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
                             </div>
                         </li>
                     {% endfor %}
@@ -118,6 +118,16 @@
                 </div>
             </div>
         </div>
+        <nav aria-label="Page navigation member_">
+                <ul class="pagination justify-content-center">
+                    {% if count %}
+                        {% for i in range(count) %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}">{{ i + 1 }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </nav>
     </div>
 {% endblock %}
 
