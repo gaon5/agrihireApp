@@ -74,8 +74,8 @@ def product_detail(category, sub, detail_id):
     return render_template('customer/product_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, product=product)
 
 # route for update information
-@app.route('/customer_update_personal_info', methods=['GET','POST'])
-def customer_update_personal_info():
+@app.route('/customer_update_personal_information', methods=['GET','POST'])
+def customer_update_personal_information():
     # get user_id from session
     # user_id = session["user_id"]
     user_id = 3
@@ -107,7 +107,7 @@ def customer_update_personal_info():
     title_list = sql_function.title_list
     region_list = sql_function.region_list
     city_list = sql_function.city_list
-    return render_template('update_personal_information.html', details_list=details_list, title_list=title_list, region_list=region_list, city_list=city_list, msg=msg, error_msg=error_msg)
+    return render_template('customer/update_personal_information.html', details_list=details_list, title_list=title_list, region_list=region_list, city_list=city_list, msg=msg, error_msg=error_msg)
 
 # route for changing password
 @app.route('/customer_change_password', methods=['GET','POST'])
@@ -138,6 +138,4 @@ def customer_change_password():
             hashed_password = bcrypt.hashpw(byte_new_password, bcrypt.gensalt())
             sql_function.update_password(hashed_password, user_id)
             msg = "Password changed."
-    return render_template('change_password.html', msg=msg, error_msg=error_msg)
-
-
+    return render_template('customer/change_password.html', msg=msg, error_msg=error_msg)

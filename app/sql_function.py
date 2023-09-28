@@ -185,3 +185,19 @@ def update_customer_details(first_name, last_name, birth_date, title, phone_numb
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
+
+
+def get_staff_details(user_id):
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number FROM user_account ua
+                INNER JOIN staff s on s.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    return details
+
+def update_staff_details(first_name, last_name, title, phone_number, email, user_id):
+    sql = """UPDATE `customer` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (first_name, last_name, title, phone_number, user_id))
+    sql = """UPDATE `user_account` SET email=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (email, user_id))
