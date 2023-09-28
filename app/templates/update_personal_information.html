@@ -20,6 +20,16 @@
                 <h5 style="text-align: center;">Click the fields to change details</h5>
                 <div class="card">
                     <div class="card-body">
+                        {% if error_msg %}
+                        <div class="alert alert-danger">
+                            {{ error_msg }}
+                        </div>
+                        {% endif %}
+                        {% if msg %}
+                            <div class="alert alert-success">
+                                {{ msg }}
+                            </div>
+                        {% endif %}
                         <form action="{{ url_for('customer_update_personal_info') }}" method="post" id="myForm" onsubmit="return validateForm()">
                             <div class="input-group mb-3">
                                 <label for="title" class="input-group-text">
@@ -36,35 +46,35 @@
                                 <label for="first_name" class="input-group-text">
                                     First Name <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name" value="{{ details_list.first_name }}" required>
+                                <input type="text" class="form-control" name="first_name" id="first_name" value="{{ details_list.first_name }}" required>
                             </div>
                             <p id="first_name_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="last_name" class="input-group-text">
                                     Last Name <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last Name" value="{{ details_list.last_name }}" required>
+                                <input type="text" class="form-control" name="last_name" id="last_name" value="{{ details_list.last_name }}" required>
                             </div>
                             <p id="last_name_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="email" class="input-group-text">
                                     Email <span style="color:red">*</span>
                                 </label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="Email Address" value="{{ details_list.email }}" required>
+                                <input type="email" class="form-control" name="email" id="email" value="{{ details_list.email }}" required>
                             </div>
                             <p id="email_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="phone_number" class="input-group-text">
                                     Phone Number <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="phone_number" id="phone_number" placeholder="Phone Number" value="{{ details_list.phone_number }}" required>
+                                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}" required>
                             </div>
                             <p id="phone_number_msg" style="color: red"></p>
                             <div class="input-group mb-3">
                                 <label for="birth_date" class="input-group-text">
                                     Date of Birth <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="birth_date" id="birth_date" placeholder="Date of Birth" value="{{ details_list.birth_date }}" required>
+                                <input type="text" class="form-control" name="birth_date" id="birth_date" value="{{ details_list.birth_date }}" required>
                             </div>
                             <div class="input-group mb-3">
                                 <label for="region" class="input-group-text">
@@ -89,19 +99,9 @@
                                 <label for="street_name" class="input-group-text">
                                     Street <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="street_name" id="street_name" placeholder="Street Name" value="{{ details_list.street_name }}" required>
+                                <input type="text" class="form-control" name="street_name" id="street_name" value="{{ details_list.street_name }}" required>
                             </div>
                             <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
-                            {% if error_msg %}
-                                <div class="alert alert-danger">
-                                    {{ error_msg }}
-                                </div>
-                            {% endif %}
-                            {% if msg %}
-                                <div class="alert alert-success">
-                                    {{ msg }}
-                                </div>
-                            {% endif %}
                             <div class="d-grid gap-2">
                                 <input type="submit" class="btn btn-warning" value="Update">
                             </div>

@@ -154,24 +154,34 @@ def get_product_by_id(product_id):
     product = operate_sql(sql, (product_id,), fetch=0)
     return product
 
-def get_customer_details(user_id):
-    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name FROM user_account ua
-                INNER JOIN customer c on c.user_id = ua.user_id
-                WHERE ua.user_id = %s;
-        """
-    details = operate_sql(sql, (user_id,), fetch=0)
-    return details
 
-def check_customer_email(email):
+def get_password(user_id):
+    sql = """SELECT user_id, password FROM `user_account`
+                WHERE user_id=%s;"""
+    password = operate_sql(sql, (user_id,), fetch=0)
+    return password
+
+def update_password(password, user_id):
+    sql = "UPDATE user_account SET password=%s WHERE user_id=%s"
+    operate_sql(sql, (password, user_id))
+
+def get_email(email):
     sql = """SELECT user_id, email FROM `user_account`
                 WHERE email=%s;"""
     result = operate_sql(sql, (email,), fetch=0)
     return result
 
+def get_customer_details(user_id):
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    return details
+
 def update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name,email,user_id):
     sql = """UPDATE `customer` SET first_name=%s,last_name=%s,birth_date=%s,title_id=%s,phone_number=%s,region_id=%s,city_id=%s,street_name=%s
                 WHERE user_id=%s;"""
-    operate_sql(sql, (first_name, last_name, birth_date, title, phone_number, region, city, street_name,user_id))
+    operate_sql(sql, (first_name, last_name, birth_date, title, phone_number, region, city, street_name, user_id))
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
-    operate_sql(sql, (email,user_id))
+    operate_sql(sql, (email, user_id))
