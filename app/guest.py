@@ -147,8 +147,7 @@ def dashboard():
             return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs)
     else:    
         return redirect(url_for('index'))
-
-
+      
 @app.route('/edit_detail', methods=['GET', 'POST'])
 def edit_detail():
     breadcrumbs = [{"text": "Edit My Detail", "url": "/edit_detail"}]
