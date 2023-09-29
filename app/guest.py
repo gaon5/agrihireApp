@@ -81,7 +81,7 @@ def register():
         session['is_customer'] = account['is_customer']
         session['is_staff'] = account['is_staff']
         msg = 'Registration success!'
-        return render_template('guest/jump.html', goUrl='/', msg=msg)
+        return render_template('guest/jump.html', goUrl='/login/', msg=msg)
     return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
 
 
@@ -89,7 +89,7 @@ def register():
 def reset_password():
     msg = ''
     breadcrumbs = [{"text": "Reset Password", "url": "/reset_password"}]
-    email = request.args.get('email')
+    email = request.form.get('email')
     if email:
         account = sql_function.get_account(email)
         if not account:
@@ -101,15 +101,19 @@ def reset_password():
             return render_template('guest/answer.html', question=question, breadcrumbs=breadcrumbs)
     if request.method == 'POST':
         # Get data
-        user_id = session['user_id']
-        answer = request.form.get('answer')
-        question = sql_function.get_customer_question(user_id)
-        if answer.lower() == question['answer'].lower():
+        if 'user_id' in session:
+            user_id = session['user_id']
+            answer = request.form.get('answer')
+            question = sql_function.get_customer_question(user_id)
+            if not question['answer'] or (answer and question['answer'] and answer.lower() != question['answer'].lower()):
+                msg = "The answer is incorrect!"
+                return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
             return redirect(url_for('change_password'))
         else:
-            msg = "The answer is incorrect!"
-        return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
+            msg = "User not logged in or session expired!"
+            return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
     return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
+
 
 
 @app.route('/change_password', methods=['GET', 'POST'])
