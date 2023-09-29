@@ -66,7 +66,7 @@
             <div class="col-6">
                 <div>
                     {% for i in range(1, equipment|length + 1) %}
-                        <div class="img-container" id="image_list1" {% if i != 1 %}style="display: none"{% endif %}>
+                        <div class="img-container" id="image_list{{ i }}" {% if i != 1 %}style="display: none"{% endif %}>
                             <img src="{{ url_for('static', filename=equipment[i-1].image_url) }}" alt="{{ i }}"
                                  style="max-width: 660px; height: 490px;">
                         </div>
