@@ -188,3 +188,57 @@ def get_equipment_by_id(equipment_id):
                 WHERE e.equipment_id=%s;"""
     equipment = operate_sql(sql, (equipment_id,))
     return equipment
+
+
+def get_all_product():
+    sql = """SELECT * FROM product AS p LEFT JOIN product_img pi on p.product_id = pi.product_id WHERE pi.priority=1;"""
+    product = operate_sql(sql)
+    return product
+
+
+def get_product_by_category(category_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                LEFT JOIN classify c on p.product_id = c.product_id
+                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
+                WHERE sc.category_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (category_id,))
+    return product
+
+
+def get_product_by_sub(sub_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                LEFT JOIN classify c on p.product_id = c.product_id
+                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
+                WHERE sc.sub_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (sub_id,))
+    return product
+
+
+def get_product_by_id(product_id):
+    sql = """SELECT * FROM product p
+                LEFT JOIN product_img pi on p.product_id = pi.product_id
+                WHERE p.product_id=%s AND pi.priority=1;"""
+    product = operate_sql(sql, (product_id,), fetch=0)
+    return product
+
+def stats_customers():
+    sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
+    customer_stat = operate_sql(sql)
+    return customer_stat
+
+def stats_staff():
+    sql = """SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;"""
+    staff_stat = operate_sql(sql)
+    return staff_stat
+
+def stats_equipment():
+    sql = """SELECT COUNT(equipment_id) FROM hire.equipment;"""
+    equipment_stat = operate_sql(sql)
+    return equipment_stat
+
+def stats_booking():
+    sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
+    booking_stat = operate_sql(sql)
+    return booking_stat
