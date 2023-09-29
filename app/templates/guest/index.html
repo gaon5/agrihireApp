@@ -7,15 +7,242 @@
 
 
 {% block mycss %}
+    <style>
+        .bg-container {
+            background-image: url('static/image/background3.jpg'); /* 替换为您的图像URL */
+            background-size: cover; /* 背景图像覆盖整个元素 */
+            background-position: center; /* 背景图像居中 */
+            color: #EECD5C; /* 设置文本颜色为白色，或者您喜欢的其他颜色 */
+            padding: 20px; /* 添加一些内边距 */
+        }
 
+        .step-box {
+            transition: transform 0.3s ease-in-out; /* 添加过渡效果 */
+        }
+
+        .step-box:hover {
+            transform: scale(1.1); /* 放大效果 */
+        }
+
+        .custom-caption {
+            position: static;
+            padding: 20px;
+        }
+
+        .custom-caption {
+            position: static;
+            padding: 20px;
+            margin-left: 50px;
+            color: #4b4029; /* 设置字体颜色为白色，您可以根据需要更改颜色代码 */
+            font-family: 'Arial', sans-serif; /* 设置艺术字体，您可以根据需要更改字体 */
+        }
+
+        .custom-caption h5 {
+            font-size: 24px; /* 设置 h5 标签的字体大小 */
+            margin-bottom: 10px; /* 设置 h5 标签的底部外边距 */
+        }
+
+        .custom-caption h6 {
+            font-size: 20px; /* 设置 h6 标签的字体大小 */
+            margin-bottom: 10px; /* 设置 h6 标签的底部外边距 */
+        }
+
+        .custom-caption p {
+            font-size: 16px; /* 设置段落文字的字体大小 */
+        }
+
+        .carousel-item .row {
+            display: flex;
+            align-items: center; /* 垂直居中对齐 */
+            height: 50vh; /* 与图片高度保持一致 */
+        }
+
+        .carousel-inner {
+            padding: 20px; /* 在容器的四周都添加20px的内边距 */
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50vh; /* 使导航栏容器填满左侧区域 */
+        }
+
+        .nav-link {
+            border: 2px solid #eeeec3; /* 为每个链接添加边框 */
+            border-radius: 5px; /* 可选：为边框添加圆角 */
+            margin-bottom: 5px; /* 添加下外边距，使链接之间有间隔 */
+            padding-left: 50px;
+            padding-right: 50px;
+            text-align: center; /* 文本居中 */
+        }
+
+        .nav-link:hover {
+            background-color: #eacd76; /* 鼠标悬停时的背景颜色 */
+        }
+
+        .nav-link.active {
+            background-color: #b29b5b; /* 激活链接的背景颜色 */
+            font-weight: bold; /* 激活链接的字体加粗 */
+        }
+
+        .slogan-text {
+            color: #eacd76; /* 您已经设定的颜色 */
+            text-align: left; /* 文字居中 */
+            font-weight: 700; /* 字体加粗 */
+            font-size: 30px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .slogan-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%; /* 或者您想要的任何高度 */
+        }
+
+    </style>
 {% endblock %}
 
 
 {% block body %}
 
+    <div class="row">
+        <div class="col-md-3">
+            <div class="nav-container">
+                <div class="d-flex flex-column align-items-start">
+                    <h5 style="color:#1d1912">Equipment</h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#" style="color:#1d1912">Catalog1</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog2</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog3</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog4</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog5</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog6</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog7</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog8</a>
+                        <a class="nav-link" href="#" style="color:#1d1912">Catalog9</a>
+
+                        <!-- 更多品类... -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active" style="background-color: #1d1912;">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}"
+                                     style="height: 50vh; object-fit: cover;" alt="First slide">
+                            </div>
+                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                                <p class="slogan-text">It's Time To Makeover Your Lawn</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item" style="background-color: #1d1912;">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}"
+                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                            </div>
+                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                                <p class="slogan-text">Are You Worried About Painting The Exterior Wall Of The Second Floor?</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item" style="background-color: #1d1912;">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <img class="d-block w-100" src="{{ url_for('static', filename='image/tree_saws.jpg') }}"
+                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                            </div>
+                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                                <p class="slogan-text">We Have The Latest Tree Saws!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-item" style="background-color: #1d1912;">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <img class="d-block w-100" src="{{ url_for('static', filename='image/loaders.jpg') }}"
+                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                            </div>
+                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                                <p class="slogan-text">It's A Chance To Play With Clay!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="mb-4">News</h2>
+        <p>
+            description1
+        </p>
+        <p>
+            description2
+        </p>
+        <!-- 可以继续添加更多的段落或其他HTML元素 -->
+    </div>
+
+    <div class="container mt-5 bg-container" id="about-us">
+        <h2 class="mb-4">About Us</h2>
+        <p>
+            Welcome to Darfield Outdoor Hire. We are professional equipment hire company, with more than 500 different types of outdoor equipment for hire
+            such as landscaping tools, trailers, earthmoving machinery, building tools and farm equipment.
+        </p>
+
+        <div class="row mt-4">
+            <div class="col-md-4 step-box">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="mb-2" style="font-size: 2em;">🛒</i>
+                    <h5>Step 1: Browse</h5>
+                    <p>Explore our wide variety of outdoor equipment available for hire.</p>
+                </div>
+            </div>
+            <div class="col-md-4 step-box">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="mb-2" style="font-size: 2em;">📄</i>
+                    <h5>Step 2: Select</h5>
+                    <p>Choose the equipment that best suits your needs and add it to your cart.</p>
+                </div>
+            </div>
+            <div class="col-md-4 step-box">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="mb-2" style="font-size: 2em;">🚚</i>
+                    <h5>Step 3: Hire</h5>
+                    <p>Complete the hiring process and get the equipment delivered to your location.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}
 
 
 {% block myjs %}
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.carousel').carousel();
+        });
+    </script>
 
 {% endblock %}

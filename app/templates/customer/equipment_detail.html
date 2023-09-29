@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .img-container {
+            border: 1px solid #ebecee;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            height: auto;
+        }
+
+        .truncated-text {
+            font-size: 18px;
+            height: 55px;
+            max-width: 580px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .image1-switcher {
+            background-image: url('{{ url_for('static', filename='image/heart11.png') }}');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .image1-switcher:hover {
+            background-image: url('{{ url_for('static', filename='image/heart12.png') }}');
+        }
+
+        .image2-switcher {
+            background-image: url('{{ url_for('static', filename='image/heart22.png') }}');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .image2-switcher:hover {
+            background-image: url('{{ url_for('static', filename='image/heart21.png') }}');
+        }
+    </style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="container" style="margin-top: 60px">
+        <div class="row py-3">
+            <div class="col-6">
+                <div>
+                    {% for i in range(1, equipment|length + 1) %}
+                        <div class="img-container" id="image_list{{ i }}" {% if i != 1 %}style="display: none"{% endif %}>
+                            <img src="{{ url_for('static', filename=equipment[i-1].image_url) }}" alt="{{ i }}"
+                                 style="max-width: 660px; height: 490px;">
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="my-2">
+                    <div class="text-center">
+                        {% for i in range(1, equipment|length + 1) %}
+                            <div class="img-container mx-auto d-inline-block" style="height: 100px;width: 100px;">
+                                <img src="{{ url_for('static', filename=equipment[i-1].image_url) }}" alt="{{ i }}" onclick="change_image({{ i }})">
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 position-relative">
+                <p class="text-center pt-5" style="font-size: 40px">{{ equipment[0]['name'] }}</p>
+                <p class="text-center" style="font-size: 35px">$ {{ equipment[0]['price'] }}</p>
+                <div class="container">
+                    <div class="truncated-text">{{ equipment[0]['description'] }}</div>
+                </div>
+                <form action="/equipment_detail/{{ detail_id }}" method="post">
+                    <input type="text" id="select_date" name="select_date" placeholder="Select Date..">
+                    <input type="text" id="days" name="days" placeholder="Select Date..">
+                    <button type="submit">submit</button>
+                </form>
+                {% if 0 %}
+                    <a href="#" class="position-absolute top-0 end-0 mx-3 my-4">
+                        <div class="image1-switcher" style="width: 25px;height:25px"></div>
+                    </a>
+                {% else %}
+                    <a href="#" class="position-absolute top-0 end-0 mx-3 my-4">
+                        <div class="image2-switcher" style="width: 25px;height:25px"></div>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <p>length: {{ equipment[0]['length'] }}</p>
+            <p>width: {{ equipment[0]['width'] }}</p>
+            <p>height: {{ equipment[0]['height'] }}</p>
+            <p>detail: {{ equipment[0]['detail'] }}</p>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        flatpickr("#select_date", {
+            disable: ["2023-10-30", "2023-10-10"],
+            minDate: new Date().fp_incr(1),
+            maxDate: new Date().fp_incr(91),
+            dateFormat: "d M Y",
+        });
+        flatpickr("#days", {
+            mode: "range",
+            disable: ["2023-10-30", "2023-10-10"],
+            minDate: new Date().fp_incr(1),
+            maxDate: new Date().fp_incr(91),
+            dateFormat: "d M Y",
+        });
+
+        const elementsArray = [];
+        for (let i = 1; i < {{equipment|length + 1}}; i++) {
+            const element = $('#image_list' + i);
+            if (element.length) {
+                elementsArray.push(element);
+            }
+        }
+        console.log(elementsArray)
+
+        function change_image(i) {
+            for (let j = 1; j < (elementsArray.length + 1); j++) {
+                if (j === i) {
+                    elementsArray[j - 1].removeAttr("style");
+                } else {
+                    elementsArray[j - 1].css({'display': 'none'})
+                }
+            }
+        }
+    </script>
+{% endblock %}
