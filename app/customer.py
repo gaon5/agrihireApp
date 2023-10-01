@@ -77,3 +77,75 @@ def equipment_detail(category, sub, detail_id):
             days = (start_date - end_date).days
             print(days)
     return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment)
+
+
+
+from flask import session, render_template, redirect, url_for
+
+@app.route('/bookings')
+def bookings():
+    try:
+        user_id = session.get('user_id')  # Assuming user_id is stored in the session
+        print(user_id)
+        if user_id is None:
+            # Redirect to login page if user_id is not available in the session
+            return redirect(url_for('login'))
+        
+        # Get customer_id using user_id
+        customer_id = sql_function.get_customer_id_by_user_id(user_id)
+        print(customer_id)
+        if customer_id is None:
+            # Handle the case where there is no corresponding customer_id for the user_id
+            return "No corresponding customer for the logged-in user", 400
+        
+        # Get bookings using customer_id
+        data = sql_function.get_bookings_by_customer_id(customer_id)
+        print(data)
+        
+        # Render the template with the fetched bookings
+        return render_template('customer/bookings.html', bookings=data)
+    
+    except Exception as e:
+        # Handle any other exceptions that might occur
+        return f"An error occurred: {str(e)}", 500
+
+
+
+
+@app.route('/delete_booking/<string:id>', methods=['POST'])
+def delete_booking(id):
+    success = sql_function.delete_booking_by_id(id)
+    if success:
+        msg = 'Booking Deleted Successfully'
+    else:
+        msg = 'Error Deleting Booking'
+    return render_template('guest/jump.html', goUrl=url_for('bookings'), msg=msg)
+
+
+
+@app.route('/edit_booking/<string:id>', methods=['GET', 'POST'])
+def edit_booking(id):
+    if request.method == 'POST':
+        new_end_date = request.form['end_date']
+        
+        if sql_function.update_booking_end_date(id, new_end_date):
+            msg = 'Booking Updated Successfully'
+        else:
+            msg = 'Failed to Update Booking'
+        return redirect(url_for('bookings', msg=msg))
+    
+    else:
+        booking = sql_function.get_booking_by_id(id)
+        if not booking:
+            msg = 'Booking not found'
+            return redirect(url_for('bookings', msg=msg))
+        return render_template('edit_booking.html', booking=booking)
+
+@app.route('/some_route')
+def some_route():
+    user_id = session.get('user_id')
+    if user_id:
+        print(user_id)
+        return str(user_id)  # just for demo, return it as a response
+    else:
+        return 'User_id not in session'

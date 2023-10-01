@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block mytitle %}Edit Booking{% endblock %}
+
+{% block mycss %}
+<!-- You can add page-specific CSS here if needed -->
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h1>Edit Booking</h1>
+    {% if booking %}
+    <form method="POST">
+        <label for="end_date">New End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ booking.hire_end }}" required>
+        <button type="submit">Update</button>
+    </form>
+    {% else %}
+    <p>Booking not found.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block myjs %}
+<!-- You can add page-specific JS here if needed -->
+{% endblock %}

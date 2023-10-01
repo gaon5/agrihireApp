@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+
+{% endblock %}
+
+
+{% block body %}
+
+    <div class="container">
+        <h1>User Bookings</h1>
+        <!-- Check if there are any bookings to display -->
+        {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        
+                        <th>Equipment Name</th>
+                        <th>Booking Date</th>
+                        <th>Amount</th>
+                        <th>Hire End</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Loop through the list of bookings and display each one in a table row -->
+                    {% for booking in bookings %}
+                        <tr>
+                            
+                            <td>{{ booking.equipment_name }}</td>
+                            <td>{{ booking.booking_date }}</td>
+                            <td>{{ booking.amount }}</td>
+                            <td>{{ booking.hire_end }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <!-- Display a message if there are no bookings -->
+            <p>No bookings found.</p>
+        {% endif %}
+    </div>
+    <!-- Include any additional JS files or external resources here -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% endblock %}
+
+
+    {% block myjs %}
+    
+    {% endblock %}

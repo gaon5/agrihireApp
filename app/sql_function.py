@@ -242,3 +242,51 @@ def stats_booking():
     sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
     booking_stat = operate_sql(sql)
     return booking_stat
+
+def get_customer_id_by_user_id(user_id):
+    sql = "SELECT customer_id FROM customer WHERE user_id = %s"
+    data = operate_sql(sql, (user_id,))  # Passing user_id as parameter.
+    
+    if not data or not data[0]:  # Checking if data is not empty and data[0] is not None.
+        return None  # or handle accordingly, maybe raise an exception or return a default value.
+    
+    customer_id = data[0]['customer_id']  # Assuming operate_sql returns a list of dictionaries.
+    return customer_id
+
+
+def get_bookings_by_customer_id(customer_id):
+    sql = """
+        SELECT 
+            e.name AS equipment_name, 
+            hl.datetime AS booking_date, 
+            hl.price AS amount, 
+            ers.expected_return_date AS hire_end 
+        FROM customer AS c 
+        LEFT JOIN hire_list AS hl ON c.customer_id = hl.customer_id
+        LEFT JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
+        LEFT JOIN equipment AS e ON e.equipment_id = hi.equipment_id
+        LEFT JOIN equipment_rental_status AS ers ON ers.customer_id = hl.customer_id
+        WHERE c.customer_id=%s;
+    """
+    data = operate_sql(sql, (customer_id,))
+    return data
+
+
+
+
+
+
+def delete_booking_by_id(id):
+    sql = """DELETE FROM bookings WHERE booking_id=%s;"""
+    result = operate_sql(sql, (id,))
+    return result  # This would return True/False based on whether the operation was successful, or some form of result indicator.
+
+def update_booking_end_date(booking_id, new_end_date):
+    sql = """UPDATE bookings SET hire_end=%s WHERE booking_id=%s;"""
+    result = operate_sql(sql, (new_end_date, booking_id))
+    return result
+
+def get_booking_by_id(booking_id):
+    sql = """SELECT * FROM bookings WHERE booking_id=%s;"""
+    data = operate_sql(sql, (booking_id,))
+    return data
