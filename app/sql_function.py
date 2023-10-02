@@ -1,6 +1,7 @@
 import mysql.connector
 from app import config, bcrypt
 from datetime import date, datetime, timedelta
+import math
 
 db_conn = None
 connection = None
@@ -107,8 +108,6 @@ def register_account(email, password, title, given_name, surname, question, answ
     sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) 
                 VALUES (%s,%s,%s,%s,%s,%s,1);"""
     operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer), close=0)
-    account = get_account(email)
-    return account
 
 
 def get_customer_question(user_id):
@@ -120,6 +119,74 @@ def get_customer_question(user_id):
 def set_password(password, user_id):
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     operate_sql("""UPDATE user_account SET password=%s WHERE user_id=%s;""", (hashed_password, user_id,))
+
+
+def get_all_equipment(sql_page):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on c.sub_id = s.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE ei.priority=1
+                LIMIT %s, 12;"""
+    equipment = operate_sql(sql, (sql_page,), close=0)
+    sql = """SELECT COUNT(e.equipment_id) AS count FROM equipment e
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on c.sub_id = s.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE ei.priority=1;"""
+    count = operate_sql(sql, fetch=0)
+    count = math.ceil(count['count'] / 12)
+    return equipment, count
+
+
+def get_equipment_by_category(category_id, sql_page):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE s.category_id=%s AND ei.priority=1
+                LIMIT %s, 12;"""
+    equipment = operate_sql(sql, (category_id, sql_page,), close=0)
+    sql = """SELECT COUNT(e.equipment_id) AS count FROM equipment e
+                LEFT JOIN equipment_img ei ON e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c ON e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s ON s.sub_id = c.sub_id
+                LEFT JOIN category ca ON ca.category_id = s.category_id
+                WHERE s.category_id = %s AND ei.priority = 1;"""
+    count = operate_sql(sql, (category_id,), fetch=0)
+    count = math.ceil(count['count'] / 12)
+    return equipment, count
+
+
+def get_equipment_by_sub(sub_id, sql_page):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE s.sub_id=%s AND ei.priority=1
+                LIMIT %s, 12;"""
+    equipment = operate_sql(sql, (sub_id, sql_page,), close=0)
+    sql = """SELECT COUNT(e.equipment_id) AS count FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE s.sub_id=%s AND ei.priority=1;"""
+    count = operate_sql(sql, (sub_id,), fetch=0)
+    count = math.ceil(count['count'] / 12)
+    return equipment, count
+
+
+def get_equipment_by_id(equipment_id):
+    sql = """SELECT * FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE e.equipment_id=%s;"""
+    equipment = operate_sql(sql, (equipment_id,))
+    return equipment
 
 
 def get_all_product():
@@ -217,3 +284,22 @@ def update_admin_details(first_name, last_name, title, phone_number, email, user
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
+def stats_customers():
+    sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
+    customer_stat = operate_sql(sql)
+    return customer_stat
+
+def stats_staff():
+    sql = """SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;"""
+    staff_stat = operate_sql(sql)
+    return staff_stat
+
+def stats_equipment():
+    sql = """SELECT COUNT(equipment_id) FROM hire.equipment;"""
+    equipment_stat = operate_sql(sql)
+    return equipment_stat
+
+def stats_booking():
+    sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
+    booking_stat = operate_sql(sql)
+    return booking_stat
