@@ -69,12 +69,13 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     return temp
 
 
-region_list = operate_sql("""SELECT * FROM `region`;""", close=0)
-title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
-city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
-question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
-category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
-sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
+user_list = operate_sql("""SELECT * FROM `user_account`;""")
+region_list = operate_sql("""SELECT * FROM `region`;""")
+title_list = operate_sql("""SELECT * FROM `title`;""")
+city_list = operate_sql("""SELECT * FROM `city`;""")
+question_list = operate_sql("""SELECT * FROM `security_question`;""")
+category_list = operate_sql("""SELECT * FROM `category`;""")
+sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
 
 category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
 for sub in sub_category_list:
@@ -221,6 +222,68 @@ def get_product_by_id(product_id):
     product = operate_sql(sql, (product_id,), fetch=0)
     return product
 
+
+def get_account_by_id(user_id):
+    sql = """SELECT user_id, password FROM `user_account`
+                WHERE user_id=%s;"""
+    password = operate_sql(sql, (user_id,), fetch=0)
+    return password
+
+
+def update_password(password, user_id):
+    sql = "UPDATE user_account SET password=%s WHERE user_id=%s"
+    operate_sql(sql, (password, user_id))
+
+
+def get_customer_details(user_id):
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    return details
+
+
+def update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, user_id):
+    sql = """UPDATE `customer` SET first_name=%s,last_name=%s,birth_date=%s,title_id=%s,phone_number=%s,region_id=%s,city_id=%s,street_name=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (first_name, last_name, birth_date, title, phone_number, region, city, street_name, user_id))
+    sql = """UPDATE `user_account` SET email=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (email, user_id))
+
+
+def get_staff_details(user_id):
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number FROM user_account ua
+                INNER JOIN staff s on s.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    return details
+
+
+def update_staff_details(first_name, last_name, title, phone_number, email, user_id):
+    sql = """UPDATE `staff` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (first_name, last_name, title, phone_number, user_id))
+    sql = """UPDATE `user_account` SET email=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (email, user_id))
+
+
+def get_admin_details(user_id):
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number FROM user_account ua
+                INNER JOIN admin a on a.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    return details
+
+
+def update_admin_details(first_name, last_name, title, phone_number, email, user_id):
+    sql = """UPDATE `admin` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (first_name, last_name, title, phone_number, user_id))
+    sql = """UPDATE `user_account` SET email=%s
+                WHERE user_id=%s;"""
+    operate_sql(sql, (email, user_id))
 def stats_customers():
     sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
     customer_stat = operate_sql(sql)
