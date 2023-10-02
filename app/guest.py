@@ -72,24 +72,20 @@ def register():
         if account:
             # Email already exists
             msg = 'Email already exists!'
-            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
+            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list,
+                                   breadcrumbs=breadcrumbs)
         # Insert account data into database
-        account = sql_function.register_account(email, password, title, given_name, surname, question, answer)
-        session['loggedIn'] = True
-        session['user_id'] = account['user_id']
-        session['is_admin'] = account['is_admin']
-        session['is_customer'] = account['is_customer']
-        session['is_staff'] = account['is_staff']
+        sql_function.register_account(email, password, title, given_name, surname, question, answer)
         msg = 'Registration success!'
-        return render_template('guest/jump.html', goUrl='/', msg=msg)
-    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
+        return redirect(url_for('login'))
+    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs, regions=sql_function.region_list, cities=sql_function.city_list)
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     msg = ''
     breadcrumbs = [{"text": "Reset Password", "url": "/reset_password"}]
-    email = request.args.get('email')
+    email = request.form.get('email')
     if email:
         account = sql_function.get_account(email)
         if not account:
@@ -101,14 +97,15 @@ def reset_password():
             return render_template('guest/answer.html', question=question, breadcrumbs=breadcrumbs)
     if request.method == 'POST':
         # Get data
-        user_id = session['user_id']
-        answer = request.form.get('answer')
-        question = sql_function.get_customer_question(user_id)
-        if answer.lower() == question['answer'].lower():
-            return redirect(url_for('change_password'))
-        else:
+        if 'user_id' in session:
+            user_id = session['user_id']
+            answer = request.form.get('answer')
+            question = sql_function.get_customer_question(user_id)
+            if not question['answer'] or (answer and question['answer'] and answer.lower() != question['answer'].lower()):
+                msg = "The answer is incorrect!"
+                return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
             msg = "The answer is incorrect!"
-        return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
+            return redirect(url_for('change_password'))
     return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
 
 
@@ -155,7 +152,6 @@ def edit_detail():
     return render_template('admin/edit_detail.html', breadcrumbs=breadcrumbs)
     return render_template('staff/edit_detail.html', breadcrumbs=breadcrumbs)
     return render_template('customer/edit_detail.html', breadcrumbs=breadcrumbs)
-
 
 # @app.errorhandler(Exception)
 # def handle_error(error):
