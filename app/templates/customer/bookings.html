@@ -32,10 +32,10 @@
                     {% for booking in bookings %}
                         <tr>
                             
-                            <td>{{ booking.equipment_name }}</td>
-                            <td>{{ booking.booking_date }}</td>
-                            <td>{{ booking.amount }}</td>
-                            <td>{{ booking.hire_end }}</td>
+                            <td>{{ booking.name }}</td>
+                            <td>{{ booking.datetime }}</td>
+                            <td>{{ booking.price }}</td>
+                            <td>{{ booking.expected_return_date }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

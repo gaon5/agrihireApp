@@ -15,7 +15,7 @@ def get_cursor():
                                          host=config.dbhost,
                                          database=config.dbname,
                                          autocommit=True)
-    db_conn = connection.cursor(dictionary=True)
+    db_conn = connection.cursor(dictionary=True) # add buffered=True to solve "unread result found" issue
     return db_conn
 
 
@@ -244,7 +244,7 @@ def stats_booking():
     return booking_stat
 
 def get_customer_id_by_user_id(user_id):
-    sql = "SELECT customer_id FROM customer WHERE user_id = %s"
+    sql = """SELECT customer_id FROM customer WHERE user_id = %s"""
     data = operate_sql(sql, (user_id,))  # Passing user_id as parameter.
     
     if not data or not data[0]:  # Checking if data is not empty and data[0] is not None.
@@ -255,26 +255,21 @@ def get_customer_id_by_user_id(user_id):
 
 
 def get_bookings_by_customer_id(customer_id):
-    sql = """
-        SELECT 
-            e.name AS equipment_name, 
-            hl.datetime AS booking_date, 
-            hl.price AS amount, 
-            ers.expected_return_date AS hire_end 
+    sql = """SELECT
+            name, 
+            datetime, 
+            e.price, 
+            expected_return_date 
         FROM customer AS c 
-        LEFT JOIN hire_list AS hl ON c.customer_id = hl.customer_id
-        LEFT JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
-        LEFT JOIN equipment AS e ON e.equipment_id = hi.equipment_id
-        LEFT JOIN equipment_rental_status AS ers ON ers.customer_id = hl.customer_id
+        INNER JOIN hire_list AS hl ON c.customer_id = hl.customer_id
+        INNER JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
+        INNER JOIN equipment_instance AS ei ON hi.instance_id = ei.instance_id
+        INNER JOIN equipment_rental_status AS ers ON ers.instance_id = hi.instance_id
+        INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
         WHERE c.customer_id=%s;
     """
     data = operate_sql(sql, (customer_id,))
     return data
-
-
-
-
-
 
 def delete_booking_by_id(id):
     sql = """DELETE FROM bookings WHERE booking_id=%s;"""

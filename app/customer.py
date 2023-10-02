@@ -86,21 +86,20 @@ from flask import session, render_template, redirect, url_for
 def bookings():
     try:
         user_id = session.get('user_id')  # Assuming user_id is stored in the session
-        print(user_id)
+        #print(user_id)
         if user_id is None:
             # Redirect to login page if user_id is not available in the session
             return redirect(url_for('login'))
         
         # Get customer_id using user_id
         customer_id = sql_function.get_customer_id_by_user_id(user_id)
-        print(customer_id)
         if customer_id is None:
             # Handle the case where there is no corresponding customer_id for the user_id
             return "No corresponding customer for the logged-in user", 400
         
         # Get bookings using customer_id
         data = sql_function.get_bookings_by_customer_id(customer_id)
-        print(data)
+        #print(data)
         
         # Render the template with the fetched bookings
         return render_template('customer/bookings.html', bookings=data)
