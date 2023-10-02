@@ -106,8 +106,6 @@ def register_account(email, password, title, given_name, surname, question, answ
     sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) 
                 VALUES (%s,%s,%s,%s,%s,%s,1);"""
     operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer), close=0)
-    account = get_account(email)
-    return account
 
 
 def get_customer_question(user_id):

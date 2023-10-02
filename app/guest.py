@@ -72,17 +72,13 @@ def register():
         if account:
             # Email already exists
             msg = 'Email already exists!'
-            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
+            return render_template('guest/register.html', msg=msg, titles=sql_function.title_list, questions=sql_function.question_list,
+                                   breadcrumbs=breadcrumbs)
         # Insert account data into database
-        account = sql_function.register_account(email, password, title, given_name, surname, question, answer)
-        session['loggedIn'] = True
-        session['user_id'] = account['user_id']
-        session['is_admin'] = account['is_admin']
-        session['is_customer'] = account['is_customer']
-        session['is_staff'] = account['is_staff']
+        sql_function.register_account(email, password, title, given_name, surname, question, answer)
         msg = 'Registration success!'
-        return render_template('guest/jump.html', goUrl='/login/', msg=msg)
-    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs)
+        return redirect(url_for('login'))
+    return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs, regions=sql_function.region_list, cities=sql_function.city_list)
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
@@ -108,12 +104,9 @@ def reset_password():
             if not question['answer'] or (answer and question['answer'] and answer.lower() != question['answer'].lower()):
                 msg = "The answer is incorrect!"
                 return render_template('guest/answer.html', question=question, msg=msg, breadcrumbs=breadcrumbs)
+            msg = "The answer is incorrect!"
             return redirect(url_for('change_password'))
-        else:
-            msg = "User not logged in or session expired!"
-            return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
     return render_template('guest/reset_password.html', msg=msg, breadcrumbs=breadcrumbs)
-
 
 
 @app.route('/change_password', methods=['GET', 'POST'])
@@ -145,7 +138,6 @@ def edit_detail():
     return render_template('admin/edit_detail.html', breadcrumbs=breadcrumbs)
     return render_template('staff/edit_detail.html', breadcrumbs=breadcrumbs)
     return render_template('customer/edit_detail.html', breadcrumbs=breadcrumbs)
-
 
 # @app.errorhandler(Exception)
 # def handle_error(error):

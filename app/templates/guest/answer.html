@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block mytitle %}
-    <title>Password Recovery</title>
+    Password Recovery
 {% endblock %}
 
 {% block mycss %}
@@ -63,7 +63,7 @@
                         {% endif %}
                         <button type="submit" class="btn btn-primary">Reset Password</button>
                     </form>
-                    <a href="{{ url_for('login') }}" class="d-block mt-3 text-decoration-none">Back to Login</a>
+{#                    <a href="{{ url_for('login') }}" class="d-block mt-3 text-decoration-none">Back to Login</a>#}
                 </div>
             </div>
         </div>
