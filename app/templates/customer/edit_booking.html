@@ -10,9 +10,9 @@
 <div class="container">
     <h1>Edit Booking</h1>
     {% if booking %}
-    <form method="POST">
-        <label for="end_date">New End Date:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ booking.hire_end }}" required>
+    <form action="{{ url_for('update_booking') }}" method="POST">
+        <label for="new_end_date">New End Date:</label>
+        <input type="date" id="new_end_date" name="new_end_date" value="{{ booking.hire_end }}" required>
         <button type="submit">Update</button>
     </form>
     {% else %}

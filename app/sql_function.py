@@ -277,12 +277,9 @@ def delete_booking_by_id(id):
     result = operate_sql(sql, (id,))
     return result  # This would return True/False based on whether the operation was successful, or some form of result indicator.
 
-def update_booking_end_date(new_end_date_format, instance_id):
+def update_booking_end_date(instance_id, new_end_date):
     sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
-   
-    operate_sql(sql, (new_end_date_format, instance_id))
-       
-
+    operate_sql(sql, (new_end_date, instance_id))
 
 def get_booking_by_id(booking_id):
     sql = """SELECT * FROM bookings WHERE booking_id=%s;"""

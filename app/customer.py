@@ -136,9 +136,10 @@ def update_booking(instance_id):
         new_end_date = request.form.get('new_end_date')
         if not new_end_date:
             return "Invalid data: Missing end date", 400
-        new_end_date_format = datetime.strptime(new_end_date, '%Y-%m-%d')
+        #print(new_end_date)
+        #print(type(new_end_date))
         
-        sql_function.update_booking_end_date(instance_id, new_end_date_format)
+        sql_function.update_booking_end_date(instance_id, new_end_date)
         
         return redirect(url_for('bookings', message='Booking updated successfully'))
 
