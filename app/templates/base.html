@@ -97,8 +97,8 @@
             </div>
 
             <div class="col-4 text-center">
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="d-flex" action="{{ url_for('search_equipment') }}" method="get">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment">
                     <button class="btn btn-outline-success search-button" type="submit">
                         <i class="fas fa-search search-icon"></i>
                     </button>
@@ -136,24 +136,21 @@
             <a href="/contact" class="custom-text ms-2" style="color:#F3F3E6; text-decoration: none;">Contact Us</a>
 
             <div class="dropdown">
-                    <span class="dropdown-toggle" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#F3F3E6">
+                    <span class="dropdown-toggle py-4" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#F3F3E6">
                         Equipment
                     </span>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="#">Catalog1</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog2</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog3</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog4</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog5</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog6</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog7</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog8</a></li>
-                    <li><a class="dropdown-item" href="#">Catalog9</a></li>
+                <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuButton">
+                    <li><a class="dropdown-item" href="/equipments/Landscaping">Landscaping</a></li>
+                    <li><a class="dropdown-item" href="/equipments/Trailers">Trailers</a></li>
+                    <li><a class="dropdown-item" href="/equipments/Earthmoving">Earthmoving</a></li>
+                    <li><a class="dropdown-item" href="/equipments/Building-and-Renovation">Building and Renovation</a></li>
+                    <li><a class="dropdown-item" href="/equipments/Tool-and-Equipment">Tool and Equipment</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 </div>
+{% if breadcrumbs %}
 <div class="container mt-5">
     <ul class="breadcrumb">
         <li class="breadcrumb-item active"><a href="/">Home</a></li>
@@ -166,6 +163,7 @@
         {% endfor %}
     </ul>
 </div>
+{% endif %}
 <div class="flex-fill">
     <!-- Content of your page goes here, this part will expand and push footer to the bottom -->
     {% block body %}{% endblock %}

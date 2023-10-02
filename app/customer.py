@@ -38,7 +38,27 @@ def equipments(category, sub):
             sql_equipments, count = sql_function.get_equipment_by_category(category_id, sql_page)
     else:
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
-    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list, count=count)
+    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
+                           count=count)
+
+
+@app.route('/equipments/search_equipment', methods=['GET', 'POST'])
+def search_equipment():
+    breadcrumbs = [{"text": "Equipments", "url": "/equipments"}, {"text": "Search", "url": ""}]
+    equipment = request.args.get('equipment')
+    page = request.args.get('page')
+    if not page:
+        sql_page = 0
+    else:
+        page = int(page)
+        sql_page = (page - 1) * 12
+    if equipment:
+        sql_equipments, count = sql_function.get_equipment_by_search(equipment, sql_page)
+        return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
+                               count=count)
+    else:
+        msg = "Sorry, we can't find the page you're looking for!."
+        return render_template('guest/jump.html', goUrl='/', msg=msg)
 
 
 @app.route('/equipments/<category>/<sub>/detail', defaults={'detail_id': None})
@@ -76,7 +96,7 @@ def equipment_detail(category, sub, detail_id):
             end_date = datetime.strptime(end_date_str, "%d %b %Y")
             days = (start_date - end_date).days
             print(days)
-    return render_template('customer/product_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, product=product)
+    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment)
 
 
 # route for update information

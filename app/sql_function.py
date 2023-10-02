@@ -141,6 +141,27 @@ def get_all_equipment(sql_page):
     return equipment, count
 
 
+def get_equipment_by_search(search, sql_page):
+    search = "%" + search + "%"
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on c.sub_id = s.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE ei.priority=1 AND e.name LIKE %s
+                LIMIT %s, 12;"""
+    equipment = operate_sql(sql, (search, sql_page,), close=0)
+    sql = """SELECT COUNT(e.equipment_id) AS count FROM equipment e
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on c.sub_id = s.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                WHERE ei.priority=1  AND e.name LIKE %s;"""
+    count = operate_sql(sql, (search,), fetch=0)
+    count = math.ceil(count['count'] / 12)
+    return equipment, count
+
+
 def get_equipment_by_category(category_id, sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
