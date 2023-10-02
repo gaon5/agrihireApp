@@ -111,34 +111,41 @@ def bookings():
 
 
 
-@app.route('/delete_booking/<string:id>', methods=['POST'])
-def delete_booking(id):
-    success = sql_function.delete_booking_by_id(id)
-    if success:
-        msg = 'Booking Deleted Successfully'
-    else:
-        msg = 'Error Deleting Booking'
-    return render_template('guest/jump.html', goUrl=url_for('bookings'), msg=msg)
+# @app.route('/delete_booking/<string:id>', methods=['POST'])
+# def delete_booking(id):
+#     success = sql_function.delete_booking_by_id(id)
+#     if success:
+#         msg = 'Booking Deleted Successfully'
+#     else:
+#         msg = 'Error Deleting Booking'
+#     return render_template('guest/jump.html', goUrl=url_for('bookings'), msg=msg)
 
 
 
-@app.route('/edit_booking/<string:id>', methods=['GET', 'POST'])
-def edit_booking(id):
-    if request.method == 'POST':
-        new_end_date = request.form['end_date']
+
+
+@app.route('/update_booking/<int:instance_id>', methods=['POST'])
+def update_booking(instance_id):
+    try:
+        user_id = session.get('user_id')  # Assuming user_id is stored in the session
+        if user_id is None:
+            # Redirect to login page if user_id is not available in the session
+            return redirect(url_for('login'))
+
+        # Fetch the new end date from form data
+        new_end_date = request.form.get('new_end_date')
+        if not new_end_date:
+            return "Invalid data: Missing end date", 400
+        new_end_date_format = datetime.strptime(new_end_date, '%Y-%m-%d')
         
-        if sql_function.update_booking_end_date(id, new_end_date):
-            msg = 'Booking Updated Successfully'
-        else:
-            msg = 'Failed to Update Booking'
-        return redirect(url_for('bookings', msg=msg))
-    
-    else:
-        booking = sql_function.get_booking_by_id(id)
-        if not booking:
-            msg = 'Booking not found'
-            return redirect(url_for('bookings', msg=msg))
-        return render_template('edit_booking.html', booking=booking)
+        sql_function.update_booking_end_date(instance_id, new_end_date_format)
+        
+        return redirect(url_for('bookings', message='Booking updated successfully'))
+
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
+
+
 
 @app.route('/some_route')
 def some_route():

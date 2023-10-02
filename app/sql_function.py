@@ -256,8 +256,9 @@ def get_customer_id_by_user_id(user_id):
 
 def get_bookings_by_customer_id(customer_id):
     sql = """SELECT
-            name, 
-            datetime, 
+            hi.instance_id,
+            name , 
+            datetime , 
             e.price, 
             expected_return_date 
         FROM customer AS c 
@@ -276,10 +277,12 @@ def delete_booking_by_id(id):
     result = operate_sql(sql, (id,))
     return result  # This would return True/False based on whether the operation was successful, or some form of result indicator.
 
-def update_booking_end_date(booking_id, new_end_date):
-    sql = """UPDATE bookings SET hire_end=%s WHERE booking_id=%s;"""
-    result = operate_sql(sql, (new_end_date, booking_id))
-    return result
+def update_booking_end_date(new_end_date_format, instance_id):
+    sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
+   
+    operate_sql(sql, (new_end_date_format, instance_id))
+       
+
 
 def get_booking_by_id(booking_id):
     sql = """SELECT * FROM bookings WHERE booking_id=%s;"""
