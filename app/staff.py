@@ -2,12 +2,11 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 import math
 import re
-import bcrypt
-from app import app, check_permissions, scheduler, sql_function
+from app import app, check_permissions, scheduler, sql_function, bcrypt
 
 
 # route for update information
-@app.route('/staff_update_personal_information', methods=['GET','POST'])
+@app.route('/staff_update_personal_information', methods=['GET', 'POST'])
 def staff_update_personal_information():
     # get user_id from session
     # user_id = session["user_id"]
@@ -23,7 +22,7 @@ def staff_update_personal_information():
         email = request.form.get('email')
         phone_number = request.form.get('phone_number')
         user_id = int(request.form.get('user_id'))
-        email_result = sql_function.get_email(email)
+        email_result = sql_function.get_account(email)
         if int(email_result['user_id']) != user_id:
             error_msg = "Email entered is already in use. Please enter another email address."
         else:
@@ -31,11 +30,12 @@ def staff_update_personal_information():
             msg = "Update successful"
     # take latest details_list
     details_list = sql_function.get_staff_details(user_id)
-    title_list = sql_function.title_list
-    return render_template('staff/update_personal_information.html', details_list=details_list, title_list=title_list, msg=msg, error_msg=error_msg)
+    return render_template('staff/update_personal_information.html', details_list=details_list, title_list=sql_function.title_list, msg=msg,
+                           error_msg=error_msg)
+
 
 # route for changing password
-@app.route('/staff_change_password', methods=['GET','POST'])
+@app.route('/staff_change_password', methods=['GET', 'POST'])
 def staff_change_password():
     # get user_id from session
     # user_id = session["user_id"]
@@ -44,7 +44,7 @@ def staff_change_password():
     error_msg = ""
     msg = ""
     # get old password from user
-    original_password = sql_function.get_password(user_id)['password'].encode('utf-8')
+    original_password = sql_function.get_account_by_id(user_id)['password'].encode('utf-8')
     # update password if the user submits the form
     if request.method == 'POST':
         old_password = request.form.get('old_pw')
