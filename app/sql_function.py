@@ -272,10 +272,13 @@ def get_bookings_by_customer_id(customer_id):
     data = operate_sql(sql, (customer_id,))
     return data
 
-def delete_booking_by_id(id):
-    sql = """DELETE FROM bookings WHERE booking_id=%s;"""
-    result = operate_sql(sql, (id,))
-    return result  # This would return True/False based on whether the operation was successful, or some form of result indicator.
+def delete_booking_by_instance_id(instance_id):
+    sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
+    operate_sql(sql, (instance_id,))
+    sql = """DELETE FROM hire_list WHERE instance_id=%s"""
+    operate_sql(sql, (instance_id,))
+    sql = """DELETE FROM equipment_rental_status WHERE instance_id=%s"""
+    operate_sql(sql, (instance_id,))
 
 def update_booking_end_date(instance_id, new_end_date):
     sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""

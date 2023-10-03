@@ -80,10 +80,9 @@ def equipment_detail(category, sub, detail_id):
 
 
 
-from flask import session, render_template, redirect, url_for
-
 @app.route('/bookings')
 def bookings():
+    msg = request.args.get('msg')
     try:
         user_id = session.get('user_id')  # Assuming user_id is stored in the session
         #print(user_id)
@@ -102,7 +101,7 @@ def bookings():
         #print(data)
         
         # Render the template with the fetched bookings
-        return render_template('customer/bookings.html', bookings=data)
+        return render_template('customer/bookings.html', bookings=data, msg=msg)
     
     except Exception as e:
         # Handle any other exceptions that might occur
@@ -111,14 +110,26 @@ def bookings():
 
 
 
-# @app.route('/delete_booking/<string:id>', methods=['POST'])
-# def delete_booking(id):
-#     success = sql_function.delete_booking_by_id(id)
-#     if success:
-#         msg = 'Booking Deleted Successfully'
-#     else:
-#         msg = 'Error Deleting Booking'
-#     return render_template('guest/jump.html', goUrl=url_for('bookings'), msg=msg)
+@app.route('/delete_booking/<int:instance_id>', methods=['POST'])
+def delete_booking(instance_id):
+    try:
+        user_id = session.get('user_id')  # Assuming user_id is stored in the session
+        if user_id is None:
+            # Redirect to login page if user_id is not available in the session
+            return redirect(url_for('login'))
+        
+        sql_function.delete_booking_by_instance_id(instance_id)
+        msg = "Booking updated successfully"
+        
+        return redirect(url_for('bookings', msg=msg))
+        
+    
+    except Exception as e:
+       
+        
+        # Handle any other exceptions that might occur
+        return f"An error occurred: {str(e)}", 500
+
 
 
 
@@ -140,8 +151,9 @@ def update_booking(instance_id):
         #print(type(new_end_date))
         
         sql_function.update_booking_end_date(instance_id, new_end_date)
+        msg = "Booking updated successfully"
         
-        return redirect(url_for('bookings', message='Booking updated successfully'))
+        return redirect(url_for('bookings', msg=msg))
 
     except Exception as e:
         return f"An error occurred: {str(e)}", 500
