@@ -252,8 +252,9 @@ def get_account_by_id(user_id):
 
 
 def update_password(password, user_id):
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     sql = "UPDATE user_account SET password=%s WHERE user_id=%s"
-    operate_sql(sql, (password, user_id))
+    operate_sql(sql, (hashed_password, user_id))
 
 
 def get_customer_details(user_id):
@@ -305,22 +306,15 @@ def update_admin_details(first_name, last_name, title, phone_number, email, user
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
-def stats_customers():
+
+
+def stats_dashboard():
     sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
     customer_stat = operate_sql(sql)
-    return customer_stat
-
-def stats_staff():
     sql = """SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;"""
     staff_stat = operate_sql(sql)
-    return staff_stat
-
-def stats_equipment():
     sql = """SELECT COUNT(equipment_id) FROM hire.equipment;"""
     equipment_stat = operate_sql(sql)
-    return equipment_stat
-
-def stats_booking():
     sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
     booking_stat = operate_sql(sql)
-    return booking_stat
+    return customer_stat, staff_stat, equipment_stat, booking_stat

@@ -7,24 +7,31 @@
             margin-left: auto;
             margin-right: auto;
         }
+
         h1 {
             text-align: center;
         }
+
         .filter {
             margin-left: 5%;
         }
+
         .card-title, span, .card-text {
             color: black;
         }
+
         ul#remove {
             list-style-type: none;
         }
-        li{
+
+        li {
             padding: 10px 20px;
         }
+
         .btn {
             width: 50%;
         }
+
         .column {
             float: left;
             border: 1px solid black;
@@ -33,12 +40,13 @@
             padding: 10px;
             margin: 5% auto;
             box-sizing: border-box;
-         }
-         .row::after {
+        }
+
+        .row::after {
             content: "";
             clear: both;
             display: table;
-         }
+        }
     </style>
 {% endblock %}
 
@@ -52,19 +60,19 @@
                         <h5 class="card-title">Customers</h5>
                         <span>Number of customers:</span>
                         <p class="card-text">
-                            {{customer_stat[0]['COUNT(customer_id)']}}
+                            {{ customer_stat[0]['COUNT(customer_id)'] }}
                         </p>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-3">
                 <div class="card text-white custom-bg-primary">
                     <div class="card-body">
                         <h5 class="card-title">Staff</h5>
                         <span>Number of staff:</span>
                         <p class="card-text">
-                            {{staff_stat[0]['COUNT(staff_id)']}}
+                            {{ staff_stat[0]['COUNT(staff_id)'] }}
                         </p>
                     </div>
                 </div>
@@ -75,7 +83,7 @@
                         <h5 class="card-title">Equipments</h5>
                         <span>Number of equipments:</span>
                         <p class="card-text">
-                            {{equipment_stat[0]['COUNT(equipment_id)']}}
+                            {{ equipment_stat[0]['COUNT(equipment_id)'] }}
                         </p>
                     </div>
                 </div>
@@ -86,7 +94,7 @@
                         <h5 class="card-title">Bookings</h5>
                         <span>Number of bookings:</span>
                         <p class="card-text">
-                            {{booking_stat[0]['COUNT(log_id)']}}
+                            {{ booking_stat[0]['COUNT(log_id)'] }}
                         </p>
                     </div>
                 </div>
@@ -94,23 +102,38 @@
         </div>
 
         <div class="row">
-            <div class="column rounded">               
+            <div class="column rounded">
                 <h2>Manage</h2>
                 <ul id="remove">
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Customers</button></a></li>
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Staff</button></a></li>
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Equipments</button></a></li>
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Bookings</button></a></li>
-                </ul>  
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Customers</button>
+                    </a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Staff</button>
+                    </a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Equipments</button>
+                    </a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Bookings</button>
+                    </a></li>
+                </ul>
             </div>
 
             <div class="column rounded">
-               <h2>Reports</h2>
+                <h2>Reports</h2>
                 <ul id="remove">
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Financial</button></a></li>
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Equipment Utilization</button></a></li>
-                    <li><a href=" "><button type="button" class="btn btn-outline-warning ">Maintenance</button></a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Financial</button>
+                    </a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Equipment Utilization</button>
+                    </a></li>
+                    <li><a href=" ">
+                        <button type="button" class="btn btn-outline-warning ">Maintenance</button>
+                    </a></li>
                 </ul>
             </div>
-         </div>
+        </div>
+    </div>
 {% endblock %}

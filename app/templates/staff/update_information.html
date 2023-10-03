@@ -7,7 +7,7 @@
 
 
 {% block mycss %}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 {% endblock %}
 
 
@@ -20,17 +20,7 @@
                 <h5 style="text-align: center;">Click the fields to change details and press "Update" button to submit changes</h5>
                 <div class="card">
                     <div class="card-body">
-                        {% if error_msg %}
-                        <div class="alert alert-danger">
-                            {{ error_msg }}
-                        </div>
-                        {% endif %}
-                        {% if msg %}
-                            <div class="alert alert-success">
-                                {{ msg }}
-                            </div>
-                        {% endif %}
-                        <form action="{{ url_for('admin_update_personal_information') }}" method="post" id="myForm" onsubmit="return validateForm()">
+                        <form action="{{ url_for('edit_detail') }}" method="post" id="myForm" onsubmit="return validateForm()">
                             <div class="input-group mb-3">
                                 <label for="title" class="input-group-text">
                                     Title <span style="color:red">*</span>
@@ -38,7 +28,7 @@
                                 <select class="form-control" name="title" id="title" required>
                                     <option value="" selected="selected" disabled>Choose Title</option>
                                     {% for title in title_list %}
-                                        <option value="{{ title.title_id }}" >{{ title.title }}</option>
+                                        <option value="{{ title.title_id }}">{{ title.title }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -67,7 +57,8 @@
                                 <label for="phone_number" class="input-group-text">
                                     Phone Number <span style="color:red">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}" required>
+                                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}"
+                                       required>
                             </div>
                             <p id="phone_number_msg" style="color: red"></p>
                             <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
@@ -84,59 +75,59 @@
 
 
 {% block myjs %}
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-    // set default value of title
-    title.value = {{ details_list.title_id }};
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // set default value of title
+        title.value = {{ details_list.title_id }};
 
-    //validate name, email and phone number
-    const first_name_msg = document.getElementById('first_name_msg');
-    const last_name_msg = document.getElementById('last_name_msg');
-    const email_msg = document.getElementById('email_msg');
-    const phone_number_msg = document.getElementById('phone_number_msg');
-    const first_name = document.getElementById('first_name');
-    const last_name = document.getElementById('last_name')
-    const email = document.getElementById('email');
-    const phone_number = document.getElementById('phone_number');
-    
-    function validateForm() {
-        const namePattern = /^[a-zA-Z]+$/;
-        const phonePattern = /^\d{7,11}$/;
-        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        if (!namePattern.test(first_name.value)) {
-            first_name_msg.innerText = "First name should contain only letters.";
-            first_name.classList.add("is-invalid");
-            return false;
-        } else {
-            first_name.classList.remove("is-invalid");
-            first_name_msg.innerText = "";
+        //validate name, email and phone number
+        const first_name_msg = document.getElementById('first_name_msg');
+        const last_name_msg = document.getElementById('last_name_msg');
+        const email_msg = document.getElementById('email_msg');
+        const phone_number_msg = document.getElementById('phone_number_msg');
+        const first_name = document.getElementById('first_name');
+        const last_name = document.getElementById('last_name')
+        const email = document.getElementById('email');
+        const phone_number = document.getElementById('phone_number');
+
+        function validateForm() {
+            const namePattern = /^[a-zA-Z]+$/;
+            const phonePattern = /^\d{7,11}$/;
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (!namePattern.test(first_name.value)) {
+                first_name_msg.innerText = "First name should contain only letters.";
+                first_name.classList.add("is-invalid");
+                return false;
+            } else {
+                first_name.classList.remove("is-invalid");
+                first_name_msg.innerText = "";
+            }
+            if (!namePattern.test(last_name.value)) {
+                last_name_msg.innerText = "Last name should contain only letters.";
+                last_name.classList.add("is-invalid");
+                return false;
+            } else {
+                last_name.classList.remove("is-invalid");
+                last_name_msg.innerText = "";
+            }
+            if (!emailPattern.test(email.value)) {
+                email.classList.add("is-invalid");
+                email_msg.innerText = "Invalid email. Please enter the correct format (Example: nicholas123@gmail.com).";
+                return false;
+            } else {
+                email.classList.remove("is-invalid");
+                email_msg.innerText = "";
+            }
+            if (!phonePattern.test(phone_number.value)) {
+                phone_number.classList.add("is-invalid");
+                phone_number_msg.innerText = "Invalid phone number. Please enter 7 to 11 numbers only.";
+                return false;
+            } else {
+                phone_number.classList.remove("is-invalid");
+                phone_number_msg.innerText = "";
+            }
+            //submit form if only all validations are passed
+            return true;
         }
-        if (!namePattern.test(last_name.value)) {
-            last_name_msg.innerText = "Last name should contain only letters.";
-            last_name.classList.add("is-invalid");
-            return false;
-        } else {
-            last_name.classList.remove("is-invalid");
-            last_name_msg.innerText = "";
-        }
-        if (!emailPattern.test(email.value)) {
-            email.classList.add("is-invalid");
-            email_msg.innerText = "Invalid email. Please enter the correct format (Example: nicholas123@gmail.com).";
-            return false;
-        } else {
-            email.classList.remove("is-invalid");
-            email_msg.innerText = "";
-        }
-        if (!phonePattern.test(phone_number.value)) {
-            phone_number.classList.add("is-invalid");
-            phone_number_msg.innerText = "Invalid phone number. Please enter 7 to 11 numbers only.";
-            return false;
-        } else {
-            phone_number.classList.remove("is-invalid");
-            phone_number_msg.innerText = "";
-        }
-        //submit form if only all validations are passed        
-        return true;
-    }
-</script>
+    </script>
 {% endblock %}
