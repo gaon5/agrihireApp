@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+    <style>
+        .label_style {
+            font-size: 20px;
+            line-height: 25px;
+            cursor: pointer;
+        }
+
+        .img-container {
+            width: 226px;
+            height: 152px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-left: 1px;
+            margin-top: 1px;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .truncated-text {
+            font-size: 12px;
+            height: 54px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image1-switcher {
+            background-image: url('{{ url_for('static', filename='image/heart11.png') }}');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .image1-switcher:hover {
+            background-image: url('{{ url_for('static', filename='image/heart12.png') }}');
+        }
+
+        .image2-switcher {
+            background-image: url('{{ url_for('static', filename='image/heart22.png') }}');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .image2-switcher:hover {
+            background-image: url('{{ url_for('static', filename='image/heart21.png') }}');
+        }
+    </style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="container">
+        <div class="row py-3">
+            <div class="col-3">
+                <ul class="pt-5" style="padding: 0; list-style: none;">
+                    {% for category in category_list %}
+                        <li style="margin: 20px 0;">
+                            <div>
+                                <input type="radio" id="{{ category.category_id }}" style="display: none">
+                                <label class="label_style" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-9">
+                <div class="row">
+                    {% for equipment in equipments %}
+                        <div class="col py-3" style="max-height: 440px;max-width: 247px">
+                            <div class="card card-wrapper position-relative" style="min-height: 420px;width: 237px">
+                                <div class="img-container">
+                                    <img src="{{ url_for('static', filename=equipment.image_url) }}" class="card-img-top" alt="">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title" style="min-height: 50px"><span style="font-size: 18px">{{ equipment.name }}</span></h5>
+                                    <p class="card-text truncated-text" title="{{ equipment.description }}">{{ equipment.description }}</p>
+                                    <p class="card-text" style="font-size: 28px">$ {{ equipment.price }}</p>
+                                    <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
+                                       class="btn btn-primary" style="font-size: 14px">See Detail</a>
+                                </div>
+                                {% if 0 %}
+                                    <a href="#" class="position-absolute top-0 end-0 mx-3 my-2">
+                                        <div class="image1-switcher" style="width: 25px;height:25px"></div>
+                                    </a>
+                                {% else %}
+                                    <a href="#" class="position-absolute top-0 end-0 mx-3 my-2">
+                                        <div class="image2-switcher" style="width: 25px;height:25px"></div>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <nav aria-label="Page navigation member_">
+            <ul class="pagination justify-content-center">
+                {% if count %}
+                    {% for i in range(count) %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}">{{ i + 1 }}</a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+    <script>
+        $('label').on('click', function () {
+            const labelContent = $(this).text().trim();
+            console.log(labelContent)
+            window.location.href = "/equipments/" + labelContent.replace(/ /g, '-');
+        });
+    </script>
+{% endblock %}

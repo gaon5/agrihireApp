@@ -2,7 +2,6 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 import mysql.connector
 from app import config
-import math
 import re
 import uuid
 from flask_apscheduler import APScheduler
@@ -10,14 +9,11 @@ from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config.from_object(config)
-app.config['PERMANENT_SESSION_LIFETIME'] = 86400
+app.config['PERMANENT_SESSION_LIFETIME'] = 8640
 app.secret_key = 'aHn6Zb7MstRxC8vEoF2zG3B9wQjKl5YD'
 scheduler = APScheduler()
 scheduler.init_app(app)
 bcrypt = Bcrypt(app)
-
-category_list = ['Landscaping']
-sub_category_list = ['Lawn-Mowers']
 
 
 def check_permissions():
@@ -77,4 +73,4 @@ def upload_image(file):
     return image_url
 
 
-from app import admin, customer, guest
+from app import admin, customer, guest, staff
