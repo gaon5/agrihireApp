@@ -256,6 +256,7 @@ def get_customer_id_by_user_id(user_id):
 
 def get_bookings_by_customer_id(customer_id):
     sql = """SELECT
+            hi.hire_id,
             hi.instance_id,
             name , 
             datetime , 
@@ -272,19 +273,20 @@ def get_bookings_by_customer_id(customer_id):
     data = operate_sql(sql, (customer_id,))
     return data
 
-def delete_booking_by_instance_id(instance_id):
-    sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
-    operate_sql(sql, (instance_id,))
-    sql = """DELETE FROM hire_list WHERE instance_id=%s"""
-    operate_sql(sql, (instance_id,))
-    sql = """DELETE FROM equipment_rental_status WHERE instance_id=%s"""
-    operate_sql(sql, (instance_id,))
+def delete_booking_by_instance_id_or_hire_id(instance_id=None, hire_id=None):
+    if instance_id:
+        sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
+        operate_sql(sql, (instance_id,))
+        
+        sql = """DELETE FROM equipment_rental_status WHERE instance_id=%s"""
+        operate_sql(sql, (instance_id,))
+    
+    if hire_id:
+        sql = """DELETE FROM hire_list WHERE hire_id=%s"""
+        operate_sql(sql, (hire_id,))
+
 
 def update_booking_end_date(instance_id, new_end_date):
     sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
     operate_sql(sql, (new_end_date, instance_id))
 
-def get_booking_by_id(booking_id):
-    sql = """SELECT * FROM bookings WHERE booking_id=%s;"""
-    data = operate_sql(sql, (booking_id,))
-    return data

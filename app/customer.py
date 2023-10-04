@@ -109,26 +109,23 @@ def bookings():
 
 
 
-
-@app.route('/delete_booking/<int:instance_id>', methods=['POST'])
-def delete_booking(instance_id):
+@app.route('/delete_booking/<int:instance_id>/<int:hire_id>', methods=['POST'])
+def delete_booking(instance_id, hire_id):
     try:
         user_id = session.get('user_id')  # Assuming user_id is stored in the session
         if user_id is None:
             # Redirect to login page if user_id is not available in the session
             return redirect(url_for('login'))
         
-        sql_function.delete_booking_by_instance_id(instance_id)
-        msg = "Booking updated successfully"
+        sql_function.delete_booking_by_instance_id_or_hire_id(instance_id, hire_id)
+        msg = "Booking deleted successfully"
         
         return redirect(url_for('bookings', msg=msg))
         
-    
     except Exception as e:
-       
-        
         # Handle any other exceptions that might occur
         return f"An error occurred: {str(e)}", 500
+
 
 
 
