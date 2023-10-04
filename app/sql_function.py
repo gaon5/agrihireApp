@@ -107,7 +107,7 @@ def register_account(email, password, title, given_name, surname, question, answ
     account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
     sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) 
                 VALUES (%s,%s,%s,%s,%s,%s,1);"""
-    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer), close=0)
+    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer))
 
 
 def get_customer_question(user_id):
@@ -205,43 +205,80 @@ def get_equipment_by_sub(sub_id, sql_page):
 def get_equipment_by_id(equipment_id):
     sql = """SELECT * FROM equipment e
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 WHERE e.equipment_id=%s;"""
     equipment = operate_sql(sql, (equipment_id,))
     return equipment
 
 
-def get_all_product():
-    sql = """SELECT * FROM product AS p LEFT JOIN product_img pi on p.product_id = pi.product_id WHERE pi.priority=1;"""
-    product = operate_sql(sql)
-    return product
+def get_equipment_by_wishlist(user_id, sql_page):
+    sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM customer
+                LEFT JOIN wishlist w ON customer.customer_id = w.customer_id
+                LEFT JOIN equipment e ON e.equipment_id = w.equipment_id
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE customer.user_id=%s AND ei.priority=1
+                LIMIT %s, 15;;"""
+    equipment = operate_sql(sql, (user_id, sql_page,))
+    sql = """SELECT COUNT(e.equipment_id) AS count FROM customer
+                    LEFT JOIN wishlist w ON customer.customer_id = w.customer_id
+                    LEFT JOIN equipment e ON e.equipment_id = w.equipment_id
+                    LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+                    LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                    LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                    LEFT JOIN category ca on ca.category_id = s.category_id
+                    WHERE customer.user_id=%s AND ei.priority=1;"""
+    count = operate_sql(sql, (user_id,), fetch=0)
+    count = math.ceil(count['count'] / 15)
+    return equipment, count
 
 
-def get_product_by_category(category_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                LEFT JOIN classify c on p.product_id = c.product_id
-                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
-                WHERE sc.category_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (category_id,))
-    return product
+def get_wishlist(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT * FROM wishlist WHERE customer_id=%s;"""
+    wishlist = operate_sql(sql, (customer_id,))
+    return wishlist
 
 
-def get_product_by_sub(sub_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                LEFT JOIN classify c on p.product_id = c.product_id
-                LEFT JOIN sub_category sc on sc.sub_id = c.sub_id
-                WHERE sc.sub_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (sub_id,))
-    return product
+def get_user_wishlist(user_id, equipment_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT * FROM wishlist WHERE customer_id=%s AND equipment_id=%s;"""
+    wishlist = operate_sql(sql, (customer_id, equipment_id,))
+    return wishlist
 
 
-def get_product_by_id(product_id):
-    sql = """SELECT * FROM product p
-                LEFT JOIN product_img pi on p.product_id = pi.product_id
-                WHERE p.product_id=%s AND pi.priority=1;"""
-    product = operate_sql(sql, (product_id,), fetch=0)
-    return product
+def add_wishlist(user_id, equipment_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """INSERT INTO wishlist (customer_id, equipment_id) VALUE (%s,%s);"""
+    operate_sql(sql, (customer_id, equipment_id,))
+
+
+def delete_wishlist(user_id, equipment_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """DELETE FROM wishlist WHERE customer_id=%s AND equipment_id=%s;"""
+    operate_sql(sql, (customer_id, equipment_id,))
 
 
 def get_account_by_id(user_id):
@@ -258,7 +295,8 @@ def update_password(password, user_id):
 
 
 def get_customer_details(user_id):
-    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name FROM user_account ua
+    sql = """SELECT ua.user_id, c.customer_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name 
+                FROM user_account ua
                 INNER JOIN customer c on c.user_id = ua.user_id
                 WHERE ua.user_id = %s;"""
     details = operate_sql(sql, (user_id,), fetch=0)

@@ -11,6 +11,7 @@ from app import app, check_permissions, sql_function, bcrypt
 def equipments(category, sub):
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}]
     sub_id = category_id = None
+    wishlist = None
     page = request.args.get('page')
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
@@ -41,14 +42,17 @@ def equipments(category, sub):
             sql_equipments, count = sql_function.get_equipment_by_category(category_id, sql_page)
     else:
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
+    if 'loggedIn' in session:
+        wishlist = sql_function.get_wishlist(session['user_id'])
     return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                           count=count, msg=last_msg, error_msg=last_error_msg)
+                           count=count, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/equipments/search_equipment', methods=['GET', 'POST'])
 def search_equipment():
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}, {"text": "Search", "url": ""}]
     equipment = request.args.get('equipment')
+    wishlist = None
     page = request.args.get('page')
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
@@ -60,8 +64,10 @@ def search_equipment():
         sql_page = (page - 1) * 12
     if equipment:
         sql_equipments, count = sql_function.get_equipment_by_search(equipment, sql_page)
+        if 'loggedIn' in session:
+            wishlist = sql_function.get_wishlist(session['user_id'])
         return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                               count=count, msg=last_msg, error_msg=last_error_msg)
+                               count=count, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -71,6 +77,7 @@ def search_equipment():
 @app.route('/equipments/<category>/<sub>/detail/<detail_id>', methods=['GET', 'POST'])
 def equipment_detail(category, sub, detail_id):
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}]
+    wishlist = None
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -80,6 +87,7 @@ def equipment_detail(category, sub, detail_id):
             category_id = next((key for key, value in sql_function.category.items() if value['name'] == category), None)
             if sub:
                 if sub in sql_function.category[category_id]['subcategories']:
+                    sub_id = next((item['sub_id'] for item in sql_function.sub_category_list if item['name'] == sub), None)
                     breadcrumbs.append({"text": str(sub).replace("-", " "), "url": "/equipments/" + str(category) + "/" + str(sub)})
                 else:
                     session['error_msg'] = "Sorry, we can't find the page you're looking for!."
@@ -92,6 +100,9 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
+    if equipment[0]['sub_id'] != sub_id:
+        session['error_msg'] = "Sorry, we can't find the page you're looking for!."
+        return redirect(url_for('equipments'))
     if request.method == 'POST':
         select_date = request.form.get('select_date')
         days = request.form.get('days')
@@ -104,5 +115,52 @@ def equipment_detail(category, sub, detail_id):
             end_date = datetime.strptime(end_date_str, "%d %b %Y")
             days = (start_date - end_date).days
             print(days)
-    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
-                           error_msg=last_error_msg)
+    if 'loggedIn' in session:
+        wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
+    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,
+                           category_list=sql_function.category_list, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
+
+
+@app.route('/user_wishlist', methods=['GET', 'POST'])
+def user_wishlist():
+    breadcrumbs = [{"text": "Equipments", "url": "/equipments"}, {"text": "Wishlist", "url": "/user_wishlist"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    page = request.args.get('page')
+    if not page:
+        sql_page = 0
+    else:
+        page = int(page)
+        sql_page = (page - 1) * 12
+    if 'loggedIn' in session:
+        sql_equipments, count = sql_function.get_equipment_by_wishlist(session['user_id'], sql_page)
+        return render_template('customer/wishlist.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
+                               count=count, msg=last_msg, error_msg=last_error_msg)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('equipments'))
+
+
+@app.route('/add_favorite/<int:equipment_id>', methods=['GET', 'POST'])
+def add_favorite(equipment_id):
+    previous_url = str(request.referrer)
+    if 'loggedIn' in session:
+        sql_function.add_wishlist(session['user_id'], equipment_id)
+        session['msg'] = 'Added successfully'
+        return redirect(previous_url)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(previous_url)
+
+
+@app.route('/remove_favorite/<int:equipment_id>', methods=['GET', 'POST'])
+def remove_favorite(equipment_id):
+    previous_url = str(request.referrer)
+    if 'loggedIn' in session:
+        sql_function.delete_wishlist(session['user_id'], equipment_id)
+        session['msg'] = 'Removed successfully'
+        return redirect(previous_url)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(previous_url)
