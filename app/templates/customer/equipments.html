@@ -69,6 +69,24 @@
         .image2-switcher:hover {
             background-image: url('{{ url_for('static', filename='image/heart21.png') }}');
         }
+
+        .tile_login {
+            font-size: 12px;
+            line-height: 15px;
+            font-style: italic;
+            color: #626262;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .link_ {
+            text-decoration: none;
+            color: black;
+        }
+
+        .link_:hover {
+            text-decoration: underline;
+        }
     </style>
 {% endblock %}
 
@@ -99,7 +117,12 @@
                                 <div class="card-body">
                                     <h5 class="card-title" style="min-height: 50px"><span style="font-size: 18px">{{ equipment.name }}</span></h5>
                                     <p class="card-text truncated-text" title="{{ equipment.description }}">{{ equipment.description }}</p>
-                                    <p class="card-text" style="font-size: 28px">$ {{ equipment.price }}</p>
+                                    <p class="card-text m-0" style="font-size: 28px">$ {{ equipment.price }}</p>
+                                    {% if 1 %}
+                                        <div class="tile_login pb-1">
+                                            <a href="{{ url_for('login') }}" class="link_">Log in to your account</a>
+                                        </div>
+                                    {% endif %}
                                     <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
                                        class="btn btn-primary" style="font-size: 14px">See Detail</a>
                                 </div>
