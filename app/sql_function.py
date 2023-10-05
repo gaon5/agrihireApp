@@ -82,6 +82,17 @@ for sub in sub_category_list:
     categories = category[sub['category_id']]
     categories['subcategories'].append(sub['name'])
 
+def get_staff_id(user_id):
+    sql = """SELECT staff_id FROM staff WHERE user_id = %s"""
+    staff_id = operate_sql(sql, (user_id,), fetch=0)['staff_id']
+    return staff_id
+
+def get_equipment_id(instance_id):
+    sql = """SELECT e.equipment_id FROM equipment AS e
+                INNER JOIN equipment_instance AS ei ON ei.equipment_id = e.equipment_id
+                WHERE instance_id = %s"""
+    equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
+    return equipment_id
 
 def get_account(email):
     sql = """SELECT * FROM user_account 
@@ -356,3 +367,57 @@ def stats_dashboard():
     sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
     booking_stat = operate_sql(sql)
     return customer_stat, staff_stat, equipment_stat, booking_stat
+
+def get_pickup_equipment(the_date):
+    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM hire.equipment_rental_status AS ers
+                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
+                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+                WHERE (rental_status_id = 1) AND (DATE(rental_start_datetime) = %s)"""
+    pickup_list = operate_sql(sql, (the_date,))
+    return pickup_list
+
+def check_out_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
+    # update the rental status of a booking
+    sql = "UPDATE equipment_rental_status SET rental_status_id = 2 WHERE equipment_rental_status_id = %s;"
+    operate_sql(sql, (equipment_rental_status_id,))
+    # get staff id from user id
+    staff_id = get_staff_id(user_id)
+    # get equipment id from instance id
+    equipment_id = get_equipment_id(instance_id)
+    # insert hire log the necessary details
+    sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
+            VALUES (NULL, %s, %s, 1, 'Equipment hired to a customer', %s);"""
+    operate_sql(sql, (staff_id, current_datetime, equipment_id))
+
+def get_return_equipment(the_date):
+    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM hire.equipment_rental_status AS ers
+                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
+                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+                WHERE (rental_status_id = 2) AND (DATE(expected_return_datetime) = %s)"""
+    return_list = operate_sql(sql, (the_date,))
+    return return_list
+
+def return_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
+    # get expected return datetime
+    sql = """SELECT expected_return_datetime AS expected_return_datetime FROM equipment_rental_status WHERE equipment_rental_status_id = %s"""
+    expected_return_datetime = operate_sql(sql, (equipment_rental_status_id,), fetch=0)['expected_return_datetime']
+    # if the equipment is overdue, change status to overdue
+    if current_datetime > expected_return_datetime:
+        rental_status_id = 4
+    # otherwise, change status to due on time
+    else:
+        rental_status_id = 3
+    # update rental status
+    sql = """UPDATE equipment_rental_status 
+                SET rental_status_id = %s, actual_return_datetime = %s
+                WHERE equipment_rental_status_id = %s"""
+    operate_sql(sql, (rental_status_id,current_datetime,equipment_rental_status_id))
+    # get staff id from user id
+    staff_id = get_staff_id(user_id)
+    # get equipment id from instance id
+    equipment_id = get_equipment_id(instance_id)
+    # insert hire log the necessary details
+    sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
+            VALUES (NULL, %s, %s, 3, 'Equipment returned from a customer', %s);"""
+    operate_sql(sql, (staff_id, current_datetime, equipment_id))
+
