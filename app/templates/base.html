@@ -91,68 +91,84 @@
             background-color: #1D1912; /* 你可以选择你喜欢的颜色值 */
         }
 
-        body {
+        /* body {
             padding-top: 100px;
-        }
+        } */
 
         .flex-fill {
             flex: 1 0 auto;
         }
+
+        .second-navbar-custom {
+        min-height: 50px; /* or whatever height you want */
+        }
+
+        .navbar-toggler {
+            border-color: #F3F3E6; /* 更改边框颜色 */
+            background-color: #EECD5C; /* 更改背景颜色 */
+        }
+
+
     </style>
 
 </head>
 
 <body style="background-color: #F3F3E6; display: flex; flex-direction: column; min-height: 100vh;" class="d-flex flex-column">
-<div class="fixed-top" style="background-color: #1D1912;">
-    <nav class="navbar navbar-expand-lg container" style="height:100px">
+    <nav class="navbar navbar-expand-lg fixed-top" style="background-color: #1D1912;">
         <div class="container-fluid">
-            <div class="col-4 text-left">
-                <a class="navbar-brand" href="{{ url_for('index') }}">
-                    <img src="{{ url_for('static', filename='image/Logo.jpg') }}" alt="Darfield Outdoor Hire" style="height: 100px; width: auto;">
-                </a>
-            </div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent1"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarContent1">
+                <div class="col-4 text-left">
+                    <a class="navbar-brand" href="{{ url_for('index') }}">
+                        <img src="{{ url_for('static', filename='image/Logo.jpg') }}" alt="Darfield Outdoor Hire" style="height: 100px; width: auto;">
+                    </a>
+                </div>
 
-            <div class="col-4 text-center">
-                <form class="d-flex" action="{{ url_for('search_equipment') }}" method="get">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment">
-                    <button class="btn btn-outline-success search-button" type="submit">
-                        <i class="fas fa-search search-icon"></i>
+                <div class="col-4 text-center">
+                    <form class="d-flex">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                        <button class="btn btn-outline-success search-button" type="submit">
+                            <i class="fas fa-search search-icon"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="col-4 d-flex align-items-center justify-content-end">
+                    <button class="btn btn-outline-dark" type="button" style="color:#EECD5C">
+                        Register Right Now!
                     </button>
-                </form>
-            </div>
-
-            <div class="col-4 d-flex justify-content-end">
-                <a href="{{ url_for('register') }}" class="btn btn-outline-dark mx-3" style="color:#EECD5C">
-                    Register now!
-                </a>
-                <a href="{{ url_for('login') }}" class="me-2 icon-link user-icon">
-                    <i class="fas fa-user-circle fa-2x"></i>
-                </a>
-                <a href="/customer_cart" class="icon-link cart-icon">
-                    <i class="fas fa-shopping-cart fa-2x"></i>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                    <a href="{{ url_for('login') }}" class="me-2 icon-link user-icon">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                    <a href="/customer_cart" class="icon-link cart-icon">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
-</div>
 
-<div style="background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);">
-    <nav class="navbar navbar-expand-lg container" style="height:50px;">
+    <nav class="navbar navbar-expand-lg second-navbar-custom" style="height:50px; background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);" id="second-navbar">
         <div class="container-fluid">
-            <!-- Other custom text -->
-            <span class="custom-text ms-2" style="color:#EECD5C">Function 1</span>
-            <span class="custom-text ms-2" style="color:#EECD5C">Function 2</span>
-            <span class="custom-text ms-2" style="color:#F3F3E6">Function 3</span>
-            <a href="#about-us" class="custom-text ms-2" style="color:#F3F3E6; text-decoration: none;">About Us</a>
-            <a href="/contact" class="custom-text ms-2" style="color:#F3F3E6; text-decoration: none;">Contact Us</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent2"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarContent2">
+                <!-- Other custom text -->
+            <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 1</span>
+            <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 2</span>
+            <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Function 3</span>
+            <a href="#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
+            <a href="/contact" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">Contact Us</a>
 
             <div class="dropdown">
-                    <span class="dropdown-toggle py-3" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#F3F3E6">
+                    <span class="dropdown-toggle py-3" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#CBB26B">
                         Equipment
                     </span>
                 <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuButton">
@@ -164,9 +180,10 @@
                     <li><a class="dropdown-item" href="/equipments/Tool-and-Equipment">Tool and Equipment</a></li>
                 </ul>
             </div>
+            </div>
         </div>
     </nav>
-</div>
+
 {% if breadcrumbs %}
     <div class="container mt-4">
         <ul class="breadcrumb">
@@ -243,6 +260,11 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // 获取所有的 .dropdown 元素
@@ -261,11 +283,17 @@
             });
         });
     });
+
+    $(document).ready(function() {
+    // Calculate the height of the first navbar
+    var firstNavbarHeight = $(".navbar.fixed-top").outerHeight();
+    
+    // Set the top margin for the second navbar based on the height of the first navbar
+    $("#second-navbar").css("margin-top", firstNavbarHeight + "px");
+    });
+
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
 <script>
     {% if msg or error_msg %}
         const myModal = new bootstrap.Modal(document.getElementById('alertModal'));
