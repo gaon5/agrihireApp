@@ -260,6 +260,12 @@
                 this.querySelector('.dropdown-menu').classList.remove('show');
             });
         });
+        // Calculate the height of the first navbar
+        var firstNavbarHeight = $(".navbar.fixed-top").outerHeight();
+        console.log(firstNavbarHeight); // This will print the height to the console
+
+        // Set the top margin for the second navbar based on the height of the first navbar
+        $("#second-navbar").css("margin-top", firstNavbarHeight + "px");
     });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
