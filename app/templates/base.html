@@ -99,10 +99,6 @@
             flex: 1 0 auto;
         }
 
-        .second-navbar-custom {
-        min-height: 50px; /* or whatever height you want */
-        }
-
         .navbar-toggler {
             border-color: #F3F3E6; /* 更改边框颜色 */
             background-color: #EECD5C; /* 更改背景颜色 */
@@ -152,7 +148,7 @@
         </div>
     </nav>
 
-    <nav class="navbar navbar-expand-lg second-navbar-custom" style="height:50px; background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);" id="second-navbar">
+    <nav class="navbar navbar-expand-lg second-navbar-custom" style=" background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);" id="second-navbar">
         <div class="container-fluid">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent2"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -164,7 +160,7 @@
             <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 1</span>
             <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 2</span>
             <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Function 3</span>
-            <a href="#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
+            <a href="{{ url_for('index') }}#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
             <a href="/contact" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">Contact Us</a>
 
             <div class="dropdown">
