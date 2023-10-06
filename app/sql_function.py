@@ -94,6 +94,18 @@ def get_equipment_id(instance_id):
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
 
+def get_staff_id(user_id):
+    sql = """SELECT staff_id FROM staff WHERE user_id = %s"""
+    staff_id = operate_sql(sql, (user_id,), fetch=0)['staff_id']
+    return staff_id
+
+def get_equipment_id(instance_id):
+    sql = """SELECT e.equipment_id FROM equipment AS e
+                INNER JOIN equipment_instance AS ei ON ei.equipment_id = e.equipment_id
+                WHERE instance_id = %s"""
+    equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
+    return equipment_id
+
 def get_account(email):
     sql = """SELECT * FROM user_account 
                 WHERE email=%s;"""
@@ -367,6 +379,43 @@ def stats_dashboard():
     sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
     booking_stat = operate_sql(sql)
     return customer_stat, staff_stat, equipment_stat, booking_stat
+  
+
+def get_bookings(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                    FROM user_account ua
+                    INNER JOIN customer c on c.user_id = ua.user_id
+                    WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, ers.rental_start_datetime, e.price, ers.expected_return_datetime 
+        FROM customer AS c 
+        INNER JOIN hire_list AS hl ON c.customer_id = hl.customer_id
+        INNER JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
+        INNER JOIN equipment_instance AS ei ON hi.instance_id = ei.instance_id
+        INNER JOIN equipment_rental_status AS ers ON ers.instance_id = hi.instance_id
+        INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+        WHERE c.customer_id=%s;"""
+    bookings = operate_sql(sql, (customer_id,))
+    return bookings
+
+def delete_booking(instance_id=None, hire_id=None):
+    if instance_id:
+        sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
+        operate_sql(sql, (instance_id,))
+        
+        sql = """DELETE FROM equipment_rental_status WHERE instance_id=%s"""
+        operate_sql(sql, (instance_id,))
+    
+    if hire_id:
+        sql = """DELETE FROM hire_list WHERE hire_id=%s"""
+        operate_sql(sql, (hire_id,))
+
+
+def update_booking_end_date(instance_id, new_end_date):
+    sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
+    operate_sql(sql, (new_end_date, instance_id))
+
 
 def get_pickup_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM hire.equipment_rental_status AS ers
@@ -420,4 +469,3 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
             VALUES (NULL, %s, %s, 3, 'Equipment returned from a customer', %s);"""
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
-

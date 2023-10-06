@@ -164,3 +164,46 @@ def remove_favorite(equipment_id):
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(previous_url)
+
+
+@app.route('/bookings')
+def bookings():
+    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Bookings", "url": "/bookings"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        sql_bookings = sql_function.get_bookings(session['user_id'])
+        return render_template('customer/bookings.html', bookings=sql_bookings, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+
+
+@app.route('/delete_booking/<int:instance_id>/<int:hire_id>', methods=['POST'])
+def delete_booking(instance_id, hire_id):
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        sql_function.delete_booking(instance_id, hire_id)
+        session['msg'] = "Booking deleted successfully"
+        return redirect(url_for('bookings'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+
+
+@app.route('/update_booking/<int:instance_id>', methods=['POST'])
+def update_booking(instance_id):
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    end_date = request.form.get('end_date')
+    if 'loggedIn' in session:
+        sql_function.update_booking_end_date(instance_id, end_date)
+        session['msg'] = "Booking updated successfully"
+        return redirect(url_for('bookings'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
