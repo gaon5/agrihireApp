@@ -207,3 +207,17 @@ def update_booking(instance_id):
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+
+
+@app.route('/customer_cart')
+def customer_cart():
+    # cart
+    return render_template('customer/customer_cart.html' )
+
+@app.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    equipment_id = request.form.get('equipment_id')
+    print(equipment_id)
+    print(session)
+    # return redirect(url_for('guest_cart'))
+    pass
