@@ -356,3 +356,39 @@ def stats_dashboard():
     sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
     booking_stat = operate_sql(sql)
     return customer_stat, staff_stat, equipment_stat, booking_stat
+  
+
+def get_bookings(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                    FROM user_account ua
+                    INNER JOIN customer c on c.user_id = ua.user_id
+                    WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, ers.rental_start_datetime, e.price, ers.expected_return_datetime 
+        FROM customer AS c 
+        INNER JOIN hire_list AS hl ON c.customer_id = hl.customer_id
+        INNER JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
+        INNER JOIN equipment_instance AS ei ON hi.instance_id = ei.instance_id
+        INNER JOIN equipment_rental_status AS ers ON ers.instance_id = hi.instance_id
+        INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+        WHERE c.customer_id=%s;"""
+    bookings = operate_sql(sql, (customer_id,))
+    return bookings
+
+def delete_booking(instance_id=None, hire_id=None):
+    if instance_id:
+        sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
+        operate_sql(sql, (instance_id,))
+        
+        sql = """DELETE FROM equipment_rental_status WHERE instance_id=%s"""
+        operate_sql(sql, (instance_id,))
+    
+    if hire_id:
+        sql = """DELETE FROM hire_list WHERE hire_id=%s"""
+        operate_sql(sql, (hire_id,))
+
+
+def update_booking_end_date(instance_id, new_end_date):
+    sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
+    operate_sql(sql, (new_end_date, instance_id))

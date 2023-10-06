@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block mytitle %}
+    Bookings
+{% endblock %}
+
+{% block mycss %}
+
+{% endblock %}
+
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">User Bookings</h1>
+    {% if bookings %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Equipment Name</th>
+                <th>Booking Date</th>
+                <th>Amount</th>
+                <th>Hire Start</th>
+                <th>Hire End</th>
+                <th>Modify Return Date</th>
+                <th>Delete Booking</th>
+            
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.name }}</td>
+                <td>{{ booking.datetime }}</td>
+                <td>{{ booking.price }}</td>
+                <td>{{ booking.rental_start_datetime }}</td>
+                <td>{{ booking.expected_return_datetime }}</td>
+                <td> <form action="{{ url_for('update_booking', instance_id=booking.instance_id) }}" method="post"> 
+                    <!-- Replace update_booking with your actual route for updating booking -->
+                        <input type="date" name="new_end_date" required>
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                    </form>
+                </td>
+                <td>
+                    <form action="{{ url_for('delete_booking', instance_id=booking.instance_id, hire_id=booking.hire_id) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this booking?');">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        No bookings found.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block myjs %}
+
+{% endblock %}
