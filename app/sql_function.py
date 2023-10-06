@@ -258,10 +258,11 @@ def get_bookings_by_customer_id(customer_id):
     sql = """SELECT
             hi.hire_id,
             hi.instance_id,
-            name , 
-            hl.datetime , 
+            hl.datetime,
+            e.name, 
+            ers.rental_start_datetime, 
             e.price, 
-            expected_return_datetime 
+            ers.expected_return_datetime 
         FROM customer AS c 
         INNER JOIN hire_list AS hl ON c.customer_id = hl.customer_id
         INNER JOIN hire_item AS hi ON hl.hire_id = hi.hire_id

@@ -25,6 +25,7 @@
                 <th>Equipment Name</th>
                 <th>Booking Date</th>
                 <th>Amount</th>
+                <th>Hire Start</th>
                 <th>Hire End</th>
                 <th>Modify Return Date</th>
                 <th>Delete Booking</th>
@@ -37,7 +38,8 @@
                 <td>{{ booking.name }}</td>
                 <td>{{ booking.datetime }}</td>
                 <td>{{ booking.price }}</td>
-                <td>{{ booking.expected_return_date }}</td>
+                <td>{{ booking.rental_start_datetime }}</td>
+                <td>{{ booking.expected_return_datetime }}</td>
                 <td> <form action="{{ url_for('update_booking', instance_id=booking.instance_id) }}" method="post"> 
                     <!-- Replace update_booking with your actual route for updating booking -->
                         <input type="date" name="new_end_date" required>
