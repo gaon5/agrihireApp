@@ -246,6 +246,18 @@ def user_change_password():
             last_msg = "Password changed."
     return render_template(template_map[permission_level], breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
+
+@app.route("/guest_cart")
+def guest_cart():
+    if 'loggedIn' in session:
+        if session['is_customer'] == 1:
+            return render_template('customer/customer_cart.html')
+    else:
+        msg = 'Please Log In To View Cart'
+        breadcrumbs = [{"text": "Login", "url": "/login"}]
+        return render_template('guest/login.html', msg=msg, breadcrumbs=breadcrumbs)
+
+
 # @app.errorhandler(Exception)
 # def handle_error(error):
 #     """
