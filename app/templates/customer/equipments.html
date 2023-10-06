@@ -180,4 +180,54 @@
             {% endfor %}
         {% endif %}
     </script>
+
+    <script>
+        var currentProduct = null;  // 在脚本的开始定义一个变量来保存当前产品
+
+        $('.btn-danger').on('click', function (event) {
+            event.preventDefault();
+            currentProduct = $(this).closest('.card');  // 保存当前产品到currentProduct
+            currentForm = $(this).closest('.card').find('.add-to-cart-form');  // 找到并保存当前产品的隐藏表单
+            $('#addToCartModal').modal('show');
+        });
+
+
+        $('#confirmAddToCart').on('click', function () {
+            if (!currentProduct) return;
+
+            var cartIcon = $('.cart-icon');
+            var productImage = currentProduct.find('img');
+
+            var clonedImage = productImage.clone()
+                .offset({
+                    top: productImage.offset().top,
+                    left: productImage.offset().left
+                })
+                .css({
+                    'opacity': '0.5',
+                    'position': 'absolute',
+                    'height': '150px',
+                    'width': '150px',
+                    'z-index': '100'
+                })
+                .appendTo($('body'));
+
+            clonedImage.animate({
+                'top': cartIcon.offset().top,
+                'left': cartIcon.offset().left,
+                'width': 50,
+                'height': 50
+            }, 1000, function () {
+                clonedImage.remove();
+
+                // 动画结束后，提交表单
+                if (currentForm) {
+                    currentForm.submit();
+                }
+            });
+
+            $('#addToCartModal').modal('hide');
+        });
+
+    </script>
 {% endblock %}
