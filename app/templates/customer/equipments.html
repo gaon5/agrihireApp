@@ -135,7 +135,14 @@
                                         </div>
                                     {% endif %}
                                     <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
-                                       class="btn btn-primary" style="font-size: 14px">See Detail</a>
+                                       class="btn btn-primary" style="font-size: 14px">See Detail
+                                    </a>
+                                    <a  href="#"
+                                        class="btn btn-danger" style="font-size: 14px">Add To Cart
+                                    </a>
+                                    <form action="/add_to_cart" method="post" class="add-to-cart-form" style="display: none;">
+                                        <input type="hidden" name="equipment_id" value="{{ equipment.equipment_id }}">
+                                    </form>
                                 </div>
                                 <a href="{{ url_for('add_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}" class="image1-switcher position-absolute top-0 end-0 mx-3 my-2"
                                    style="width: 20px;height:20px"></a>
