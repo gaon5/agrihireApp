@@ -57,6 +57,11 @@
             height: 50vh; /* 与图片高度保持一致 */
         }
 
+        .carousel-item img {
+            max-height: 50vh; 
+            width: auto; 
+        }
+
         .carousel-inner {
             padding: 20px; /* 在容器的四周都添加20px的内边距 */
         }
@@ -108,36 +113,35 @@
 {% block body %}
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-12">
             <div class="nav-container">
-                <div class="d-flex flex-column align-items-start">
-                    <h5 style="color:#1d1912">Equipment</h5>
-                    <nav class="nav flex-column">
-                        <a class="nav-link active" href="#" style="color:#1d1912">Catalog1</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog2</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog3</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog4</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog5</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog6</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog7</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog8</a>
-                        <a class="nav-link" href="#" style="color:#1d1912">Catalog9</a>
-
-                        <!-- 更多品类... -->
-                    </nav>
-                </div>
+                <nav class="navbar navbar-expand-md">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>                    
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="nav flex-column">
+                            <li class="nav-item"><a class="nav-link active" href="/equipments" style="color:#1d1912">Equipments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/equipments/Landscaping" style="color:#1d1912">Landscaping</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/equipments/Trailers" style="color:#1d1912">Trailers</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/equipments/Earthmoving" style="color:#1d1912">Earthmoving</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/equipments/Building-and-Renovation" style="color:#1d1912">Building and Renovation</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/equipments/Tool-and-Equipment" style="color:#1d1912">Tool and Equipment</a></li>
+                            <!-- ... 其他导航链接 ... -->
+                        </ul>
+                    </div>
+                </nav>
             </div>
         </div>
-        <div class="col-md-9">
-            <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+        <div class="col-md-9 col-sm-12">
+            <div id="carouselExampleControls" class="carousel slide">
                 <div class="carousel-inner">
                     <div class="carousel-item active" style="background-color: #1d1912;">
                         <div class="row">
                             <div class="col-md-9">
-                                <img class="d-block w-100" src="{{ url_for('static', filename='image/mowers.jpg') }}"
-                                     style="height: 50vh; object-fit: cover;" alt="First slide">
+                                <img class="d-block w-100 img-fluid" src="{{ url_for('static', filename='image/mowers.jpg') }}" alt="First slide">
                             </div>
-                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <div class="col-md-3 slogan-container">
                                 <p class="slogan-text">It's Time To Makeover Your Lawn</p>
                             </div>
                         </div>
@@ -145,21 +149,19 @@
                     <div class="carousel-item" style="background-color: #1d1912;">
                         <div class="row">
                             <div class="col-md-9">
-                                <img class="d-block w-100" src="{{ url_for('static', filename='image/lifting.jpg') }}"
-                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                                <img class="d-block w-100 img-fluid" src="{{ url_for('static', filename='image/lifting.jpg') }}"  alt="Second slide">
                             </div>
-                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
-                                <p class="slogan-text">Are You Worried About Painting The Exterior Wall Of The Second Floor?</p>
+                            <div class="col-md-3 slogan-container">
+                                <p class="slogan-text">Are You Worried About The Second Floor?</p>
                             </div>
                         </div>
                     </div>
                     <div class="carousel-item" style="background-color: #1d1912;">
                         <div class="row">
                             <div class="col-md-9">
-                                <img class="d-block w-100" src="{{ url_for('static', filename='image/tree_saws.jpg') }}"
-                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                                <img class="d-block w-100 img-fluid" src="{{ url_for('static', filename='image/tree_saws.jpg') }}" alt="Second slide">
                             </div>
-                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <div class="col-md-3 slogan-container">
                                 <p class="slogan-text">We Have The Latest Tree Saws!</p>
                             </div>
                         </div>
@@ -167,23 +169,22 @@
                     <div class="carousel-item" style="background-color: #1d1912;">
                         <div class="row">
                             <div class="col-md-9">
-                                <img class="d-block w-100" src="{{ url_for('static', filename='image/loaders.jpg') }}"
-                                     style="height: 50vh; object-fit: cover;" alt="Second slide">
+                                <img class="d-block w-100 img-fluid" src="{{ url_for('static', filename='image/loaders.jpg') }}" alt="Second slide">
                             </div>
-                            <div class="col-md-3 slogan-container" style="background-color: #1d1912; height: 50vh;">
+                            <div class="col-md-3 slogan-container">
                                 <p class="slogan-text">It's A Chance To Play With Clay!</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="sr-only">Previous</span>
                 </a>
-                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="sr-only">Next</span>
-                </a>
+                </a>                
             </div>
         </div>
     </div>
@@ -236,13 +237,11 @@
 
 
 {% block myjs %}
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-
     <script>
         $(document).ready(function () {
-            $('.carousel').carousel();
+            $('.carousel').carousel({
+                interval: 5000 // 设置为5秒
+            });
         });
     </script>
-
 {% endblock %}
