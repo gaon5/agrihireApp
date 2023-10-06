@@ -4,12 +4,16 @@ import math
 import re
 from app import app, check_permissions, scheduler, sql_function, bcrypt
 
+
 # route for check out list
 @app.route('/check_out_list', methods=['GET', 'POST'])
 def check_out_list():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Check Out", "url": "/check_out_list"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
         if check_permissions() > 1:
-            msg = ''
             # if method is POST ...
             if request.method == 'POST':
                 # get the date from the website
@@ -27,7 +31,7 @@ def check_out_list():
                     current_datetime = datetime.now().replace(microsecond=0)
                     # update an equipment's rental status AND insert a log about the equipment into the log
                     sql_function.check_out_equipment(equipment_rental_status_id, instance_id, session['user_id'], current_datetime)
-                    msg = "Equipment checked out successful"
+                    last_msg = "Equipment checked out successful"
             # otherwise, set the date as today's date
             else:
                 the_date = date.today()
@@ -40,21 +44,25 @@ def check_out_list():
                 pickup['rental_start_datetime'] = time(hour=hours, minute=minutes).strftime('%H:%M')
             # convert the date to a user-friendly format
             the_date = the_date.strftime("%d %b %Y")
-            return render_template('staff/check_out_list.html', pickup_list=pickup_list, the_date=the_date, msg=msg)
+            return render_template('staff/check_out_list.html', pickup_list=pickup_list, the_date=the_date, breadcrumbs=breadcrumbs, last_msg=last_msg,
+                                   last_error_msg=last_error_msg)
         else:
             session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
-            return redirect('/') 
+            return redirect(url_for('index'))
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect('/login') 
-    
+        return redirect(url_for('login'))
+
 
 # route for return list
 @app.route('/return_list', methods=['GET', 'POST'])
 def return_list():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Return List", "url": "/return_list"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
         if check_permissions() > 1:
-            msg = ""
             # if method is POST ...
             if request.method == 'POST':
                 # get the date from the website
@@ -72,25 +80,24 @@ def return_list():
                     current_datetime = datetime.now().replace(microsecond=0)
                     # update an equipment's rental status based on the current datetime AND insert a log about the equipment into the log
                     sql_function.return_equipment(equipment_rental_status_id, instance_id, session['user_id'], current_datetime)
-                    msg = "Equipment returned successful"
+                    last_msg = "Equipment returned successful"
             # otherwise, set the date as today's date
             else:
                 the_date = date.today()
             # get every rented out equipment.
-            return_list = sql_function.get_return_equipment(the_date)
+            sql_return_list = sql_function.get_return_equipment(the_date)
             # convert timedelta object to a time object
-            for return_item in return_list:
+            for return_item in sql_return_list:
                 hours = return_item['expected_return_datetime'].seconds // 3600
                 minutes = (return_item['expected_return_datetime'].seconds % 3600) // 60
                 return_item['expected_return_datetime'] = time(hour=hours, minute=minutes).strftime('%H:%M')
             # convert the date to a user-friendly format
             the_date = the_date.strftime("%d %b %Y")
-            return render_template('staff/return_list.html', return_list=return_list, the_date=the_date, msg=msg)
+            return render_template('staff/return_list.html', return_list=sql_return_list, the_date=the_date, breadcrumbs=breadcrumbs, last_msg=last_msg,
+                                   last_error_msg=last_error_msg)
         else:
             session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
-            return redirect('/') 
+            return redirect(url_for('index'))
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect('/login') 
-
-
+        return redirect(url_for('login'))
