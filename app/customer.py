@@ -82,86 +82,42 @@ def equipment_detail(category, sub, detail_id):
 
 @app.route('/bookings')
 def bookings():
-    msg = request.args.get('msg')
-    try:
-        user_id = session.get('user_id')  # Assuming user_id is stored in the session
-        #print(user_id)
-        if user_id is None:
-            # Redirect to login page if user_id is not available in the session
-            return redirect(url_for('login'))
-        
-        # Get customer_id using user_id
-        customer_id = sql_function.get_customer_id_by_user_id(user_id)
-        if customer_id is None:
-            # Handle the case where there is no corresponding customer_id for the user_id
-            return "No corresponding customer for the logged-in user", 400
-        
-        # Get bookings using customer_id
-        data = sql_function.get_bookings_by_customer_id(customer_id)
-        #print(data)
-        
-        # Render the template with the fetched bookings
-        return render_template('customer/bookings.html', bookings=data, msg=msg)
-    
-    except Exception as e:
-        # Handle any other exceptions that might occur
-        return f"An error occurred: {str(e)}", 500
-
+    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Bookings", "url": "/bookings"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        sql_bookings = sql_function.get_bookings(session['user_id'])
+        return render_template('customer/bookings.html', bookings=sql_bookings, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
 
 
 @app.route('/delete_booking/<int:instance_id>/<int:hire_id>', methods=['POST'])
 def delete_booking(instance_id, hire_id):
-    try:
-        user_id = session.get('user_id')  # Assuming user_id is stored in the session
-        if user_id is None:
-            # Redirect to login page if user_id is not available in the session
-            return redirect(url_for('login'))
-        
-        sql_function.delete_booking_by_instance_id_or_hire_id(instance_id, hire_id)
-        msg = "Booking deleted successfully"
-        
-        return redirect(url_for('bookings', msg=msg))
-        
-    except Exception as e:
-        # Handle any other exceptions that might occur
-        return f"An error occurred: {str(e)}", 500
-
-
-
-
-
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        sql_function.delete_booking(instance_id, hire_id)
+        session['msg'] = "Booking deleted successfully"
+        return redirect(url_for('bookings'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
 
 
 @app.route('/update_booking/<int:instance_id>', methods=['POST'])
 def update_booking(instance_id):
-    try:
-        user_id = session.get('user_id')  # Assuming user_id is stored in the session
-        if user_id is None:
-            # Redirect to login page if user_id is not available in the session
-            return redirect(url_for('login'))
-
-        # Fetch the new end date from form data
-        new_end_date = request.form.get('new_end_date')
-        if not new_end_date:
-            return "Invalid data: Missing end date", 400
-        #print(new_end_date)
-        #print(type(new_end_date))
-        
-        sql_function.update_booking_end_date(instance_id, new_end_date)
-        msg = "Booking updated successfully"
-        
-        return redirect(url_for('bookings', msg=msg))
-
-    except Exception as e:
-        return f"An error occurred: {str(e)}", 500
-
-
-
-@app.route('/some_route')
-def some_route():
-    user_id = session.get('user_id')
-    if user_id:
-        print(user_id)
-        return str(user_id)  # just for demo, return it as a response
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    end_date = request.form.get('end_date')
+    if 'loggedIn' in session:
+        sql_function.update_booking_end_date(instance_id, end_date)
+        session['msg'] = "Booking updated successfully"
+        return redirect(url_for('bookings'))
     else:
-        return 'User_id not in session'
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))

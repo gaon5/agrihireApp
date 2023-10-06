@@ -15,7 +15,7 @@ def get_cursor():
                                          host=config.dbhost,
                                          database=config.dbname,
                                          autocommit=True)
-    db_conn = connection.cursor(dictionary=True) # add buffered=True to solve "unread result found" issue
+    db_conn = connection.cursor(dictionary=True)
     return db_conn
 
 
@@ -243,38 +243,25 @@ def stats_booking():
     booking_stat = operate_sql(sql)
     return booking_stat
 
-def get_customer_id_by_user_id(user_id):
-    sql = """SELECT customer_id FROM customer WHERE user_id = %s"""
-    data = operate_sql(sql, (user_id,))  # Passing user_id as parameter.
-    
-    if not data or not data[0]:  # Checking if data is not empty and data[0] is not None.
-        return None  # or handle accordingly, maybe raise an exception or return a default value.
-    
-    customer_id = data[0]['customer_id']  # Assuming operate_sql returns a list of dictionaries.
-    return customer_id
-
-
-def get_bookings_by_customer_id(customer_id):
-    sql = """SELECT
-            hi.hire_id,
-            hi.instance_id,
-            hl.datetime,
-            e.name, 
-            ers.rental_start_datetime, 
-            e.price, 
-            ers.expected_return_datetime 
+def get_bookings(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                    FROM user_account ua
+                    INNER JOIN customer c on c.user_id = ua.user_id
+                    WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, ers.rental_start_datetime, e.price, ers.expected_return_datetime 
         FROM customer AS c 
         INNER JOIN hire_list AS hl ON c.customer_id = hl.customer_id
         INNER JOIN hire_item AS hi ON hl.hire_id = hi.hire_id
         INNER JOIN equipment_instance AS ei ON hi.instance_id = ei.instance_id
         INNER JOIN equipment_rental_status AS ers ON ers.instance_id = hi.instance_id
         INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
-        WHERE c.customer_id=%s;
-    """
-    data = operate_sql(sql, (customer_id,))
-    return data
+        WHERE c.customer_id=%s;"""
+    bookings = operate_sql(sql, (customer_id,))
+    return bookings
 
-def delete_booking_by_instance_id_or_hire_id(instance_id=None, hire_id=None):
+def delete_booking(instance_id=None, hire_id=None):
     if instance_id:
         sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
         operate_sql(sql, (instance_id,))
