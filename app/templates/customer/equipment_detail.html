@@ -72,22 +72,35 @@
 {% block body %}
     <div class="container">
         <div class="row py-3">
-            <div class="col-3">
+            <div class="col-md-3 col-sm-12">
                 <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Category</h5>
                 <ul style="padding: 0; list-style: none;">
                     {% for category in category_list %}
                         <li style="margin: 20px 0;">
                             <div>
                                 <input type="radio" id="{{ category.category_id }}" style="display: none">
-                                <label class="label_style" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
+                                <label class="label_style label_name1" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
                             </div>
                         </li>
                     {% endfor %}
                 </ul>
+                {% if sub_list %}
+                    <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Sub Category</h5>
+                    <ul style="padding: 0; list-style: none;">
+                        {% for subcategory in sub_list['subcategories'] %}
+                            <li style="margin: 20px 0;">
+                                <div>
+                                    <input type="radio" id="{{ subcategory }}" style="display: none">
+                                    <label class="label_style label_name2" for="{{ subcategory }}">{{ subcategory.replace("-", " ") }}</label>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
-            <div class="col-9">
+            <div class="col-md-9 col-sm-12">
                 <div class="row py-3">
-                    <div class="col-6">
+                    <div class="col-md-6 col-sm-12">
                         <div>
                             {% for i in range(1, equipment|length + 1) %}
                                 <div class="img-container" id="image_list{{ i }}" style="background-color: white;{% if i != 1 %}display: none{% endif %}">
@@ -107,7 +120,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-6 position-relative">
+                    <div class="col-md-6 col-sm-12 position-relative">
                         <p class="text-center pt-5" style="font-size: 35px">{{ equipment[0]['name'] }}</p>
                         <div class="d-flex justify-content-center" style="min-height: 75px">
                             <div class="truncated-text">{{ equipment[0]['description'] }}</div>
@@ -117,7 +130,7 @@
                                 <thead>
                                 <tr>
                                     {% set helf = equipment[0]['price']|float %}
-                                    <th class="m-0" style="font-size: 23px">Half-Day: $ {{ "%.2f"|format(helf * 0.75) }}</th>
+                                    <th class="m-0" style="font-size: 23px">Half Day: $ {{ "%.2f"|format(helf * 0.75) }}</th>
                                     <th class="m-0" style="font-size: 23px">Full Day: $ {{ equipment[0]['price'] }} </th>
                                 </tr>
                                 </thead>
@@ -183,13 +196,20 @@
             }
         }
 
-        $('label').on('click', function () {
+        $('.label_name1').on('click', function () {
             const labelContent = $(this).text().trim();
             window.location.href = "/equipments/" + labelContent.replace(/ /g, '-');
         });
+        {% if sub_list %}
+            $('.label_name2').on('click', function () {
+                const labelContent1 = "{{ sub_list['name'] }}"
+                const labelContent2 = $(this).text().trim();
+                window.location.href = "/equipments/" + labelContent1 + "/" + labelContent2.replace(/ /g, '-');
+            });
+        {% endif %}
         {% if wishlist %}
-                $('#favorite').removeClass("image1-switcher").addClass("image2-switcher");
-                $('#favorite').attr('href', '{{ url_for('remove_favorite', equipment_id=equipment[0]['equipment_id']) }}');
+            $('#favorite').removeClass("image1-switcher").addClass("image2-switcher");
+            $('#favorite').attr('href', '{{ url_for('remove_favorite', equipment_id=equipment[0]['equipment_id']) }}');
         {% endif %}
     </script>
 {% endblock %}

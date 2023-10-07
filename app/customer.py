@@ -11,7 +11,7 @@ from app import app, check_permissions, sql_function, bcrypt
 def equipments(category, sub):
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}]
     sub_id = category_id = None
-    wishlist = None
+    sub_list = wishlist = None
     page = request.args.get('page')
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
@@ -40,12 +40,13 @@ def equipments(category, sub):
             sql_equipments, count = sql_function.get_equipment_by_sub(sub_id, sql_page)
         else:
             sql_equipments, count = sql_function.get_equipment_by_category(category_id, sql_page)
+        sub_list = sql_function.category[category_id]
     else:
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
     if 'loggedIn' in session:
         wishlist = sql_function.get_wishlist(session['user_id'])
     return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                           count=count, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
+                           count=count, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/equipments/search_equipment', methods=['GET', 'POST'])
@@ -77,7 +78,7 @@ def search_equipment():
 @app.route('/equipments/<category>/<sub>/detail/<detail_id>', methods=['GET', 'POST'])
 def equipment_detail(category, sub, detail_id):
     breadcrumbs = [{"text": "Equipments", "url": "/equipments"}]
-    wishlist = None
+    sub_list = wishlist = None
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -85,6 +86,7 @@ def equipment_detail(category, sub, detail_id):
         if any(categories['name'] == category for categories in sql_function.category.values()):
             breadcrumbs.append({"text": str(category).replace("-", " "), "url": "/equipments/" + str(category)})
             category_id = next((key for key, value in sql_function.category.items() if value['name'] == category), None)
+            sub_list = sql_function.category[category_id]
             if sub:
                 if sub in sql_function.category[category_id]['subcategories']:
                     sub_id = next((item['sub_id'] for item in sql_function.sub_category_list if item['name'] == sub), None)
@@ -118,7 +120,7 @@ def equipment_detail(category, sub, detail_id):
     if 'loggedIn' in session:
         wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
     return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,
-                           category_list=sql_function.category_list, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
+                           category_list=sql_function.category_list, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
