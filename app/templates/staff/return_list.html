@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+<style>
+    #navigation-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    p {
+        text-align: center;
+    }
+    .column1 { 
+        width: 100px; 
+    }
+    .column2 { 
+        width: 100px; 
+    }
+    .column3 { 
+        width: 100px; 
+    }
+    .column4 { 
+        width: 100px; 
+    }
+    .column5 { 
+        width: 100px; 
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-8" style="text-align: center">
+                <br>
+                <h1>Return List</h1>
+                <br></br>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form action="{{ url_for('return_list') }}" method="post">
+                <div id="navigation-container">
+                    <button type="submit" class="btn btn-dark mx-5 px-4" id="previous_day" name="previous_day" value="previous_day">&larr;</button>
+                    <p id="date" class="px-3">{{ the_date }}</p>
+                    <button type="submit" class="btn btn-dark mx-5 px-4" id="next_day" name="next_day" value="next_day">&rarr;</button>
+                </div>
+                <br>
+                {% if return_list %}
+                    <div class="card mt-6">
+                        <div class="card-body">
+                            <table class="table table-bordered table-light table-hover">
+                                <thead>
+                                <tr class="table-dark">
+                                    <th scope="col">Equipment Name</th>
+                                    <th scope="col">Customer ID</th>
+                                    <th scope="col">Return Time</th>
+                                    <th scope="col">Notes</th>
+                                    <th scope="col">Return</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for return in return_list %}
+                                    <tr>
+                                        <td class="column1">{{ return.name }}</td>
+                                        <td class="column2">{{ return.customer_id }}</td>
+                                        <td class="column3">{{ return.expected_return_datetime }}</td>
+                                        <td class="column4">{{ return.notes }}</td>
+                                        <td class="column5">
+                                            <input type="hidden" name="instance_id" id="instance_id" value="{{ return.instance_id }}">
+                                            <input type="hidden" name="equipment_rental_status_id" id="equipment_rental_status_id" value="{{ return.equipment_rental_status_id }}">
+                                            <button type="submit" class="btn btn-primary" name="instance_id" id="instance_id" value="{{ return.instance_id }}">
+                                                Return
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <p>There is no equipment for pickup</p>
+                {% endif %}
+                <input type="hidden" name="the_date" id="the_date" value="{{ the_date }}">
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+{% endblock %}
