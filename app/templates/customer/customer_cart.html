@@ -8,22 +8,133 @@ Shopping Cart
 
 {% block mycss %}
 <style>
-    .cart-item {
-        border-bottom: 1px solid #ccc;
-        padding: 10px 0;
-        display: flex;
-        justify-content: space-between;
+    .cart-title {
+        color: #1D1912;       /* 字体颜色 */
+        font-family: 'Poppins', sans-serif;    /* 字体 */
+        font-size: 24px;       /* 字体大小 */
+        margin-left: 15%;      /* 左侧距离 */
+        margin-right: 15%;     /* 右侧距离 */
+        border-bottom: 3px solid #1D1912;    /* 3px深色横线 */
+        padding-bottom: 10px;      /* 为了使横线与文字之间有些间距 */
     }
+
+    .quantity-btn {
+        border: none;  /* 移除按钮的边框 */
+        background-color: transparent;  /* 透明背景 */
+        color: #1D1912;  /* 修改字体颜色 */
+        cursor: pointer;  /* 更改光标样式为pointer */
+    }
+
+    .quantity-btn:hover {
+        background-color: #eacd76;  /* 设置鼠标hover时的背景颜色 */
+    }
+
+    .total-bar {
+        display: flex;
+        justify-content: space-between;  /* 将内容分布在两端，而不仅仅是右侧 */
+        padding: 10px 0;
+        border-top: 2px solid #1D1912;
+    }
+
+    .total-price {
+        margin-right: 15%;  /* 与页面右侧对齐 */
+        font-size: 24px;    /* 字体大小 */
+        font-weight: bold;  /* 粗体字 */
+        font-family: 'Poppins', sans-serif;
+    }
+
 </style>
     
 {% endblock %}
 
 
 {% block body %}
+<div>
+    <p class="cart-title">
+        My Shopping Cart
+    </p>
+
+    <div style="margin-left: 15%; margin-right: 15%;">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">My Equipment</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Rental Date</th>
+                    <th scope="col">Estimate Return Date</th>
+                    <th scope="col">Unit Price</th>
+                    <th scope="col">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <!-- 图片部分 -->
+                            <img src="{{ url_for('static', filename='image/mowers.jpg') }}" alt="Equipment Image" style="width: 50px; height: auto; margin-right: 10px;">
+                            <!-- 文字部分 -->
+                            <div style="max-width: 200px; word-wrap: break-word;">
+                                品名
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <!-- 减号按钮 -->
+                            <button class="quantity-btn" onclick="decrementQuantity()">-</button>
+                    
+                            <!-- 数量输入字段 -->
+                            <input type="number" id="quantityInput" value="1" min="1" style="width: 50px; text-align: center; margin: 0 5px;">
+                    
+                            <!-- 加号按钮 -->
+                            <button class="quantity-btn" onclick="incrementQuantity()">+</button>
+                        </div>
+                    </td>
+                    <td>Data 3</td>
+                    <td>Data 4</td>
+                    <td>Data 5</td>
+                    <td>
+                        <form action="{{ url_for('delete_item') }}" method="post">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+        
+        <div class="total-bar">
+            <span class="total-price">Total Price: $123.45</span>
+            <form action="{{ url_for('location') }}" method="get">  <!-- 使用你的下一页路由名替换'next_step_route' -->
+                <button type="submit" class="btn btn-primary">Next Step</button>
+            </form>
+        </div>
+
+
+
+
+    </div>
+
+</div>
     
 {% endblock %}
 
 
 {% block myjs %}
+    <script>
+        function decrementQuantity() {
+            let input = document.getElementById('quantityInput');
+            let currentValue = parseInt(input.value, 10);
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        function incrementQuantity() {
+            let input = document.getElementById('quantityInput');
+            let currentValue = parseInt(input.value, 10);
+            input.value = currentValue + 1;
+        }
+    </script>
     
 {% endblock %}

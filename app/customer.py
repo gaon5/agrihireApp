@@ -214,10 +214,21 @@ def customer_cart():
     # cart
     return render_template('customer/customer_cart.html' )
 
+
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     equipment_id = request.form.get('equipment_id')
     print(equipment_id)
     print(session)
     # return redirect(url_for('guest_cart'))
+    pass
+
+
+@app.route('/delete_item', methods=['POST'])
+def delete_item():
+    equipment_id = request.form.get('equipment_id')
+    pass
+
+@app.route('/location', methods=['POST'])
+def location():
     pass
