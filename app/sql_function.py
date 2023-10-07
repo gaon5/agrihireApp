@@ -69,12 +69,12 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     return temp
 
 
-user_list = operate_sql("""SELECT * FROM `user_account`;""")
-region_list = operate_sql("""SELECT * FROM `region`;""")
-title_list = operate_sql("""SELECT * FROM `title`;""")
-city_list = operate_sql("""SELECT * FROM `city`;""")
-question_list = operate_sql("""SELECT * FROM `security_question`;""")
-category_list = operate_sql("""SELECT * FROM `category`;""")
+user_list = operate_sql("""SELECT * FROM `user_account`;""", close=0)
+region_list = operate_sql("""SELECT * FROM `region`;""", close=0)
+title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
+city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
+question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
+category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
 sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
 
 category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
@@ -244,7 +244,7 @@ def get_equipment_by_wishlist(user_id, sql_page):
                 LEFT JOIN category ca on ca.category_id = s.category_id
                 WHERE customer.user_id=%s AND ei.priority=1
                 LIMIT %s, 15;;"""
-    equipment = operate_sql(sql, (user_id, sql_page,))
+    equipment = operate_sql(sql, (user_id, sql_page,), close=0)
     sql = """SELECT COUNT(e.equipment_id) AS count FROM customer
                     LEFT JOIN wishlist w ON customer.customer_id = w.customer_id
                     LEFT JOIN equipment e ON e.equipment_id = w.equipment_id
@@ -329,7 +329,7 @@ def get_customer_details(user_id):
 def update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, user_id):
     sql = """UPDATE `customer` SET first_name=%s,last_name=%s,birth_date=%s,title_id=%s,phone_number=%s,region_id=%s,city_id=%s,street_name=%s
                 WHERE user_id=%s;"""
-    operate_sql(sql, (first_name, last_name, birth_date, title, phone_number, region, city, street_name, user_id))
+    operate_sql(sql, (first_name, last_name, birth_date, title, phone_number, region, city, street_name, user_id), close=0)
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
@@ -346,7 +346,7 @@ def get_staff_details(user_id):
 def update_staff_details(first_name, last_name, title, phone_number, email, user_id):
     sql = """UPDATE `staff` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
                 WHERE user_id=%s;"""
-    operate_sql(sql, (first_name, last_name, title, phone_number, user_id))
+    operate_sql(sql, (first_name, last_name, title, phone_number, user_id), close=0)
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
@@ -363,21 +363,17 @@ def get_admin_details(user_id):
 def update_admin_details(first_name, last_name, title, phone_number, email, user_id):
     sql = """UPDATE `admin` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
                 WHERE user_id=%s;"""
-    operate_sql(sql, (first_name, last_name, title, phone_number, user_id))
+    operate_sql(sql, (first_name, last_name, title, phone_number, user_id), close=0)
     sql = """UPDATE `user_account` SET email=%s
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
 
 
 def stats_dashboard():
-    sql = """SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;"""
-    customer_stat = operate_sql(sql)
-    sql = """SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;"""
-    staff_stat = operate_sql(sql)
-    sql = """SELECT COUNT(equipment_id) FROM hire.equipment;"""
-    equipment_stat = operate_sql(sql)
-    sql = """SELECT COUNT(log_id) FROM hire.hire_log;"""
-    booking_stat = operate_sql(sql)
+    customer_stat = operate_sql("""SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;""", close=0)
+    staff_stat = operate_sql("""SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;""", close=0)
+    equipment_stat = operate_sql("""SELECT COUNT(equipment_id) FROM hire.equipment;""", close=0)
+    booking_stat = operate_sql("""SELECT COUNT(log_id) FROM hire.hire_log;""")
     return customer_stat, staff_stat, equipment_stat, booking_stat
   
 
