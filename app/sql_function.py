@@ -467,7 +467,7 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
     
 def customer_list():
-    equipment = operate_sql("""SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, e.name AS Equipment, rs.name AS Status, DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, TIME(ers.expected_return_datetime) AS rTime
+    equipment = operate_sql("""SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, c.phone_number, e.name AS Equipment, rs.name AS Status, DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, TIME(ers.expected_return_datetime) AS rTime
                                 FROM hire.equipment_rental_status ers
                                 INNER JOIN customer c ON c.customer_id = ers.customer_id
                                 INNER JOIN rental_status rs ON ers.rental_status_id = rs.rental_status_id
