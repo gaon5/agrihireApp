@@ -465,3 +465,14 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
             VALUES (NULL, %s, %s, 3, 'Equipment returned from a customer', %s);"""
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
+    
+def customer_list():
+    equipment = operate_sql("""SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, e.name AS Equipment, rs.name AS Status, DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, TIME(ers.expected_return_datetime) AS rTime
+                                FROM hire.equipment_rental_status ers
+                                INNER JOIN customer c ON c.customer_id = ers.customer_id
+                                INNER JOIN rental_status rs ON ers.rental_status_id = rs.rental_status_id
+                                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
+                                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+                                ORDER BY ers.expected_return_datetime ASC;""")
+    return equipment
+    
