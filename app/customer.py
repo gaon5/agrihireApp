@@ -209,3 +209,35 @@ def update_booking(instance_id):
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+
+
+
+@app.route('/faq')
+def faq():
+    contact_details = "support@example.com"  # This can also come from a database or configuration.
+    return render_template('customer/faq.html', contact=contact_details)
+
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    breadcrumbs = [{"text": "contact", "url": "/contact"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if request.method == 'POST':
+        # Get form data (to be stored or processed)
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        location = request.form.get('location')
+        enquiry_type = request.form.get('enquiry_type')
+        enquiry_details = request.form.get('enquiry_details')
+
+        
+        session['msg'] = "'Your enquiry has been submitted successfully!', 'success'"
+
+        return render_template('customer/contact.html', msg=last_msg, error_msg=last_error_msg)
+
+
+    return render_template('customer/contact.html')
