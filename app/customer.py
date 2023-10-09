@@ -217,11 +217,17 @@ def customer_cart():
 
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
+    selected_date = request.form.get('selected_date')
+    selected_days = request.form.get('selected_days')
     equipment_id = request.form.get('equipment_id')
     print(equipment_id)
     print(session)
-    # return redirect(url_for('guest_cart'))
-    pass
+    user_id = session['user_id']
+    customer_details = sql_function.get_customer_details(user_id)
+    customer_id = customer_details['customer_id']
+    count = 1
+    cart_items = sql_function.add_equipment_into_cart(customer_id,equipment_id,count,selected_date,selected_days)
+    return render_template('customer/customer_cart.html', cart_items = cart_items )
 
 
 @app.route('/delete_item', methods=['POST'])

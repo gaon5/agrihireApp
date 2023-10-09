@@ -469,3 +469,8 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
             VALUES (NULL, %s, %s, 3, 'Equipment returned from a customer', %s);"""
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
+
+
+def add_equipment_into_cart(customer_id,equipment_id,count,start_date,duration):
+    sql = """INSERT INTO shopping_cart_item (%s,%s,%s,%s,%s)"""
+    operate_sql(sql, (customer_id,equipment_id,count,start_date,duration))

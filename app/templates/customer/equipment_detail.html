@@ -127,9 +127,19 @@
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
                                 <input type="text" id="select_date" name="select_date" placeholder="Select Date..">
                                 <input type="text" id="days" name="days" placeholder="Select Date..">
+                                <input type="hidden" name="selected_date" id="selected_date" value="">
+                                <input type="hidden" name="selected_days" id="selected_days" value="">
                                 <button type="submit">submit</button>
                             </form>
                         </div>
+
+                        <div class="d-flex justify-content-center pt-3">
+                            <a href="#" class="btn btn-danger add-to-cart-button" style="font-size: 14px">Add To Cart</a>
+                            <form action="/add_to_cart" method="post" class="add-to-cart-form" style="display: none;">
+                            <input type="hidden" name="equipment_id" value="{{ equipment.equipment_id }}">
+                        </form>
+                        </div>
+
                         <a href="{{ url_for('add_favorite', equipment_id=equipment[0]['equipment_id'] ) }}" id="favorite"
                            class="image1-switcher position-absolute top-0 end-0 mx-3 my-4" style="width: 20px;height:20px"></a>
                     </div>
@@ -192,4 +202,74 @@
                 $('#favorite').attr('href', '{{ url_for('remove_favorite', equipment_id=equipment[0]['equipment_id']) }}');
         {% endif %}
     </script>
+
+    <script>
+    $('.add-to-cart-button').on('click', function (event) {
+        console.log("点击事件被触发了");
+        event.preventDefault();
+
+        // 获取已选择的日期和days字段的值
+        var selectedDate = $('#select_date').val();
+        var selectedDays = $('#days').val();
+
+        // 将已选择的日期和days字段的值设置到隐藏字段中
+        $('#selected_date').val(selectedDate);
+        $('#selected_days').val(selectedDays);
+
+        var formData = {
+            selected_date: selectedDate,
+            selected_days: selectedDays,
+            equipment_id: '{{ equipment.equipment_id }}'
+        };
+
+        var currentProduct = $(this).closest('.row');  // 找到包含 equipment 图片的父元素
+        var productImage = currentProduct.find('.img-container img');  // 找到 equipment 图片
+    
+        // 克隆产品图片并设置样式
+        var clonedImage = productImage.clone()
+            .offset({
+                top: productImage.offset().top,
+                left: productImage.offset().left
+            })
+            .css({
+                'opacity': '0.5',
+                'position': 'absolute',
+                'height': '150px',
+                'width': '150px',
+                'z-index': '100'
+            })
+            .appendTo($('body'));
+    
+        // 创建动画效果，将图片移动到购物车图标位置
+        clonedImage.animate({
+            'top': $('.cart-icon').offset().top,
+            'left': $('.cart-icon').offset().left,
+            'width': 50,
+            'height': 50
+        }, 1000, function () {
+            clonedImage.remove();
+    
+            // 此处可以执行添加到购物车的操作，比如发送请求等
+            // 然后提示用户添加成功等信息
+            // 如果需要添加到购物车的数据，可以从当前产品的相关属性中获取
+        });
+
+        console.log("点击事件被触发了");
+
+        $.ajax({
+        type: 'POST',
+        url: '/add_to_cart',
+        data: formData,
+        success: function (response) {
+            // 处理添加到购物车成功的响应
+            // 可能会更新购物车数量、显示提示消息等
+        },
+        error: function (error) {
+            // 处理错误情况
+            console.error('Error:', error);
+        }
+    });
+    </script>
+
+    
 {% endblock %}
