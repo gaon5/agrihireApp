@@ -465,3 +465,8 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
             VALUES (NULL, %s, %s, 3, 'Equipment returned from a customer', %s);"""
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
+    # update equipment's rental status to available
+    sql = """UPDATE equipment_instance 
+                SET instance_status = 1
+                WHERE instance_id = %s"""
+    operate_sql(sql, (instance_id,))
