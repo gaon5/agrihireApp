@@ -471,6 +471,13 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
 
 
-def add_equipment_into_cart(customer_id,equipment_id,count,start_date,duration):
-    sql = """INSERT INTO shopping_cart_item (%s,%s,%s,%s,%s)"""
-    operate_sql(sql, (customer_id,equipment_id,count,start_date,duration))
+def add_equipment_into_cart(user_id,equipment_id,count,start_time,duration):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,duration)
+            VALUES (%s,%s,%s,%s,%s)"""
+    operate_sql(sql, (customer_id,equipment_id,count,start_time,duration))

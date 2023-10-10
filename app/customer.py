@@ -215,19 +215,28 @@ def customer_cart():
     return render_template('customer/customer_cart.html' )
 
 
-@app.route('/add_to_cart', methods=['POST'])
+@app.route('/add_to_cart', methods=['POST','get'])
 def add_to_cart():
     selected_date = request.form.get('selected_date')
     selected_days = request.form.get('selected_days')
     equipment_id = request.form.get('equipment_id')
+    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')
+    if not (selected_date and selected_days and equipment_id):
+        session['error_msg'] = 'Please select the required date and time.'
     print(equipment_id)
     print(session)
-    user_id = session['user_id']
-    customer_details = sql_function.get_customer_details(user_id)
-    customer_id = customer_details['customer_id']
-    count = 1
-    cart_items = sql_function.add_equipment_into_cart(customer_id,equipment_id,count,selected_date,selected_days)
-    return render_template('customer/customer_cart.html', cart_items = cart_items )
+    if 'loggedIn' in session:
+        user_id = session['user_id']
+        count = 1
+        add_into_cart = sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
+        session['msg'] = "Add to cart successfully"
+        previous_url = str(request.referrer)
+        return redirect(previous_url)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    
 
 
 @app.route('/delete_item', methods=['POST'])
