@@ -417,7 +417,8 @@ def get_pickup_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM hire.equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
                 INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
-                WHERE (rental_status_id = 1) AND (DATE(rental_start_datetime) = %s)"""
+                WHERE (rental_status_id = 1) AND (DATE(rental_start_datetime) = %s)
+                ORDER BY rental_start_datetime"""
     pickup_list = operate_sql(sql, (the_date,))
     return pickup_list
 
@@ -438,7 +439,8 @@ def get_return_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM hire.equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
                 INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
-                WHERE (rental_status_id = 2) AND (DATE(expected_return_datetime) = %s)"""
+                WHERE (rental_status_id = 2) AND (DATE(expected_return_datetime) = %s)
+                ORDER BY expected_return_datetime"""
     return_list = operate_sql(sql, (the_date,))
     return return_list
 
