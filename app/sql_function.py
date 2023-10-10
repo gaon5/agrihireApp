@@ -1,7 +1,9 @@
 import mysql.connector
+from flask import Flask, url_for
 from app import config, bcrypt
 from datetime import date, datetime, timedelta
 import math
+import uuid
 
 db_conn = None
 connection = None
@@ -470,3 +472,23 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 SET instance_status = 1
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
+    
+def equipment_details():
+    sql = """SELECT * FROM equipment e LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id;"""
+    equipment_details = operate_sql(sql)
+    for item in equipment_details:
+        print(item['name'])
+        print(item['requires_drive_license'])
+    return equipment_details
+
+def updating_equipment_image(image_url,name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id):
+        sql = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
+        operate_sql(sql, (equipment_id,image_url))
+        sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, height = %s, description = %s, detail = %s WHERE equipment_id= %s"""
+        operate_sql(sql, (name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id))
+    
+def updating_equipment(name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id):
+    sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, height = %s, description = %s, detail = %s
+                WHERE equipment_id= %s"""
+    operate_sql(sql, (name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id))
+    

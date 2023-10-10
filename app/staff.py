@@ -2,6 +2,7 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta, time
 import math
 import re
+import uuid
 from app import app, check_permissions, scheduler, sql_function, bcrypt
 
 
@@ -101,3 +102,78 @@ def return_list():
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
+
+@app.route('/equipment')
+def equipment():
+    breadcrumbs = [{"text": "Equipments", "url": "/manage_equiment"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        if check_permissions() > 1: 
+            equipment = sql_function.equipment_details()
+            return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+        else:
+            session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    
+@app.route('/more_detail/<detail_id>', methods=['GET', 'POST'])
+def more_detail(detail_id):
+    breadcrumbs = [{"text": "Equipments", "url": "equipment_detail"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        if check_permissions() > 1: 
+            equipment = sql_function.get_equipment_by_id(detail_id)
+            # for item in equipment:
+            #     print(item['equipment_id'])
+            return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+        else:
+            session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+
+@app.route('/update_equipment/<detail_id>', methods=['GET', 'POST'])
+def update_equipment(detail_id):
+    breadcrumbs = [{"text": "Update Equipment", "url": "update_equipment"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        if check_permissions() > 1:
+            equipment = sql_function.get_equipment_by_id(detail_id)
+            if request.method == 'POST':
+                id = request.form.get('equipment_id')
+                image = request.files['image']
+                equipment = request.form.get('ename')
+                price = request.form.get('price')
+                stock = request.form.get('stock')
+                license = request.form.get('license')
+                length = request.form.get('length')
+                width = request.form.get('width')
+                height = request.form.get('height')
+                description = request.form.get('description')
+                detail = request.form.get('detail')
+                capitalize_name = equipment.title()
+                if image:
+                    file_name = str(uuid.uuid4()) + '.jpg'
+                    image_url = url_for('static', filename=f'image/upload_image/{file_name}')
+                    sql_function.updating_equipment_image(id,image_url,capitalize_name, price,stock,license,length,width,height,description,detail)
+                    image.save(f"./static/image/upload_image/{file_name}")
+                else: 
+                    if license == 'yes':
+                        license= 1
+                    elif license == 'no':
+                        license = 0
+                    sql_function.updating_equipment(capitalize_name,price,stock,license,length,width,height,description,detail,id)
+                session['msg'] = 'Updated successfully!'
+                return redirect(url_for('more_detail', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
+        return render_template('staff/update_equipment.html',detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+
+
