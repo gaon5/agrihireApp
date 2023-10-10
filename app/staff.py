@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, time
 import math
 import re
 import uuid
-from app import app, check_permissions, scheduler, sql_function, bcrypt
+from app import app, check_permissions, scheduler, sql_function, bcrypt, upload_image
 
 
 # route for check out list
@@ -161,11 +161,10 @@ def update_equipment(detail_id):
                 description = request.form.get('description')
                 detail = request.form.get('detail')
                 capitalize_name = equipment.title()
-                if image:
-                    file_name = str(uuid.uuid4()) + '.jpg'
-                    image_url = url_for('static', filename=f'image/upload_image/{file_name}')
-                    sql_function.updating_equipment_image(id,image_url,capitalize_name, price,stock,license,length,width,height,description,detail)
-                    image.save(f"./static/image/upload_image/{file_name}")
+                if image.filename:
+                    image_url = upload_image(image)
+                    sql_function.updating_equipment_image(id,image_url)
+                    sql_function.updating_equipment(capitalize_name,price,stock,license,length,width,height,description,detail,id)
                 else: 
                     if license == 'yes':
                         license= 1

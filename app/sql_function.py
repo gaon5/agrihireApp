@@ -481,11 +481,9 @@ def equipment_details():
         print(item['requires_drive_license'])
     return equipment_details
 
-def updating_equipment_image(image_url,name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id):
-        sql = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
-        operate_sql(sql, (equipment_id,image_url))
-        sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, height = %s, description = %s, detail = %s WHERE equipment_id= %s"""
-        operate_sql(sql, (name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id))
+def updating_equipment_image(image_url,equipment_id):
+        sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
+        operate_sql(sql_img, (equipment_id,image_url))
     
 def updating_equipment(name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id):
     sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, height = %s, description = %s, detail = %s
