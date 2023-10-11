@@ -480,4 +480,5 @@ def add_equipment_into_cart(user_id,equipment_id,count,start_time,duration):
     customer_id = customer['customer_id']
     sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,duration)
             VALUES (%s,%s,%s,%s,%s)"""
+    print(sql % (customer_id,equipment_id,count,start_time,duration))
     operate_sql(sql, (customer_id,equipment_id,count,start_time,duration))

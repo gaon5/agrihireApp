@@ -205,7 +205,6 @@
 
     <script>
     $('.add-to-cart-button').on('click', function (event) {
-        console.log("点击事件被触发了");
         event.preventDefault();
 
         // 获取已选择的日期和days字段的值
@@ -254,21 +253,8 @@
             // 如果需要添加到购物车的数据，可以从当前产品的相关属性中获取
         });
 
-        console.log("点击事件被触发了");
-
-        $.ajax({
-        type: 'POST',
-        url: '/add_to_cart',
-        data: formData,
-        success: function (response) {
-            // 处理添加到购物车成功的响应
-            // 可能会更新购物车数量、显示提示消息等
-        },
-        error: function (error) {
-            // 处理错误情况
-            console.error('Error:', error);
-        }
-        });
+        // 提交表单
+        $('.add-to-cart-form').submit();
     })
     </script>
 

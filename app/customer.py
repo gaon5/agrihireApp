@@ -220,16 +220,18 @@ def add_to_cart():
     selected_date = request.form.get('selected_date')
     selected_days = request.form.get('selected_days')
     equipment_id = request.form.get('equipment_id')
+    print(selected_date)
+    print(selected_days)
+    print(equipment_id)
     last_error_msg = session.get('error_msg', '')
     last_msg = session.get('msg', '')
-    if not (selected_date and selected_days and equipment_id):
+    if not (selected_date or selected_days) and equipment_id:
         session['error_msg'] = 'Please select the required date and time.'
-    print(equipment_id)
     print(session)
     if 'loggedIn' in session:
         user_id = session['user_id']
         count = 1
-        add_into_cart = sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
+        sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
         session['msg'] = "Add to cart successfully"
         previous_url = str(request.referrer)
         return redirect(previous_url)
