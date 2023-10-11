@@ -122,7 +122,7 @@ def equipment_list():
     
 @app.route('/more_detail/<detail_id>', methods=['GET', 'POST'])
 def more_detail(detail_id):
-    breadcrumbs = [{"text": "Equipments", "url": "equipment_detail"}]
+    breadcrumbs = [{"text": "Equipment List", "url": "/equipment_list"}, {"text": "Details", "url": ""}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -141,7 +141,7 @@ def more_detail(detail_id):
 
 @app.route('/update_equipment/<detail_id>', methods=['GET', 'POST'])
 def update_equipment(detail_id):
-    breadcrumbs = [{"text": "Update Equipment", "url": "update_equipment"}]
+    breadcrumbs = [{"text": "Equipment List", "url": "/equipment_list"}, {"text": "Update Equipment", "url": ""}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -177,7 +177,7 @@ def update_equipment(detail_id):
 
 @app.route('/search_result', methods=['GET', 'POST'])
 def search_result():
-    breadcrumbs = [{"text": "Equipments List", "url": "/equipment_list"}, {"text": "Result", "url": ""}]
+    breadcrumbs = [{"text": "Equipment List", "url": "/equipment_list"}, {"text": "Result", "url": ""}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
