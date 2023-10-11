@@ -44,7 +44,8 @@ def equipments(category, sub):
     else:
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
     if 'loggedIn' in session:
-        wishlist = sql_function.get_wishlist(session['user_id'])
+        if check_permissions() == 1:
+            wishlist = sql_function.get_wishlist(session['user_id'])
     return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
                            count=count, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
@@ -66,9 +67,10 @@ def search_equipment():
     if equipment:
         sql_equipments, count = sql_function.get_equipment_by_search(equipment, sql_page)
         if 'loggedIn' in session:
-            wishlist = sql_function.get_wishlist(session['user_id'])
+            if check_permissions() == 1:
+                wishlist = sql_function.get_wishlist(session['user_id'])
         return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                               count=count, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
+                               count=count, wishlist=wishlist, equipment_search=equipment, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -118,7 +120,8 @@ def equipment_detail(category, sub, detail_id):
             days = (start_date - end_date).days
             print(days)
     if 'loggedIn' in session:
-        wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
+        if check_permissions() == 1:
+            wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
     return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,
                            category_list=sql_function.category_list, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
@@ -136,9 +139,10 @@ def user_wishlist():
         page = int(page)
         sql_page = (page - 1) * 12
     if 'loggedIn' in session:
-        sql_equipments, count = sql_function.get_equipment_by_wishlist(session['user_id'], sql_page)
-        return render_template('customer/wishlist.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                               count=count, msg=last_msg, error_msg=last_error_msg)
+        if check_permissions() == 1:
+            sql_equipments, count = sql_function.get_equipment_by_wishlist(session['user_id'], sql_page)
+            return render_template('customer/wishlist.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
+                                   count=count, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('equipments'))

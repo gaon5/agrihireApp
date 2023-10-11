@@ -82,10 +82,98 @@ for sub in sub_category_list:
     categories = category[sub['category_id']]
     categories['subcategories'].append(sub['name'])
 
+
 def get_staff_id(user_id):
     sql = """SELECT staff_id FROM staff WHERE user_id = %s"""
     staff_id = operate_sql(sql, (user_id,), fetch=0)['staff_id']
     return staff_id
+
+
+def get_all_staff(page):
+    sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
+                DATE_FORMAT(register_date,'%d %b %Y') AS register_date,DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from staff s
+                LEFT JOIN user_account ua on ua.user_id = s.user_id
+                WHERE state=1
+                LIMIT %s, 15;"""
+    staff_list = operate_sql(sql, (page,))
+    sql = """SELECT COUNT(s.staff_id) AS count FROM staff s
+                LEFT JOIN user_account ua on ua.user_id = s.user_id
+                WHERE state=1;"""
+    count = operate_sql(sql, fetch=0)
+    count = math.ceil(count['count'] / 15)
+    return staff_list, count
+
+
+def search_staff(search, page):
+    sqlSearch = "%" + search + "%"
+    sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
+                DATE_FORMAT(register_date,'%d %b %Y') AS register_date,DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from staff s
+                LEFT JOIN user_account ua on ua.user_id = s.user_id
+                WHERE state=1 AND CONCAT(s.first_name, s.last_name, ua.email) LIKE %s
+                LIMIT %s, 15;"""
+    staff_list = operate_sql(sql, (sqlSearch, page,))
+    sql = """SELECT COUNT(s.staff_id) AS count FROM staff s
+                LEFT JOIN user_account ua on ua.user_id = s.user_id
+                WHERE state=1 AND CONCAT(s.first_name, s.last_name, ua.email) LIKE %s;"""
+    count = operate_sql(sql, (sqlSearch,), fetch=0)
+    count = math.ceil(count['count'] / 15)
+    return staff_list, count
+
+
+def get_all_customer(page):
+    sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
+                question_id,answer,state,email,DATE_FORMAT(register_date,'%d %b %Y') AS register_date,
+                DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from customer c
+                LEFT JOIN user_account ua on ua.user_id = c.user_id
+                WHERE state=1
+                LIMIT %s, 15;"""
+    customer_list = operate_sql(sql, (page,))
+    sql = """SELECT COUNT(c.customer_id) AS count from customer c
+                LEFT JOIN user_account ua on ua.user_id = c.user_id
+                WHERE state=1;"""
+    count = operate_sql(sql, fetch=0)
+    count = math.ceil(count['count'] / 15)
+    return customer_list, count
+
+
+def search_customer(search, page):
+    sqlSearch = "%" + search + "%"
+    sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
+                question_id,answer,state,email,DATE_FORMAT(register_date,'%d %b %Y') AS register_date,
+                DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from customer c
+                LEFT JOIN user_account ua on ua.user_id = c.user_id
+                WHERE state=1 AND CONCAT(c.first_name, c.last_name, ua.email) LIKE %s
+                LIMIT %s, 15;"""
+    customer_list = operate_sql(sql, (sqlSearch, page,))
+    sql = """SELECT COUNT(c.customer_id) AS count from customer c
+                    LEFT JOIN user_account ua on ua.user_id = c.user_id
+                    WHERE state=1 AND CONCAT(c.first_name, c.last_name, ua.email) LIKE %s;"""
+    count = operate_sql(sql, (sqlSearch,), fetch=0)
+    count = math.ceil(count['count'] / 15)
+    return customer_list, count
+
+
+def get_user_detail(user_id):
+    sql = """SELECT ua.user_id, c.customer_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name, c.state
+            FROM user_account ua
+            INNER JOIN customer c on c.user_id = ua.user_id
+            WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    if details:
+        return details
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, s.state FROM user_account ua
+                    INNER JOIN staff s on s.user_id = ua.user_id
+                    WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    if details:
+        return details
+    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number, a.state FROM user_account ua
+                    INNER JOIN admin a on a.user_id = ua.user_id
+                    WHERE ua.user_id = %s;"""
+    details = operate_sql(sql, (user_id,), fetch=0)
+    if details:
+        return details
+
 
 def get_equipment_id(instance_id):
     sql = """SELECT e.equipment_id FROM equipment AS e
@@ -94,17 +182,6 @@ def get_equipment_id(instance_id):
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
 
-def get_staff_id(user_id):
-    sql = """SELECT staff_id FROM staff WHERE user_id = %s"""
-    staff_id = operate_sql(sql, (user_id,), fetch=0)['staff_id']
-    return staff_id
-
-def get_equipment_id(instance_id):
-    sql = """SELECT e.equipment_id FROM equipment AS e
-                INNER JOIN equipment_instance AS ei ON ei.equipment_id = e.equipment_id
-                WHERE instance_id = %s"""
-    equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
-    return equipment_id
 
 def get_account(email):
     sql = """SELECT * FROM user_account 
@@ -317,15 +394,6 @@ def update_password(password, user_id):
     operate_sql(sql, (hashed_password, user_id))
 
 
-def get_customer_details(user_id):
-    sql = """SELECT ua.user_id, c.customer_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name 
-                FROM user_account ua
-                INNER JOIN customer c on c.user_id = ua.user_id
-                WHERE ua.user_id = %s;"""
-    details = operate_sql(sql, (user_id,), fetch=0)
-    return details
-
-
 def update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, user_id):
     sql = """UPDATE `customer` SET first_name=%s,last_name=%s,birth_date=%s,title_id=%s,phone_number=%s,region_id=%s,city_id=%s,street_name=%s
                 WHERE user_id=%s;"""
@@ -335,12 +403,14 @@ def update_customer_details(first_name, last_name, birth_date, title, phone_numb
     operate_sql(sql, (email, user_id))
 
 
-def get_staff_details(user_id):
-    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number FROM user_account ua
-                INNER JOIN staff s on s.user_id = ua.user_id
-                WHERE ua.user_id = %s;"""
-    details = operate_sql(sql, (user_id,), fetch=0)
-    return details
+def add_customer(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, password):
+    register_account(email, password, title, last_name, first_name, 1, "1")
+#     birth_date, phone_number, region, city, street_name
+
+
+def delete_customer(user_id):
+    sql = """UPDATE customer SET state=0 Where user_id=%s"""
+    operate_sql(sql, (user_id))
 
 
 def update_staff_details(first_name, last_name, title, phone_number, email, user_id):
@@ -352,12 +422,21 @@ def update_staff_details(first_name, last_name, title, phone_number, email, user
     operate_sql(sql, (email, user_id))
 
 
-def get_admin_details(user_id):
-    sql = """SELECT ua.user_id, title_id, first_name, last_name, email, phone_number FROM user_account ua
-                INNER JOIN admin a on a.user_id = ua.user_id
-                WHERE ua.user_id = %s;"""
-    details = operate_sql(sql, (user_id,), fetch=0)
-    return details
+def add_staff(first_name, last_name, title, phone_number, email, password):
+    today = datetime.today().date()
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    sql = """INSERT INTO user_account (email, password, is_staff, register_date, last_login_date) 
+                    VALUES (%s, %s, 1, %s, %s);"""
+    operate_sql(sql, (email, hashed_password, today, today), close=0)
+    account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
+    sql = """INSERT INTO staff (user_id,title_id,first_name,last_name,phone_number,state) 
+                    VALUES (%s,%s,%s,%s,%s,1);"""
+    operate_sql(sql, (account['user_id'], title, given_name, surname, phone_number,))
+
+
+def delete_staff(user_id):
+    sql = """UPDATE staff SET state=0 Where user_id=%s"""
+    operate_sql(sql, (user_id))
 
 
 def update_admin_details(first_name, last_name, title, phone_number, email, user_id):
@@ -395,6 +474,7 @@ def get_bookings(user_id):
     bookings = operate_sql(sql, (customer_id,))
     return bookings
 
+
 def delete_booking(instance_id=None, hire_id=None):
     if instance_id:
         sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
@@ -422,6 +502,7 @@ def get_pickup_equipment(the_date):
     pickup_list = operate_sql(sql, (the_date,))
     return pickup_list
 
+
 def check_out_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
     # update the rental status of a booking
     sql = "UPDATE equipment_rental_status SET rental_status_id = 2 WHERE equipment_rental_status_id = %s;"
@@ -435,6 +516,7 @@ def check_out_equipment(equipment_rental_status_id, instance_id, user_id, curren
             VALUES (NULL, %s, %s, 1, 'Equipment hired to a customer', %s);"""
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
 
+
 def get_return_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM hire.equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
@@ -443,6 +525,7 @@ def get_return_equipment(the_date):
                 ORDER BY expected_return_datetime"""
     return_list = operate_sql(sql, (the_date,))
     return return_list
+
 
 def return_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
     # get expected return datetime
@@ -458,7 +541,7 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     sql = """UPDATE equipment_rental_status 
                 SET rental_status_id = %s, actual_return_datetime = %s
                 WHERE equipment_rental_status_id = %s"""
-    operate_sql(sql, (rental_status_id,current_datetime,equipment_rental_status_id))
+    operate_sql(sql, (rental_status_id, current_datetime, equipment_rental_status_id))
     # get staff id from user id
     staff_id = get_staff_id(user_id)
     # get equipment id from instance id

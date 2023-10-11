@@ -121,7 +121,7 @@
 
                 <div class="col-md-4 col-sm-12 text-md-center text-center align-self-center py-3 pl-3">
                     <form class="d-flex" action="{{ url_for('search_equipment') }}" method="get">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment" {% if equipment_search %}value="{{ equipment_search }}"{% endif %}>
                         <button class="btn btn-outline-success search-button" type="submit">
                             <i class="fas fa-search search-icon"></i>
                         </button>
@@ -264,6 +264,9 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+<script src="{{ url_for('static', filename='js/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/validate/jquery.validate.js') }}"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
