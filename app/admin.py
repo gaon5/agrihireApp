@@ -4,6 +4,7 @@ import math
 import re
 from app import app, check_permissions, scheduler, sql_function, bcrypt
 
+
 # route for managing categories
 @app.route('/manage_category', methods=['GET', 'POST'])
 def manage_category():
@@ -40,7 +41,7 @@ def manage_category():
                         last_msg = "Category deleted"
             # get every category from the database
             category_list = sql_function.get_categories()
-            return render_template('admin/manage_category.html',breadcrumbs=breadcrumbs, last_msg=last_msg, 
+            return render_template('admin/manage_category.html', breadcrumbs=breadcrumbs, last_msg=last_msg,
                                    last_error_msg=last_error_msg, category_list=category_list)
         else:
             session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
@@ -48,7 +49,7 @@ def manage_category():
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
-    
+
 
 # route for managing categories
 @app.route('/manage_subcategory', methods=['GET', 'POST'])
@@ -58,14 +59,14 @@ def manage_subcategory():
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
-        if check_permissions() > 2:
+        if check_permissions() == 3:
             # if method is POST ...
             if request.method == 'POST':
                 # if add button is pressed, insert a new category
                 if 'add' in request.form:
                     main_category_id = request.form['main_category_id']
                     new_sub_category = request.form['new_sub_category']
-                    sql_function.insert_subcategory(main_category_id,new_sub_category)
+                    sql_function.insert_subcategory(main_category_id, new_sub_category)
                     last_msg = "New sub category added"
                 # if the change button is pressed, change the main category of the sub category
                 elif 'change' in request.form:
@@ -95,7 +96,7 @@ def manage_subcategory():
             category_list = sql_function.get_categories()
             # get every sub category and respective main categories from the database
             subcategory_list = sql_function.get_main_and_sub_categories()
-            return render_template('admin/manage_subcategory.html',breadcrumbs=breadcrumbs, last_msg=last_msg, 
+            return render_template('admin/manage_subcategory.html', breadcrumbs=breadcrumbs, last_msg=last_msg,
                                    last_error_msg=last_error_msg, subcategory_list=subcategory_list, category_list=category_list)
         else:
             session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
@@ -103,6 +104,7 @@ def manage_subcategory():
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
+
 
 @app.route('/admin/manage_staff', methods=['GET', 'POST'])
 def manage_staff():
@@ -131,7 +133,6 @@ def manage_staff():
         email = request.form.get('email')
         phone_number = request.form.get('phone_number')
         user_id = request.form.get('user_id')
-        print(request.form)
         if user_id:
             last_msg = "Updated successfully"
             sql_function.update_staff_details(first_name, last_name, title, phone_number, email, user_id)
@@ -142,7 +143,8 @@ def manage_staff():
         staff_list, count = sql_function.search_staff(search, sql_page)
     else:
         staff_list, count = sql_function.get_all_staff(sql_page)
-    return render_template('admin/manage_staff.html', breadcrumbs=breadcrumbs, staff_list=staff_list, title_list=sql_function.title_list, count=count, staff_search=search, msg=last_msg, error_msg=last_error_msg)
+    return render_template('admin/manage_staff.html', breadcrumbs=breadcrumbs, staff_list=staff_list, title_list=sql_function.title_list, count=count,
+                           staff_search=search, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/admin/manage_customer', methods=['GET', 'POST'])
@@ -187,7 +189,8 @@ def manage_customer():
     else:
         customer_list, count = sql_function.get_all_customer(sql_page)
     return render_template('admin/manage_customer.html', breadcrumbs=breadcrumbs, customer_list=customer_list, title_list=sql_function.title_list,
-                           city_list=sql_function.city_list, region_list=sql_function.region_list, count=count, customer_search=search, msg=last_msg, error_msg=last_error_msg)
+                           city_list=sql_function.city_list, region_list=sql_function.region_list, count=count, customer_search=search, msg=last_msg,
+                           error_msg=last_error_msg)
 
 
 @app.route('/admin/delete_user', methods=['GET', 'POST'])

@@ -35,7 +35,6 @@ def login():
         account = sql_function.get_account(email)
         if account is not None:
             user_detail = sql_function.get_user_detail(account['user_id'])
-            print(user_detail)
             if user_detail['state']:
                 if bcrypt.check_password_hash(account['password'], password):
                     # Login successful
