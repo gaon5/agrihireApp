@@ -24,24 +24,25 @@ def manage_staff():
     else:
         page = int(page)
         sql_page = (page - 1) * 15
-    if search:
-        staff_list, count = sql_function.search_staff(search, sql_page)
-    else:
-        staff_list, count = sql_function.get_all_staff(sql_page)
     if request.method == 'POST':
-        first_name = request.form.get('first_name').capitalize(),
-        last_name = request.form.get('last_name').capitalize(),
-        password = request.form.get('password'),
-        title = request.form.get('title'),
-        email = request.form.get('email'),
-        phone_number = request.form.get('phone_number'),
+        first_name = request.form.get('first_name').capitalize()
+        last_name = request.form.get('last_name').capitalize()
+        password = request.form.get('password')
+        title = request.form.get('title')
+        email = request.form.get('email')
+        phone_number = request.form.get('phone_number')
         user_id = request.form.get('user_id')
+        print(request.form)
         if user_id:
             last_msg = "Updated successfully"
             sql_function.update_staff_details(first_name, last_name, title, phone_number, email, user_id)
         else:
             last_msg = "Added successfully"
             sql_function.add_staff(first_name, last_name, title, phone_number, email, password)
+    if search:
+        staff_list, count = sql_function.search_staff(search, sql_page)
+    else:
+        staff_list, count = sql_function.get_all_staff(sql_page)
     return render_template('admin/manage_staff.html', breadcrumbs=breadcrumbs, staff_list=staff_list, title_list=sql_function.title_list, count=count, staff_search=search, msg=last_msg, error_msg=last_error_msg)
 
 
@@ -64,21 +65,17 @@ def manage_customer():
     else:
         page = int(page)
         sql_page = (page - 1) * 15
-    if search:
-        customer_list, count = sql_function.search_customer(search, sql_page)
-    else:
-        customer_list, count = sql_function.get_all_customer(sql_page)
     if request.method == 'POST':
-        first_name = request.form.get('first_name').capitalize(),
-        last_name = request.form.get('last_name').capitalize(),
-        password = request.form.get('password'),
-        title = request.form.get('title'),
-        email = request.form.get('email'),
-        phone_number = request.form.get('phone_number'),
-        birth_date = request.form.get('birth_date'),
-        region = request.form.get('region'),
-        city = request.form.get('city'),
-        street_name = request.form.get('street_name'),
+        first_name = request.form.get('first_name').capitalize()
+        last_name = request.form.get('last_name').capitalize()
+        password = request.form.get('password')
+        title = request.form.get('title')
+        email = request.form.get('email')
+        phone_number = request.form.get('phone_number')
+        birth_date = datetime.strptime(request.form.get('birth_date'), '%d %b %Y').strftime('%Y-%m-%d')
+        region = request.form.get('region')
+        city = request.form.get('city')
+        street_name = request.form.get('street_name')
         user_id = request.form.get('user_id')
         if user_id:
             last_msg = "Updated successfully"
@@ -86,6 +83,10 @@ def manage_customer():
         else:
             last_msg = "Added successfully"
             sql_function.add_customer(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, password)
+    if search:
+        customer_list, count = sql_function.search_customer(search, sql_page)
+    else:
+        customer_list, count = sql_function.get_all_customer(sql_page)
     return render_template('admin/manage_customer.html', breadcrumbs=breadcrumbs, customer_list=customer_list, title_list=sql_function.title_list,
                            city_list=sql_function.city_list, region_list=sql_function.region_list, count=count, customer_search=search, msg=last_msg, error_msg=last_error_msg)
 

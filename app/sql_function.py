@@ -90,7 +90,8 @@ def get_staff_id(user_id):
 
 
 def get_all_staff(page):
-    sql = """SELECT * from staff s
+    sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
+                DATE_FORMAT(register_date,'%d %b %Y') AS register_date,DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from staff s
                 LEFT JOIN user_account ua on ua.user_id = s.user_id
                 WHERE state=1
                 LIMIT %s, 15;"""
@@ -105,7 +106,8 @@ def get_all_staff(page):
 
 def search_staff(search, page):
     sqlSearch = "%" + search + "%"
-    sql = """SELECT * from staff s
+    sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
+                DATE_FORMAT(register_date,'%d %b %Y') AS register_date,DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from staff s
                 LEFT JOIN user_account ua on ua.user_id = s.user_id
                 WHERE state=1 AND CONCAT(s.first_name, s.last_name, ua.email) LIKE %s
                 LIMIT %s, 15;"""
@@ -119,7 +121,9 @@ def search_staff(search, page):
 
 
 def get_all_customer(page):
-    sql = """SELECT * from customer c
+    sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
+                question_id,answer,state,email,DATE_FORMAT(register_date,'%d %b %Y') AS register_date,
+                DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from customer c
                 LEFT JOIN user_account ua on ua.user_id = c.user_id
                 WHERE state=1
                 LIMIT %s, 15;"""
@@ -134,10 +138,12 @@ def get_all_customer(page):
 
 def search_customer(search, page):
     sqlSearch = "%" + search + "%"
-    sql = """SELECT * from customer c
-                    LEFT JOIN user_account ua on ua.user_id = c.user_id
-                    WHERE state=1 AND CONCAT(c.first_name, c.last_name, ua.email) LIKE %s
-                    LIMIT %s, 15;"""
+    sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
+                question_id,answer,state,email,DATE_FORMAT(register_date,'%d %b %Y') AS register_date,
+                DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from customer c
+                LEFT JOIN user_account ua on ua.user_id = c.user_id
+                WHERE state=1 AND CONCAT(c.first_name, c.last_name, ua.email) LIKE %s
+                LIMIT %s, 15;"""
     customer_list = operate_sql(sql, (sqlSearch, page,))
     sql = """SELECT COUNT(c.customer_id) AS count from customer c
                     LEFT JOIN user_account ua on ua.user_id = c.user_id
