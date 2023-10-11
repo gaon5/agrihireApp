@@ -103,9 +103,9 @@ def return_list():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
 
-@app.route('/equipment')
-def equipment():
-    breadcrumbs = [{"text": "Equipments", "url": "/manage_equiment"}]
+@app.route('/equipment_list')
+def equipment_list():
+    breadcrumbs = [{"text": "Equipments List", "url": "/equipment_list"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -175,4 +175,35 @@ def update_equipment(detail_id):
                 return redirect(url_for('more_detail', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
         return render_template('staff/update_equipment.html',detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+@app.route('/search_result', methods=['GET', 'POST'])
+def search_result():
+    breadcrumbs = [{"text": "Equipments List", "url": "/equipment_list"}, {"text": "Result", "url": ""}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    # Retrieve word that has been inputed
+    search= request.form.get('equipmentsearch')
+    if 'loggedIn' in session:
+        if check_permissions() > 1:
+            # Check if search is not empty or contains only whitespace
+            if search and search.strip():
+                # equipmentsearch used for partial matching
+                equipmentsearch = f'{search}'
+                equipment = sql_function.search_equipment_list(equipmentsearch)
+                if not equipment:
+                    # No results found for the search
+                    session['error_msg']  = "No equipment found for your search."
+                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+                else:
+                    # Results found, render the equipment list
+                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+            else: 
+                # Handle the case where search is empty or contains only whitespace
+                session['error_msg'] = 'Search field cannot be left blank.'
+                return redirect(url_for('equipment_list', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
+        else:
+            session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))

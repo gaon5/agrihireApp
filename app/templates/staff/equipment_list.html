@@ -2,23 +2,39 @@
 
 {% block mycss %}
 <style>
-    table {
+    table, th.header {
         vertical-align: middle;
     }
     td {
         vertical-align: middle;
         width: -75px;
     }
+    .input-group{
+        float: none;
+        width: 40%;
+        margin-left: 30%;
+        margin-top: 1%;
+    } 
 </style>
 {% endblock %}
 
 {% block body %}
+<form class="form-inline my-2 my-lg-0" action="/search_result" method="POST">
+    <div class="input-group">
+        <input type="search" id="s1" class="form-control rounded" placeholder="Search by Equipment Name, Category, Sub Category..." name="equipmentsearch" aria-label="Search" aria-describedby="search-addon"  autocomplete="off" />
+        <button type="submit" id="s2" value="Search" class="btn btn-warning">Search</button>
+    </div>
+</form>
+
 <div class="container mt-3">
     <div class="row justify-content-center">
         <div class="col-md-10" style="text-align: center">
             <table class="table align-middle mb-0 bg-white">
                 <thead>
                 <tr>
+                    <th class="header">Category
+                    <p class="text-muted mb-0">Sub Category</p>
+                    </th>
                     <th class="header">Image</th>
                     <th class="header">Equipment Name</th>
                     <th class="header">Price($)</th>
@@ -29,10 +45,14 @@
                     {% for item in equipment %}
                 <tr>
                     <td>
+                        <p class="fw-normal mb-1">{{item.ca_name}}</p>
+                        <p class="text-muted mb-0">{{item.sub_name}}</p>
+                    </td>
+                    <td>
                         <img src="{{ url_for('static', filename=item.image_url) }}" class="img-thumbnail" width="100" height="100">
                     </td>
                     <td>
-                        <a href="{{ url_for('more_detail', detail_id=item.equipment_id) }}">{{item.name}}</a>
+                        <a href="{{ url_for('more_detail', detail_id=item.equipment_id) }}">{{item.e_name}}</a>
                     </td>
                     <td>
                         <p class="fw-normal mb-1">{{item.price}}</p>
