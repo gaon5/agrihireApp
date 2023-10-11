@@ -4,6 +4,7 @@
 <style>
     th.header {
         background-color: #eecd5c;
+        vertical-align: middle;
     }
 </style>
 {% endblock %}
@@ -19,10 +20,9 @@
                     <th class="header">Phone Number</th>
                     <th class="header">Equipment</th>
                     <th class="header">Status</th>
-                    <th class="header">Start Date</th>
-                    <th class="header">Start Time</th>
-                    <th class="header">Return Date</th>
-                    <th class="header">Return Time</th>
+                    <th class="header">Start Date-Time</th>
+                    <th class="header">Return Date-Time</th>
+                    <th class="header">Actual Return Date-Time</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -42,15 +42,15 @@
                     </td>
                     <td>
                         <p class="fw-normal mb-1">{{item.sDate}}</p>
-                    </td>
-                    <td>
-                        <p class="fw-normal mb-1">{{item.sTime}}</p>
+                        <p class="small mb-0 ms-2">{{item.sTime}}</p>
                     </td>
                     <td>
                         <p class="fw-normal mb-1">{{item.rDate}}</p>
+                        <p class="small mb-0 ms-2">{{item.rTime}}</p>
                     </td>
                     <td>
-                        <p class="fw-normal mb-1">{{item.rTime}}</p>
+                        <p class="fw-normal mb-1">{{item.aDate}}</p>
+                        <p class="small mb-0 ms-2">{{item.aTime}}</p>
                     </td>
                 </tr>
                 {% endfor %}
