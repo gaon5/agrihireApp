@@ -44,6 +44,7 @@ def equipments(category, sub):
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
     if 'loggedIn' in session:
         wishlist = sql_function.get_wishlist(session['user_id'])
+    # print(sql_equipments)
     return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
                            count=count, wishlist=wishlist, msg=last_msg, error_msg=last_error_msg)
 
@@ -211,34 +212,36 @@ def update_booking(instance_id):
 
 @app.route('/customer_cart')
 def customer_cart():
+    if 'loggedIn' in session:
+        user_id = session['user_id']
+        equipment = sql_function.my_cart(user_id)
+        print(equipment)
+
     # cart
-    return render_template('customer/customer_cart.html' )
+    return render_template('customer/customer_cart.html', equipment = equipment)
 
 
 @app.route('/add_to_cart', methods=['POST','get'])
 def add_to_cart():
-    selected_date = request.form.get('selected_date')
-    selected_days = request.form.get('selected_days')
+    selected_date = request.form.get('select_date')
+    selected_days = request.form.get('days')
     equipment_id = request.form.get('equipment_id')
-    print(selected_date)
-    print(selected_days)
-    print(equipment_id)
+    # print(request.form)
     last_error_msg = session.get('error_msg', '')
     last_msg = session.get('msg', '')
     if not (selected_date or selected_days) and equipment_id:
         session['error_msg'] = 'Please select the required date and time.'
-    print(session)
-    if 'loggedIn' in session:
-        user_id = session['user_id']
-        count = 1
-        sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
-        session['msg'] = "Add to cart successfully"
-        previous_url = str(request.referrer)
-        return redirect(previous_url)
     else:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('index'))
-    
+        if 'loggedIn' in session:
+            user_id = session['user_id']
+            count = 1
+            sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
+            session['msg'] = "Add to cart successfully"
+        else:
+            session['error_msg'] = 'You are not logged in, please login first.'
+            return redirect(url_for('index'))
+    previous_url = str(request.referrer)
+    return redirect(previous_url)
 
 
 @app.route('/delete_item', methods=['POST'])

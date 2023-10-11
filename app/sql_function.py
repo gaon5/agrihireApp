@@ -480,5 +480,21 @@ def add_equipment_into_cart(user_id,equipment_id,count,start_time,duration):
     customer_id = customer['customer_id']
     sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,duration)
             VALUES (%s,%s,%s,%s,%s)"""
-    print(sql % (customer_id,equipment_id,count,start_time,duration))
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
     operate_sql(sql, (customer_id,equipment_id,count,start_time,duration))
+
+def my_cart(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT * FROM hire.shopping_cart_item as sci
+                inner join equipment as e on sci.equipment_id = e.equipment_id
+                LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify as c on e.equipment_id = c.equipment_id
+                WHERE sci.customer_id = %s;"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    equipment_in_cart = operate_sql(sql, (customer_id,))
+    return equipment_in_cart

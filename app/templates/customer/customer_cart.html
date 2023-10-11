@@ -103,29 +103,31 @@ Shopping Cart
         <div class="card mb-3">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-3 d-flex align-items-center">
-                        <img src="{{ url_for('static', filename='image/mowers.jpg') }}" alt="Equipment Image" class="img-fluid" style="max-width: 80px;">
-                        <span style="max-width: 200px; word-wrap: break-word; margin-left: 15px;">品名</span>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        <button class="quantity-btn" onclick="decrementQuantity()">-</button>
-                        <input type="number" id="quantityInput" value="1" min="1" style="width: 50px; text-align: center; margin: 0 5px;">
-                        <button class="quantity-btn" onclick="incrementQuantity()">+</button>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        Rental Date
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        Estimate Return Date
-                    </div>
-                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                        Unit Price
-                    </div>
-                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                        <form action="{{ url_for('delete_item') }}" method="post">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </div>
+                    {% for equipment in equipments %}
+                        <div class="col-md-3 d-flex align-items-center">
+                            <img src="{{ url_for('static', filename='equipment.image_url') }}" alt="Equipment Image" class="img-fluid" style="max-width: 80px;">
+                            <span style="max-width: 200px; word-wrap: break-word; margin-left: 15px;">{{ equipment.name }}</span>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <button class="quantity-btn" onclick="decrementQuantity()">-</button>
+                            <input type="number" id="quantityInput" value="1" min="1" style="width: 50px; text-align: center; margin: 0 5px;">
+                            <button class="quantity-btn" onclick="incrementQuantity()">+</button>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            {{ equipment.start_time }}
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            {{ equipment.duration }}
+                        </div>
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            {{ equipment.price }}
+                        </div>
+                        <div class="col-md-1 d-flex align-items-center justify-content-center">
+                            <form action="{{ url_for('delete_item') }}" method="post">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
