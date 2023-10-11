@@ -49,8 +49,13 @@
                         <p class="small mb-0 ms-2">{{item.rTime}}</p>
                     </td>
                     <td>
-                        <p class="fw-normal mb-1">{{item.aDate}}</p>
-                        <p class="small mb-0 ms-2">{{item.aTime}}</p>
+                        {% if item.aDate == None or item.aTime== None %}
+                            <p class="fw-normal mb-1"></p>
+                            <p class="small mb-0 ms-2"></p>
+                        {% else %}
+                            <p class="fw-normal mb-1">{{item.aDate}}</p>
+                            <p class="small mb-0 ms-2">{{item.aTime}}</p>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
