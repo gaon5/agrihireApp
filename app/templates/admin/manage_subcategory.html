@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+<style>
+    #navigation-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    p {
+        text-align: center;
+    }
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        background-color: #e5e5e5;
+        border-bottom: 1px solid #1D1912;
+        font-weight: bold;
+    }
+    .header-cell {
+        text-align: center;
+    }
+    .header-cell:nth-child(1) {
+        width: 650px
+    }
+    .header-cell:nth-child(2) {
+        width: 600px
+    }
+    .header-cell:nth-child(3) {
+        width: 0px
+    }
+    .header-cell:nth-child(4) {
+        width: 595px
+    }
+    .row {
+        height: 70px;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8" style="text-align: center">
+            <br>
+            <h1>Manage Sub Category</h1>
+        </div>
+    </div>
+</div>
+<br></br>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Add Sub Catergory</h5><br>
+                    <form action="{{ url_for('manage_subcategory') }}" method="post">
+                        <div class="input-group mb-3">                        
+                            <input type="text" class="form-control" name="new_sub_category" id="new_sub_category" value="" placeholder="Enter new sub category here" required>
+                        </div>
+                        <div class="input-group mb-3">
+                            <select class="form-control" name="main_category_id" id="main_category_id" required>
+                                <option value="" selected="selected" disabled>Choose a main category</option>
+                                {% for category in category_list %}
+                                    <option value="{{ category.category_id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary" id="add" name="add" value="add">
+                                Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br></br><br></br><br></br><br>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Change Main Category</h5><br>
+                    <form action="{{ url_for('manage_subcategory') }}" method="post">
+                        <div class="input-group mb-3">
+                            <select class="form-control" name="sub_category_id" id="sub_category_id" onchange="update_category()" required>
+                                <option value="" selected="selected" disabled>Choose a sub category</option>
+                                {% for subcategory in subcategory_list %}
+                                    <option value="{{ subcategory.sub_id }}">{{ subcategory.sub }} ({{ subcategory.main }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <select class="form-control" name="main_category_id_2" id="main_category_id_2" required>
+                                <option value="" selected="selected" disabled>Choose a main category</option>
+                                {% for category in category_list %}
+                                    <option value="{{ category.category_id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-primary" id="change" name="change" value="change">
+                                Change
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br></br><br></br><br></br><br>
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <br>
+        {% if subcategory_list %}
+            <div class="table-header">
+                <div class="header-cell">Sub Category</div>
+                <div class="header-cell">Main Category</div>
+                <div class="header-cell"></div>
+                <div class="header-cell"></div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% for subcategory in subcategory_list %}
+                        <form action="{{ url_for('manage_subcategory') }}" method="post">
+                            <div class="row">
+                                <div class="col-md-4 d-flex align-items-center justify-content-center">
+                                    <input type="text" class="form-control" name="subcategory_name" id="subcategory_name" value="{{ subcategory.sub }}" required>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center justify-content-center">
+                                    {{ subcategory.main }}
+                                </div>
+                                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                    <button type="submit" class="btn btn-primary" id="edit" name="edit" value="edit">
+                                        Edit
+                                    </button>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                    <input type="hidden" name="subcategory_id" id="subcategory_id" value="{{ subcategory.sub_id }}">
+                                    <button type="submit" onclick="return confirmDelete()"  class="btn btn-danger">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <p>There is no category</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block myjs %}
+<script>
+    function confirmDelete() {
+      // Display a confirmation dialog
+      return confirm('Are you sure you want to delete this sub category?');
+    }
+  </script>
+{% endblock %}
