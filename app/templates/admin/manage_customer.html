@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+    <style>
+        .label_style {
+            font-size: 20px;
+            line-height: 25px;
+            cursor: pointer;
+        }
+
+        .label_style:hover {
+            font-weight: 700;
+        }
+
+        th, td {
+            background-color: transparent !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-12">
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Admin Manage</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '/admin/manage_customer'">Manage Customer</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '/admin/manage_staff'">Manage Staff</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Manage Equipment</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Manage Booking</label>
+                        </div>
+                    </li>
+                </ul>
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Report</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Financial Report</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Equipment Utilization Report</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Maintenance Report</label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-9 col-sm-12">
+                <dev class="d-flex">
+                    <form class="d-flex" action="{{ url_for('manage_customer') }}" method="get">
+                        <div class="form-group">
+                            <input type="text" class="form-control mx-3" placeholder="Search" name="search" {% if customer_search %}value="{{ customer_search }}"{% endif %}>
+                        </div>
+                        <div class="form-group ml-2">
+                            <button type="submit" class="btn btn-primary mx-3">Search</button>
+                        </div>
+                    </form>
+                    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#instructor_Modal2" onclick="showLink(-1)">
+                        Add Customer
+                    </button>
+                </dev>
+                <table class="table table-hover mt-3">
+                    <thead>
+                    <tr>
+                        <th scope="col">Customer Id</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Register Date</th>
+                        <th scope="col">Last Login Date</th>
+                        <th scope="col">Operate</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in customer_list %}
+                        <tr>
+                            <th scope="row">{{ item['customer_id'] }}</th>
+                            <td>{{ item['email'] }}</td>
+                            <td>{{ item['first_name'] }} {{ item['last_name'] }}</td>
+                            <td>{{ item['register_date'] }}</td>
+                            <td>{{ item['last_login_date'] }}</td>
+                            <td>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#instructor_Modal"
+                                        onclick="showLink({{ item['user_id'] }})">Edit
+                                </button>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        onclick="confirmDelete({{ item['user_id'] }})">Delete
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation member_">
+                    <ul class="pagination justify-content-center">
+                        {% if count %}
+                            {% for i in range(count) %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}{% if customer_search %}&search={{ customer_search }}{% endif %}">{{ i + 1 }}</a>
+                                </li>
+                            {% endfor %}
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="instructor_Modal" tabindex="-1" aria-labelledby="instructor_Modal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="pt-3 pb-3">
+                        <div class="container w-75">
+                            <form action="{{ url_for('manage_customer') }}" method="post" id="myForm" onsubmit="return validateForm()">
+                                <div class="input-group mb-3">
+                                    <label for="title" class="input-group-text">
+                                        Title <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="title" id="title" required>
+                                        <option value="" selected="selected" disabled>Choose Title</option>
+                                        {% for title in title_list %}
+                                            <option value="{{ title.title_id }}">{{ title.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="first_name" class="input-group-text">
+                                        First Name <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="first_name" id="first_name" required>
+                                </div>
+                                <p id="first_name_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="last_name" class="input-group-text">
+                                        Last Name <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="last_name" id="last_name" required>
+                                </div>
+                                <p id="last_name_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="email" class="input-group-text">
+                                        Email <span style="color:red">*</span>
+                                    </label>
+                                    <input type="email" class="form-control" name="email" id="email" required>
+                                </div>
+                                <p id="email_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="phone_number" class="input-group-text">
+                                        Phone Number <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+                                </div>
+                                <p id="phone_number_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="birth_date" class="input-group-text">
+                                        Date of Birth <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="birth_date" id="birth_date" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="region" class="input-group-text">
+                                        Region <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="region" id="region" onchange="update_region()" required>
+                                        <option value="" selected="selected" disabled>Choose Region</option>
+                                        {% for region in region_list %}
+                                            <option value="{{ region.region_id }}">{{ region.region }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="city" class="input-group-text">
+                                        City <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="city" id="city" required>
+                                        <option value="" selected="selected" disabled>Choose City</option>
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="street_name" class="input-group-text">
+                                        Street <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="street_name" id="street_name" required>
+                                </div>
+                                <input type="hidden" id="edit_user_id" name="user_id">
+                                <div class="d-grid gap-2">
+                                    <input type="submit" class="btn btn-warning" value="Update">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="instructor_Modal2" tabindex="-1" aria-labelledby="instructor_Modal2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="pt-3 pb-3">
+                        <div class="container w-75">
+                            <form action="{{ url_for('manage_customer') }}" method="post" id="myForm" onsubmit="return validateForm()">
+                                <div class="input-group mb-3">
+                                    <label for="title" class="input-group-text">
+                                        Title <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="title" id="title" required>
+                                        <option value="" selected="selected" disabled>Choose Title</option>
+                                        {% for title in title_list %}
+                                            <option value="{{ title.title_id }}">{{ title.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="password" class="input-group-text">
+                                        Password <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="password" id="password" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="first_name" class="input-group-text">
+                                        First Name <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="first_name" id="first_name" required>
+                                </div>
+                                <p id="first_name_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="last_name" class="input-group-text">
+                                        Last Name <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="last_name" id="last_name" required>
+                                </div>
+                                <p id="last_name_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="email" class="input-group-text">
+                                        Email <span style="color:red">*</span>
+                                    </label>
+                                    <input type="email" class="form-control" name="email" id="email" required>
+                                </div>
+                                <p id="email_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="phone_number" class="input-group-text">
+                                        Phone Number <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="phone_number" id="phone_number" required>
+                                </div>
+                                <p id="phone_number_msg" style="color: red"></p>
+                                <div class="input-group mb-3">
+                                    <label for="birth_date" class="input-group-text">
+                                        Date of Birth <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="birth_date" id="birth_date" required>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="region" class="input-group-text">
+                                        Region <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="region" id="region" onchange="update_region()" required>
+                                        <option value="" selected="selected" disabled>Choose Region</option>
+                                        {% for region in region_list %}
+                                            <option value="{{ region.region_id }}">{{ region.region }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="city" class="input-group-text">
+                                        City <span style="color:red">*</span>
+                                    </label>
+                                    <select class="form-control" name="city" id="city" required>
+                                        <option value="" selected="selected" disabled>Choose City</option>
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <label for="street_name" class="input-group-text">
+                                        Street <span style="color:red">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="street_name" id="street_name" required>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <input type="submit" class="btn btn-warning" value="Update">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form action="{{ url_for('delete_user') }}" method="post">
+                        <input type="hidden" id="user_id" name="user_id">
+                        <button type="submit" class="btn btn-danger my-1">Yes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+    <script>
+        flatpickr("#birth_date", {
+            minDate: "01 01 1900",
+            maxDate: "30 12 2004",
+            dateFormat: "d M Y",
+        });
+
+        const city_list = JSON.parse('{{ city_list|tojson }}');
+        const region = document.getElementById('region');
+        const city = document.getElementById('city');
+
+        function update_region() {
+            city.innerHTML = '<option value="" disabled>---Choose city---</option>';
+            for (const i in city_list) {
+                if (String(city_list[i].region_id) === region.value) {
+                    const option = document.createElement('option');
+                    option.value = city_list[i].city_id;
+                    option.text = city_list[i].city;
+                    city.appendChild(option);
+                }
+            }
+        }
+
+        function validateForm() {
+
+        }
+
+        function confirmDelete(user_id) {
+            document.getElementById("user_id").value = user_id;
+        }
+
+        function showLink(id) {
+            if (id === -1) {
+
+            } else {
+                document.getElementById("edit_user_id").value = id;
+            }
+        }
+    </script>
+{% endblock %}

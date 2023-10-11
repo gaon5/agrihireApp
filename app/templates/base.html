@@ -121,7 +121,7 @@
 
                 <div class="col-md-4 col-sm-12 text-md-center text-center align-self-center py-3 pl-3">
                     <form class="d-flex" action="{{ url_for('search_equipment') }}" method="get">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment" {% if equipment_search %}value="{{ equipment_search }}"{% endif %}>
                         <button class="btn btn-outline-success search-button" type="submit">
                             <i class="fas fa-search search-icon"></i>
                         </button>
