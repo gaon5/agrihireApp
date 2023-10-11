@@ -218,7 +218,7 @@
         var formData = {
             selected_date: selectedDate,
             selected_days: selectedDays,
-            equipment_id: '{{ equipment.equipment_id }}'
+            equipment_id: '{{ equipment[0]['equipment_id'] }}'
         };
 
         var currentProduct = $(this).closest('.row');  // 找到包含 equipment 图片的父元素
