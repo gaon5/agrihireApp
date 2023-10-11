@@ -12,7 +12,7 @@ def manage_category():
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
-        if check_permissions() > 1:
+        if check_permissions() > 2:
             # if method is POST ...
             if request.method == 'POST':
                 # if add button is pressed, insert a new category
@@ -53,12 +53,12 @@ def manage_category():
 # route for managing categories
 @app.route('/manage_subcategory', methods=['GET', 'POST'])
 def manage_subcategory():
-    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Manage Category", "url": "/manage_category"}]
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Manage Sub Category", "url": "/manage_subcategory"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
-        if check_permissions() > 1:
+        if check_permissions() > 2:
             # if method is POST ...
             if request.method == 'POST':
                 # if add button is pressed, insert a new category

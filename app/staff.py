@@ -101,3 +101,34 @@ def return_list():
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
+
+# route for maintenance list
+@app.route('/maintenance_list', methods=['GET', 'POST'])
+def maintenance_list():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Maintenance List", "url": "/maintenance_list"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        if check_permissions() > 1:
+            # if method is POST, mark the instance as completed
+            if request.method == 'POST':
+                instance_id = request.form['instance_id']
+                sql_function.complete_maintenance(instance_id)
+                last_msg = "Maintenance marked completed"
+            # get today's date
+            the_date = date.today()
+            # get every equipment which is under maintenance
+            maintenance_list = sql_function.get_maintenance_equipment(the_date)
+            # convert the date to a user-friendly format
+            for maintenance in maintenance_list:
+                maintenance['start_date'] = maintenance['start_date'].strftime("%d %b %Y")
+                maintenance['end_date'] = maintenance['end_date'].strftime("%d %b %Y")
+            return render_template('staff/maintenance_list.html', maintenance_list=maintenance_list, breadcrumbs=breadcrumbs, last_msg=last_msg,
+                                   last_error_msg=last_error_msg)
+        else:
+            session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))

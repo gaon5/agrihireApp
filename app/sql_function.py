@@ -473,6 +473,35 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
 
+def get_maintenance_equipment(today_date):
+    details = operate_sql("""SELECT * FROM `equipment_maintenance`;""", close=0)
+    # set status to overdue if the maintenance is not completed and the expected return date is in the past
+    sql = """UPDATE equipment_maintenance 
+                SET maintenance_status_id=2
+                WHERE instance_id=%s"""
+    for detail in details:
+        if detail['maintenance_end_date'] < today_date and detail['maintenance_status_id'] != 3:
+            operate_sql(sql, (detail['instance_id'],))
+    # get every detail of each equipment under maintenance
+    sql = """SELECT instance_id, maintenance_start_date AS start_date, maintenance_end_date AS end_date, maintenance_type.name AS type, maintenance_status.name AS status, notes FROM equipment_maintenance
+                INNER JOIN maintenance_type ON maintenance_type.maintenance_type_id = equipment_maintenance.maintenance_type_id
+                INNER JOIN maintenance_status ON maintenance_status.maintenance_status_id = equipment_maintenance.maintenance_status_id
+                ORDER BY maintenance_start_date"""
+    details = operate_sql(sql)
+    return details
+
+def complete_maintenance(id):
+    # update instance's status in the equipment_maintenance table
+    sql="""UPDATE equipment_maintenance
+            SET maintenance_status_id=3
+            WHERE instance_id=%s"""
+    operate_sql(sql, (id,))
+    # update instance's status to available
+    sql="""UPDATE equipment_instance
+            SET instance_status=1
+            WHERE instance_id=%s"""
+    operate_sql(sql, (id,))
+
 def get_categories():
     return operate_sql("""SELECT * FROM `category`;""", close=0)
 
@@ -530,3 +559,4 @@ def edit_subcategory(id, name):
 def delete_subcategory(id):
     sql = """DELETE FROM sub_category WHERE sub_id=%s"""
     operate_sql(sql, (id,))
+
