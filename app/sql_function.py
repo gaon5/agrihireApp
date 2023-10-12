@@ -1,9 +1,7 @@
 import mysql.connector
-from flask import Flask, url_for
 from app import config, bcrypt
 from datetime import date, datetime, timedelta
 import math
-import uuid
 
 db_conn = None
 connection = None
@@ -472,10 +470,11 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 SET instance_status = 1
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
-    
+
+
 def equipment_details():
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name
-				FROM equipment e 
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 LEFT JOIN sub_category s on s.sub_id = c.sub_id
@@ -484,24 +483,26 @@ def equipment_details():
     equipment_details = operate_sql(sql)
     return equipment_details
 
-def updating_equipment_image(image_url,equipment_id):
-        sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
-        operate_sql(sql_img, (equipment_id,image_url))
-    
-def updating_equipment(name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id):
-    sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, height = %s, description = %s, detail = %s
+
+def updating_equipment_image(image_url, equipment_id):
+    sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
+    operate_sql(sql_img, (equipment_id, image_url))
+
+
+def updating_equipment(name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id):
+    sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, 
+                height = %s, description = %s, detail = %s
                 WHERE equipment_id= %s"""
-    operate_sql(sql, (name, price, count, requires_drive_license, length,width,height,description,detail,equipment_id))
-    
+    operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
+
+
 def search_equipment_list(search):
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name
-				FROM equipment e 
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 LEFT JOIN sub_category s on s.sub_id = c.sub_id
                 LEFT JOIN category ca on ca.category_id = s.category_id
                 WHERE e.name LIKE %s OR s.name LIKE %s OR ca.name LIKE %s"""
-    result = operate_sql(sql, ('%' + search + '%','%' + search + '%', '%' + search + '%',))
+    result = operate_sql(sql, ('%' + search + '%', '%' + search + '%', '%' + search + '%',))
     return result
-  
-    

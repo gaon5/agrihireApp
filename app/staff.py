@@ -2,7 +2,6 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta, time
 import math
 import re
-import uuid
 from app import app, check_permissions, scheduler, sql_function, bcrypt, upload_image
 
 
@@ -103,6 +102,7 @@ def return_list():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
 
+
 @app.route('/equipment_list')
 def equipment_list():
     breadcrumbs = [{"text": "Equipments List", "url": "/equipment_list"}]
@@ -110,7 +110,7 @@ def equipment_list():
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
-        if check_permissions() > 1: 
+        if check_permissions() > 1:
             equipment = sql_function.equipment_details()
             return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
         else:
@@ -119,7 +119,8 @@ def equipment_list():
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
-    
+
+
 @app.route('/more_detail/<detail_id>', methods=['GET', 'POST'])
 def more_detail(detail_id):
     breadcrumbs = [{"text": "Equipment List", "url": "/equipment_list"}, {"text": "Details", "url": ""}]
@@ -127,17 +128,19 @@ def more_detail(detail_id):
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
-        if check_permissions() > 1: 
+        if check_permissions() > 1:
             equipment = sql_function.get_equipment_by_id(detail_id)
             # for item in equipment:
             #     print(item['equipment_id'])
-            return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+            return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
+                                   error_msg=last_error_msg)
         else:
             session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
             return redirect(url_for('index'))
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
+
 
 @app.route('/update_equipment/<detail_id>', methods=['GET', 'POST'])
 def update_equipment(detail_id):
@@ -149,12 +152,12 @@ def update_equipment(detail_id):
         if check_permissions() > 1:
             equipment = sql_function.get_equipment_by_id(detail_id)
             if request.method == 'POST':
-                id = request.form.get('equipment_id')
+                equipment_id = request.form.get('equipment_id')
                 image = request.files['image']
                 equipment = request.form.get('ename')
                 price = request.form.get('price')
                 stock = request.form.get('stock')
-                license = request.form.get('license')
+                driver_license = request.form.get('license')
                 length = request.form.get('length')
                 width = request.form.get('width')
                 height = request.form.get('height')
@@ -163,17 +166,20 @@ def update_equipment(detail_id):
                 capitalize_name = equipment.title()
                 if image.filename:
                     image_url = upload_image(image)
-                    sql_function.updating_equipment_image(id,image_url)
-                    sql_function.updating_equipment(capitalize_name,price,stock,license,length,width,height,description,detail,id)
-                else: 
-                    if license == 'yes':
-                        license= 1
-                    elif license == 'no':
-                        license = 0
-                    sql_function.updating_equipment(capitalize_name,price,stock,license,length,width,height,description,detail,id)
+                    sql_function.updating_equipment_image(equipment_id, image_url)
+                    sql_function.updating_equipment(capitalize_name, price, stock, driver_license, length, width, height, description, detail, equipment_id)
+                else:
+                    if driver_license == 'yes':
+                        driver_license = 1
+                    elif driver_license == 'no':
+                        driver_license = 0
+                    sql_function.updating_equipment(capitalize_name, price, stock, driver_license, length, width, height, description, detail, equipment_id)
                 session['msg'] = 'Updated successfully!'
-                return redirect(url_for('more_detail', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
-        return render_template('staff/update_equipment.html',detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+                return redirect(
+                    url_for('more_detail', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
+        return render_template('staff/update_equipment.html', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg,
+                               error_msg=last_error_msg)
+
 
 @app.route('/search_result', methods=['GET', 'POST'])
 def search_result():
@@ -182,7 +188,7 @@ def search_result():
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     # Retrieve word that has been inputed
-    search= request.form.get('equipmentsearch')
+    search = request.form.get('equipmentsearch')
     if 'loggedIn' in session:
         if check_permissions() > 1:
             # Check if search is not empty or contains only whitespace
@@ -192,12 +198,14 @@ def search_result():
                 equipment = sql_function.search_equipment_list(equipmentsearch)
                 if not equipment:
                     # No results found for the search
-                    session['error_msg']  = "No equipment found for your search."
-                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+                    session['error_msg'] = "No equipment found for your search."
+                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
+                                           error_msg=last_error_msg)
                 else:
                     # Results found, render the equipment list
-                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
-            else: 
+                    return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
+                                           error_msg=last_error_msg)
+            else:
                 # Handle the case where search is empty or contains only whitespace
                 session['error_msg'] = 'Search field cannot be left blank.'
                 return redirect(url_for('equipment_list', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))

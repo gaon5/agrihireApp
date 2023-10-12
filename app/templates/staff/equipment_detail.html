@@ -2,23 +2,23 @@
 
 {% block body %}
     {% for item in equipment %}
-    <div class="container" style="min-height: 800px">
-        <h1 class="my-4">{{item.name}}</h1>
-        <img src="{{ url_for('static', filename=item.image_url) }}" class="img-thumbnail" width="300" height="300">
-        <p>Price: ${{ item.price }}</p>
-        <p>Stock: {{ item.count }}</p>
-        {% if item['requires_drive_license'] == 1 %}
-            <p>License: Yes</p>
-        {% elif item['requires_drive_license'] == 0  %}
-            <p> License: No</p>
-        {% endif %}
-        <p>Length: {{ item.length}}mm</p>
-        <p>Width: {{ item.width }}mm</p>
-        <p>Height: {{ item.height }}mm</p>
-        <p>Description: {{ item.description }}</p>
-        <p>Detail: {{ item.detail }}</p>
+        <div class="container" style="min-height: 800px">
+            <h1 class="my-4">{{ item.name }}</h1>
+            <img src="{{ url_for('static', filename=item.image_url) }}" class="img-thumbnail" width="300" height="300">
+            <p>Price: ${{ item.price }}</p>
+            <p>Stock: {{ item.count }}</p>
+            {% if item['requires_drive_license'] == 1 %}
+                <p>License: Yes</p>
+            {% elif item['requires_drive_license'] == 0 %}
+                <p> License: No</p>
+            {% endif %}
+            <p>Length: {{ item.length }}mm</p>
+            <p>Width: {{ item.width }}mm</p>
+            <p>Height: {{ item.height }}mm</p>
+            <p>Description: {{ item.description }}</p>
+            <p>Detail: {{ item.detail }}</p>
 
-        <a role="button" id="update" class="btn btn-primary" href="{{url_for('update_equipment', detail_id = item['equipment_id']) }}">Update</a></td>
-    </div>
+            <a role="button" id="update" class="btn btn-primary" href="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}">Update</a></td>
+        </div>
     {% endfor %}
 {% endblock %}
