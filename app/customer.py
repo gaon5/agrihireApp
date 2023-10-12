@@ -297,7 +297,7 @@ def delete_item():
     previous_url = str(request.referrer)
     return redirect(previous_url)
 
-@app.route('/edit_details', methods=['get'])
+@app.route('/edit_details', methods=['post'])
 def edit_details():
     if 'loggedIn' in session:
             user_id = session['user_id']

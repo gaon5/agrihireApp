@@ -124,17 +124,17 @@ Shopping Cart
                             <button class="quantity-btn" onclick="incrementQuantity({{ loop.index }})">+</button>
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
-                            {{ equipment.start_time }}
+                            <span id="startTime_{{ loop.index }}" data-start-time="{{ equipment.start_time }}">{{ equipment.start_time }}</span>
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
-                            {{ equipment.end_time }}
+                            <span id="endTime_{{ loop.index }}" data-end-time="{{ equipment.end_time }}">{{ equipment.end_time }}</span>
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
                             <span id="itemPrice_{{ loop.index }}" data-original-price="{{ equipment.price }}">{{ equipment.price }}</span>
                         </div>
 
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
-                            <a href="/edit_details?cart_item_id={{ equipment.cart_item_id }}" class="btn btn-primary" style="font-size: 14px">Edit</a>
+                            <a href="#" class="btn btn-primary" style="font-size: 14px" data-bs-toggle="modal" data-bs-target="#editModal" onclick="openEditModal({{ loop.index }})">Edit</a>
                         </div>
                         
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
@@ -152,13 +152,40 @@ Shopping Cart
                 <button type="submit" class="btn btn-primary">Next Step</button>
             </form>
         </div>
-
-
-
-
     </div>
-
 </div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Edit Rental Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Quantity Input -->
+          <div class="mb-3">
+            <label for="Quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="Quantity">
+          </div>
+          <!-- Date Input -->
+          <div class="mb-3">
+            <label for="Rental Date" class="form-label">Rental Date</label>
+            <input type="date" class="form-control" id="rentalDate">
+          </div>
+          <div class="mb-3">
+            <label for="Return Date" class="form-label">Return Date</label>
+            <input type="date" class="form-control" id="returnDate">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
     
 {% endblock %}
 
@@ -209,6 +236,44 @@ Shopping Cart
             // 将总计更新到.total-amount元素
             document.querySelector('.total-amount').textContent = total.toFixed(2);
         }
+
+        function openEditModal(index) {
+            let quantityInput = document.getElementById('quantityInput_' + index);
+            let rentalDate = document.getElementById('startTime_' + index);
+            let returnDate = document.getElementById('endTime_' + index);
+
+            // 设置模态框中的输入值
+            document.getElementById('Quantity').value = quantityInput.value;
+            document.getElementById('rentalDate').value = rentalDate;
+            document.getElementById('returnDate').value = returnDate;
+        }
+
+        function saveChanges() {
+            let quantity = document.getElementById('Quantity').value;
+            let rentalDate = document.getElementById('rentalDate').value;
+            let returnDate = document.getElementById('returnDate').value;
+
+            // 使用fetch或XMLHttpRequest向服务器发送数据
+            fetch('/edit_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    quantity: quantity,
+                    start_time: rentalDate,
+                    end_time: returnDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 处理服务器的响应，例如更新页面
+            });
+        }
+
+        // 监听模态框上的保存按钮点击事件
+        document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
+
     </script>
     
 {% endblock %}
