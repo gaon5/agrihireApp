@@ -502,3 +502,10 @@ def my_cart(user_id):
     # print(sql % (customer_id,equipment_id,count,start_time,duration))
     equipment_in_cart = operate_sql(sql, (customer_id,))
     return equipment_in_cart
+
+def max_count(equipment_id):
+    sql = """SELECT count(*) FROM hire.equipment_instance
+                where equipment_id = %s and instance_status = 1;"""
+    max_count = operate_sql(sql, (equipment_id,))
+    max_amount = list(max_count[0].values())[0]
+    return max_amount

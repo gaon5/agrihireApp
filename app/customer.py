@@ -215,8 +215,8 @@ def customer_cart():
     if 'loggedIn' in session:
         user_id = session['user_id']
         equipment_list = sql_function.my_cart(user_id)
+        total_amount = 0
         for equipment in equipment_list:
-            print(equipment)
             start_time = equipment['start_time']
             end_time = equipment['end_time']
             # 计算时间差
@@ -229,16 +229,22 @@ def customer_cart():
             days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
             hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
             minutes, _ = divmod(remainder, 60)
-            if hours <=4:
+            if 0< hours <=4:
                 days = days+0.75
+            elif hours == 0:
+                days = days
             else:
                 days = days+1
             unit_price = float(equipment['price'])
             total_item_price = unit_price * days
             equipment['price'] = total_item_price
+            total_amount = total_amount + total_item_price
+            print(type(equipment['price']))
             print(f"{days} days, {hours} hours, {minutes} minutes")
+            max_amount = sql_function.max_count(equipment['equipment_id'])
+            equipment['count'] = max_amount
             
-        return render_template('customer/customer_cart.html', equipment_list = equipment_list)
+        return render_template('customer/customer_cart.html', equipment_list = equipment_list,total_amount = total_amount)
     else:
             session['error_msg'] = 'You are not logged in, please login first.'
             return redirect(url_for('index'))
@@ -291,7 +297,7 @@ def delete_item():
     previous_url = str(request.referrer)
     return redirect(previous_url)
 
-@app.route('/edit_details', methods=['POST'])
+@app.route('/edit_details', methods=['get'])
 def edit_details():
     if 'loggedIn' in session:
             user_id = session['user_id']

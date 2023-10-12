@@ -81,6 +81,11 @@ Shopping Cart
         font-weight: bold;  /* 粗体字 */
         font-family: 'Poppins', sans-serif;
     }
+    .total-amount {  
+        font-size: 24px;    /* 字体大小 */
+        font-weight: bold;  /* 粗体字 */
+        font-family: 'Poppins', sans-serif;
+    }
 
 </style>
     
@@ -114,9 +119,9 @@ Shopping Cart
                             <span style="max-width: 200px; word-wrap: break-word; margin-left: 15px;">{{ equipment.name }}</span>
                         </div>
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
-                            <button class="quantity-btn" onclick="decrementQuantity()">-</button>
-                            <input type="number" id="quantityInput" value="1" min="1" style="width: 50px; text-align: center; margin: 0 5px;">
-                            <button class="quantity-btn" onclick="incrementQuantity()">+</button>
+                            <button class="quantity-btn" onclick="decrementQuantity({{ loop.index }})">-</button>
+                            <input type="number" id="quantityInput_{{ loop.index }}" data-max-count="{{ equipment.count }}" value="1" min="1" max="{{ equipment.count }}" style="width: 50px; text-align: center; margin: 0 5px;">
+                            <button class="quantity-btn" onclick="incrementQuantity({{ loop.index }})">+</button>
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
                             {{ equipment.start_time }}
@@ -125,7 +130,7 @@ Shopping Cart
                             {{ equipment.end_time }}
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
-                            {{ equipment.price }}
+                            <span id="itemPrice_{{ loop.index }}" data-original-price="{{ equipment.price }}">{{ equipment.price }}</span>
                         </div>
 
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
@@ -141,8 +146,9 @@ Shopping Cart
         </div>
         
         <div class="total-bar">
-            <span class="total-price">Total Price: $123.45</span>
-            <form action="{{ url_for('payment') }}" method="get">  <!-- 使用你的下一页路由名替换'next_step_route' -->
+            <span class="total-price">Total Price: </span>
+            <span class="total-amount">{{  total_amount  }} </span>
+            <form action="{{ url_for('payment') }}" method="get"> 
                 <button type="submit" class="btn btn-primary">Next Step</button>
             </form>
         </div>
@@ -159,18 +165,49 @@ Shopping Cart
 
 {% block myjs %}
     <script>
-        function decrementQuantity() {
-            let input = document.getElementById('quantityInput');
+        function decrementQuantity(index) {
+            let input = document.getElementById('quantityInput_' + index);
             let currentValue = parseInt(input.value, 10);
             if (currentValue > 1) {
                 input.value = currentValue - 1;
+                updateItemPrice(index);
             }
         }
 
-        function incrementQuantity() {
-            let input = document.getElementById('quantityInput');
+        function incrementQuantity(index) {
+            let input = document.getElementById('quantityInput_' + index);
             let currentValue = parseInt(input.value, 10);
-            input.value = currentValue + 1;
+            let maxCount = parseInt(input.getAttribute('data-max-count'), 10);
+
+            if (currentValue < maxCount) {
+                input.value = currentValue + 1;
+                updateItemPrice(index);
+            }
+        }
+
+        function updateItemPrice(index) {
+            let quantityInput = document.getElementById('quantityInput_' + index);
+            let priceElement = document.getElementById('itemPrice_' + index);
+
+            let originalPrice = parseFloat(priceElement.getAttribute('data-original-price'));
+            let quantity = parseInt(quantityInput.value, 10);
+
+            let totalPriceForItem = originalPrice * quantity;
+            priceElement.textContent = totalPriceForItem.toFixed(2);  // 显示两位小数的价格
+
+            updateTotalAmount();
+        }
+
+        function updateTotalAmount() {
+            let total = 0;
+            let items = document.querySelectorAll('[id^="itemPrice_"]');  // 选择所有以 "itemPrice_" 开头的ID的元素
+
+            items.forEach(item => {
+                total += parseFloat(item.textContent);
+            });
+
+            // 将总计更新到.total-amount元素
+            document.querySelector('.total-amount').textContent = total.toFixed(2);
         }
     </script>
     
