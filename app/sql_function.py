@@ -509,3 +509,16 @@ def max_count(equipment_id):
     max_count = operate_sql(sql, (equipment_id,))
     max_amount = list(max_count[0].values())[0]
     return max_amount
+
+def edit_equipment_in_cart(user_id,cart_item_id,quantity,start_time,end_time):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """UPDATE shopping_cart_item 
+                    SET count = %s, start_time = %s, end_time = %s
+                    WHERE (customer_id = %s) and (cart_item_id = %s)"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    operate_sql(sql, (quantity,start_time,end_time,customer_id,cart_item_id,))

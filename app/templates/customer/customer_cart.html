@@ -117,6 +117,7 @@ Shopping Cart
                         <div class="col-md-3 d-flex align-items-center">
                             <img src="{{ url_for('static', filename=equipment.image_url) }}" alt="Equipment Image" class="img-fluid" style="max-width: 80px;">
                             <span style="max-width: 200px; word-wrap: break-word; margin-left: 15px;">{{ equipment.name }}</span>
+                            <input type="hidden" id="cart_item_id" name="cart_item_id" value="{{ equipment.cart_item_id }}">
                         </div>
                         <div class="col-md-1 d-flex align-items-center justify-content-center">
                             <button class="quantity-btn" onclick="decrementQuantity({{ loop.index }})">-</button>
@@ -166,21 +167,25 @@ Shopping Cart
           <!-- Quantity Input -->
           <div class="mb-3">
             <label for="Quantity" class="form-label">Quantity</label>
-            <input type="number" class="form-control" id="Quantity">
+            <div style="display: flex; align-items: center;">
+                <button class="quantity-btn" onclick="decrementModalQuantity()">-</button>
+                <input type="text" class="form-control" id="Quantity" value="1" readonly style="width: 60px; text-align: center; margin: 0 5px;">
+                <button class="quantity-btn" onclick="incrementModalQuantity()">+</button>
+            </div>
           </div>
           <!-- Date Input -->
           <div class="mb-3">
             <label for="Rental Date" class="form-label">Rental Date</label>
-            <input type="date" class="form-control" id="rentalDate">
+            <input type="text" id="start_time_updated" name="start_time" placeholder="Rental Date & Time">
           </div>
           <div class="mb-3">
             <label for="Return Date" class="form-label">Return Date</label>
-            <input type="date" class="form-control" id="returnDate">
+            <input type="text" id="end_time_updated" name="end_time" placeholder="Return Date & Time">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
         </div>
       </div>
     </div>
@@ -192,6 +197,7 @@ Shopping Cart
 
 {% block myjs %}
     <script>
+        let currentIndex;
         function decrementQuantity(index) {
             let input = document.getElementById('quantityInput_' + index);
             let currentValue = parseInt(input.value, 10);
@@ -237,21 +243,66 @@ Shopping Cart
             document.querySelector('.total-amount').textContent = total.toFixed(2);
         }
 
+        flatpickr("#start_time_updated", {
+            enableTime: true, // 启用时间选择
+            noCalendar: false, // 显示日期选择器
+            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
+            time_24hr: true, // 使用24小时制时间格式
+            disable: ["2023-10-30", "2023-10-10"], //可以添加为设备租借完了的日子
+            minDate: new Date().fp_incr(1),
+            maxDate: new Date().fp_incr(91),
+        });
+
+        flatpickr("#end_time_updated", {
+            enableTime: true, // 启用时间选择
+            noCalendar: false, // 显示日期选择器
+            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
+            time_24hr: true, // 使用24小时制时间格式
+            disable: ["2023-10-30", "2023-10-10"],
+            minDate: new Date().fp_incr(1),
+            maxDate: new Date().fp_incr(91),
+        });
+
+        function decrementModalQuantity() {
+            let input = document.getElementById('Quantity');
+            let currentValue = parseInt(input.value, 10);
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        function incrementModalQuantity() {
+            let input = document.getElementById('Quantity');
+            let maxCount = parseInt(document.querySelector("#quantityInput_" + currentIndex).getAttribute('data-max-count'), 10);
+            let currentValue = parseInt(input.value, 10);
+            if (currentValue < maxCount) {
+                input.value = currentValue + 1;
+            }
+        }
+
         function openEditModal(index) {
+            currentIndex = index;
             let quantityInput = document.getElementById('quantityInput_' + index);
-            let rentalDate = document.getElementById('startTime_' + index);
-            let returnDate = document.getElementById('endTime_' + index);
+            let start_time = document.getElementById('startTime_' + index);
+            let end_time = document.getElementById('endTime_' + index);
 
             // 设置模态框中的输入值
             document.getElementById('Quantity').value = quantityInput.value;
-            document.getElementById('rentalDate').value = rentalDate;
-            document.getElementById('returnDate').value = returnDate;
+            document.getElementById('start_time_updated').value = start_time.textContent;
+            document.getElementById('end_time_updated').value = end_time.textContent;
+
+            // 步骤二的代码
+            let modalQuantityInput = document.getElementById('Quantity');
+            let maxCount = parseInt(quantityInput.getAttribute('data-max-count'), 10);
+            modalQuantityInput.setAttribute('min', '1');
+            modalQuantityInput.setAttribute('max', maxCount.toString());
         }
 
         function saveChanges() {
+            let cart_item_id = document.getElementById('cart_item_id').value;
             let quantity = document.getElementById('Quantity').value;
-            let rentalDate = document.getElementById('rentalDate').value;
-            let returnDate = document.getElementById('returnDate').value;
+            let start_time = document.getElementById('start_time_updated').value
+            let end_time = document.getElementById('end_time_updated').value;
 
             // 使用fetch或XMLHttpRequest向服务器发送数据
             fetch('/edit_details', {
@@ -260,9 +311,10 @@ Shopping Cart
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    cart_item_id: cart_item_id,
                     quantity: quantity,
-                    start_time: rentalDate,
-                    end_time: returnDate
+                    start_time: start_time,
+                    end_time: end_time
                 })
             })
             .then(response => response.json())

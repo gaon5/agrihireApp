@@ -212,6 +212,9 @@ def update_booking(instance_id):
 
 @app.route('/customer_cart')
 def customer_cart():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
         user_id = session['user_id']
         equipment_list = sql_function.my_cart(user_id)
@@ -244,7 +247,7 @@ def customer_cart():
             max_amount = sql_function.max_count(equipment['equipment_id'])
             equipment['count'] = max_amount
             
-        return render_template('customer/customer_cart.html', equipment_list = equipment_list,total_amount = total_amount)
+        return render_template('customer/customer_cart.html', equipment_list = equipment_list,total_amount = total_amount, msg=last_msg, error_msg=last_error_msg)
     else:
             session['error_msg'] = 'You are not logged in, please login first.'
             return redirect(url_for('index'))
@@ -258,8 +261,7 @@ def add_to_cart():
     # print(request.form)
     last_error_msg = session.get('error_msg', '')
     last_msg = session.get('msg', '')
-    session['msg'] = session['msg'] = ''
-    session['error_msg'] = session['error_msg'] = ''
+    session['msg'] = session['error_msg'] = ''
     if not (start_time and end_time and equipment_id):
         session['error_msg'] = 'Please select the required date and time.'
     else:
@@ -291,6 +293,9 @@ def add_to_cart():
 
 @app.route('/delete_item', methods=['get'])
 def delete_item():
+    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')
+    session['msg'] = session['error_msg'] = ''
     cart_item_id = request.args.get('cart_item_id')
     sql_function.delete_item(cart_item_id)
     session['msg'] = "Delete successfully"
@@ -301,8 +306,25 @@ def delete_item():
 def edit_details():
     if 'loggedIn' in session:
             user_id = session['user_id']
-            cart_item_id = request.args.get('cart_item_id')
-    pass
+            data = request.get_json()
+
+            # 从数据中提取特定的值
+            cart_item_id = data.get('cart_item_id')
+            quantity = data.get('quantity')
+            start_time = data.get('start_time')
+            end_time = data.get('end_time')
+
+            sql_function.edit_equipment_in_cart(user_id,cart_item_id,quantity,start_time,end_time)
+            session['msg'] = "Update successfully"
+
+            return redirect(url_for('customer_cart'))
+    else:
+            session['error_msg'] = 'You are not logged in, please login first.'
+            return redirect(url_for('index'))
+
+
+            
+    
 
 @app.route('/payment', methods=['POST'])
 def payment():
