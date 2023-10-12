@@ -692,3 +692,16 @@ def delete_subcategory(id):
     sql = """DELETE FROM sub_category WHERE sub_id=%s"""
     operate_sql(sql, (id,))
 
+
+def customer_list():
+    sql = """SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, c.phone_number, e.name AS Equipment, rs.name AS Status, 
+                DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, 
+                TIME(ers.expected_return_datetime) AS rTime, DATE(actual_return_datetime) AS aDate, TIME(actual_return_datetime) AS aTime
+                FROM hire.equipment_rental_status ers
+                INNER JOIN customer c ON c.customer_id = ers.customer_id
+                INNER JOIN rental_status rs ON ers.rental_status_id = rs.rental_status_id
+                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
+                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
+                ORDER BY ers.expected_return_datetime ASC;"""
+    equipment = operate_sql(sql)
+    return equipment

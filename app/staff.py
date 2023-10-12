@@ -229,3 +229,22 @@ def search_result():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
 
+
+@app.route('/customerslist')
+def customer_list():
+    breadcrumbs = [{"text": "Customers List", "url": "/customers"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    equipment = sql_function.customer_list()
+    if 'loggedIn' in session:
+        # First determine whether to log in, then determine the user type, and then return different panels according to the type.
+        if check_permissions() > 1:
+            return render_template('staff/customer_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
+                                   error_msg=last_error_msg)
+        else:
+            session['error_msg'] = 'Incorrect permissions'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'Incorrect permissions'
+        return redirect(url_for('index'))

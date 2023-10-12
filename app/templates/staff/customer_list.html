@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block mycss %}
+<style>
+    th.header {
+        background-color: #eecd5c;
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10" style="text-align: center">
+            <table class="table align-middle mb-0 bg-white">
+                <thead>
+                <tr>
+                    <th class="header">Customer</th>
+                    <th class="header">Phone Number</th>
+                    <th class="header">Equipment</th>
+                    <th class="header">Status</th>
+                    <th class="header">Start Date-Time</th>
+                    <th class="header">Return Date-Time</th>
+                    <th class="header">Actual Return Date-Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for item in equipment %}
+                <tr>
+                    <td>
+                    <p class="fw-normal mb-1">{{item.Customer}}</p>
+                    </td>
+                    <td>
+                        <p class="fw-normal mb-1">{{item.phone_number}}</p>
+                        </td>
+                    <td>
+                        <p class="fw-normal mb-1">{{item.Equipment}}</p>
+                    </td>
+                    <td>
+                        <span class="badge bg-warning text-dark">{{item.Status}}</span>
+                    </td>
+                    <td>
+                        <p class="fw-normal mb-1">{{item.sDate}}</p>
+                        <p class="small mb-0 ms-2">{{item.sTime}}</p>
+                    </td>
+                    <td>
+                        <p class="fw-normal mb-1">{{item.rDate}}</p>
+                        <p class="small mb-0 ms-2">{{item.rTime}}</p>
+                    </td>
+                    <td>
+                        {% if item.aDate == None or item.aTime== None %}
+                            <p class="fw-normal mb-1"></p>
+                            <p class="small mb-0 ms-2"></p>
+                        {% else %}
+                            <p class="fw-normal mb-1">{{item.aDate}}</p>
+                            <p class="small mb-0 ms-2">{{item.aTime}}</p>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
