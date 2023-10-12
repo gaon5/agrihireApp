@@ -471,17 +471,21 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (staff_id, current_datetime, equipment_id))
 
 
-def add_equipment_into_cart(user_id,equipment_id,count,start_time,duration):
+def add_equipment_into_cart(user_id,equipment_id,count,start_time,end_time):
     sql = """SELECT ua.user_id, c.customer_id
                 FROM user_account ua
                 INNER JOIN customer c on c.user_id = ua.user_id
                 WHERE ua.user_id = %s;"""
     customer = operate_sql(sql, (user_id,), fetch=0, close=0)
     customer_id = customer['customer_id']
-    sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,duration)
+    sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,end_time)
             VALUES (%s,%s,%s,%s,%s)"""
     # print(sql % (customer_id,equipment_id,count,start_time,duration))
-    operate_sql(sql, (customer_id,equipment_id,count,start_time,duration))
+    operate_sql(sql, (customer_id,equipment_id,count,start_time,end_time,))
+
+def delete_item(cart_item_id):
+    sql = """DELETE FROM shopping_cart_item WHERE cart_item_id=%s"""
+    operate_sql(sql,(cart_item_id,))
 
 def my_cart(user_id):
     sql = """SELECT ua.user_id, c.customer_id

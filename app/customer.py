@@ -214,29 +214,44 @@ def update_booking(instance_id):
 def customer_cart():
     if 'loggedIn' in session:
         user_id = session['user_id']
-        equipment = sql_function.my_cart(user_id)
-        print(equipment)
+        equipment_list = sql_function.my_cart(user_id)
+        # for equipment in equipment_list:
+        #     print(equipment)
 
     # cart
-    return render_template('customer/customer_cart.html', equipment = equipment)
+    return render_template('customer/customer_cart.html', equipment_list = equipment_list)
 
 
 @app.route('/add_to_cart', methods=['POST','get'])
 def add_to_cart():
-    selected_date = request.form.get('select_date')
-    selected_days = request.form.get('days')
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
     equipment_id = request.form.get('equipment_id')
     # print(request.form)
     last_error_msg = session.get('error_msg', '')
     last_msg = session.get('msg', '')
-    if not (selected_date or selected_days) and equipment_id:
+    if not (start_time and end_time and equipment_id):
         session['error_msg'] = 'Please select the required date and time.'
     else:
         if 'loggedIn' in session:
             user_id = session['user_id']
             count = 1
-            sql_function.add_equipment_into_cart(user_id,equipment_id,count,selected_date,selected_days)
-            session['msg'] = "Add to cart successfully"
+            try:
+                start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+                end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+                # print(start_time)
+                # print(end_time)
+                if start_time >= end_time:
+                    session['error_msg'] = 'Start time must be before end time.'
+                    previous_url = str(request.referrer)
+                    return redirect(previous_url)
+                else:
+                    sql_function.add_equipment_into_cart(user_id,equipment_id,count,start_time,end_time)
+                    session['msg'] = "Add to cart successfully"
+            except ValueError:
+                session['error_msg'] = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
+                previous_url = str(request.referrer)
+                return redirect(previous_url)
         else:
             session['error_msg'] = 'You are not logged in, please login first.'
             return redirect(url_for('index'))
@@ -244,11 +259,18 @@ def add_to_cart():
     return redirect(previous_url)
 
 
-@app.route('/delete_item', methods=['POST'])
+@app.route('/delete_item', methods=['get'])
 def delete_item():
-    equipment_id = request.form.get('equipment_id')
+    cart_item_id = request.args.get('cart_item_id')
+    sql_function.delete_item(cart_item_id)
+    session['msg'] = "Delete successfully"
+    previous_url = str(request.referrer)
+    return redirect(previous_url)
+
+@app.route('/edit_details', methods=['POST'])
+def edit_details():
     pass
 
-@app.route('/location', methods=['POST'])
-def location():
+@app.route('/payment', methods=['POST'])
+def payment():
     pass
