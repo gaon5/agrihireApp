@@ -5,141 +5,139 @@
 {% endblock %}
 
 {% block mycss %}
+    <style>
+        .form-control {
+            border-color: #c0c0c0; /* Light gray */
+            border-radius: 20px; /* Rounded edges */
+            padding: 12px 20px; /* More padding for a larger, more modern look */
+            font-size: 1rem; /* Larger font size */
+        }
 
-.form-control {
-    border-color: #c0c0c0;  /* Light gray */
-    border-radius: 20px; /* Rounded edges */
-    padding: 12px 20px; /* More padding for a larger, more modern look */
-    font-size: 1rem; /* Larger font size */
-}
+        .form-control:focus {
+            border-color: #a0a0a0; /* Darker gray when focused */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bringing back a subtle shadow when focused, but you can remove it if you want */
+        }
 
-.form-control:focus {
-    border-color: #a0a0a0;  /* Darker gray when focused */
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);  /* Bringing back a subtle shadow when focused, but you can remove it if you want */
-}
+        /* Placeholder star */
+        .form-control::placeholder {
+            color: #a0a0a0; /* Gray color for placeholder */
+            position: relative;
+        }
 
-/* Placeholder star */
-.form-control::placeholder {
-    color: #a0a0a0; /* Gray color for placeholder */
-    position: relative;
-}
+        .form-control {
+            direction: ltr;
+        }
 
-.form-control {
-    direction: ltr;
-}
-
-/* Button styling */
-.btn-primary {
-    background-color: #007bff;
-    border-radius: 20px; /* Rounded edges */
-    padding: 10px 30px; /* A bit more padding */
-    font-size: 1rem; /* Larger font size */
-    letter-spacing: 1px; /* Slightly spaced out letters for a modern look */
-}
-
+        /* Button styling */
+        .btn-primary {
+            background-color: #007bff;
+            border-radius: 20px; /* Rounded edges */
+            padding: 10px 30px; /* A bit more padding */
+            font-size: 1rem; /* Larger font size */
+            letter-spacing: 1px; /* Slightly spaced out letters for a modern look */
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <!-- Contact Info -->
-    <div class="text-center bg-dark p-3 rounded mb-4">
-        <h1 class="text-white">Contact Us</h1>
-        <p class="text-white mb-0">Want to get in touch? Fill out the form below, or alternatively, you can call <strong>0800 15 15 15</strong> to be put in touch with your local branch.</p>
-    </div>
+    <div class="container my-4">
+        <!-- Contact Info -->
+        <div class="text-center bg-dark p-3 rounded mb-4">
+            <h1 class="text-white">Contact Us</h1>
+            <p class="text-white mb-0">Want to get in touch? Fill out the form below, or alternatively, you can call <strong>0800 15 15 15</strong> to be
+                put in touch with your local branch.</p>
+        </div>
 
-    <div class="row g-6">
-        <!-- Form Column -->
-        <div class="col-md-8">
-            <div class="card p-4">
-                <h3>Make an Enquiry</h3>
-                <form name="contactForm" action="{{ url_for('contact') }}" method="post" onsubmit="return validateForm()" class="mt-4">
-                    <div class="mb-3">
-                        <input type="text" name="first_name" class="form-control" placeholder="* First Name" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" name="last_name" class="form-control" placeholder="* Last Name" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="email" name="email" class="form-control" placeholder="* Email Address" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="tel" name="phone" class="form-control" placeholder="* Phone Number" required>
-                    </div>
-                    <div class="mb-3">
-                        <input type="text" name="location" class="form-control" placeholder="Location">
-                    </div>
-                    <div class="mb-3">
-                        <select name="enquiry_type" class="form-select">
-                            <option value="general">General</option>
-                            <option value="sales">Sales</option>
-                            <option value="support">Support</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <textarea name="enquiry_details" class="form-control" placeholder="* Your Enquiry" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">SEND ENQUIRY</button>
-                    </div>
-                </form>
+        <div class="row g-6">
+            <!-- Form Column -->
+            <div class="col-md-8">
+                <div class="card p-4">
+                    <h3>Make an Enquiry</h3>
+                    <form name="contactForm" action="{{ url_for('contact') }}" method="post" onsubmit="return validateForm()" class="mt-4">
+                        <div class="mb-3">
+                            <input type="text" name="first_name" class="form-control" placeholder="* First Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="last_name" class="form-control" placeholder="* Last Name" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="* Email Address" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="tel" name="phone" class="form-control" placeholder="* Phone Number" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" name="location" class="form-control" placeholder="Location">
+                        </div>
+                        <div class="mb-3">
+                            <select name="enquiry_type" class="form-select form-control">
+                                <option value="general">General</option>
+                                <option value="sales">Sales</option>
+                                <option value="support">Support</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="enquiry_details" class="form-control" placeholder="* Your Enquiry" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">SEND ENQUIRY</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- National Support Office Column -->
+            <div class="col-md-4">
+                <h3>National Support Office</h3>
+                <address>
+                    820 Great South Road,<br>
+                    Penrose Auckland 1061<br>
+                    PO Box 12048<br>
+                    Penrose 1642
+                </address>
+
+                <p><strong>For Support Office enquiries only please email us on:</strong></p>
+                <ul class="list-unstyled">
+                    <li><a href="mailto:info@darfield.co.nz">info@darfield.co.nz</a></li>
+                    <li><a href="mailto:accounts.receivable@darfield.co.nz">accounts.receivable@darfield.co.nz</a></li>
+                    <li><a href="mailto:apinvoices@darfield.co.nz">apinvoices@darfield.co.nz</a></li>
+                </ul>
+                <p><strong>For Marketing and Sponsorship please email us on:</strong></p>
+                <a href="mailto:info@darfield.co.nz">info@darfield.co.nz</a>
             </div>
         </div>
-        <!-- National Support Office Column -->
-        <div class="col-md-4">
-            <h3>National Support Office</h3>
-            <address>
-                820 Great South Road,<br>
-                Penrose Auckland 1061<br>
-                PO Box 12048<br>
-                Penrose 1642
-            </address>
-
-            <p><strong>For Support Office enquiries only please email us on:</strong></p>
-            <ul class="list-unstyled">
-                <li><a href="mailto:info@darfield.co.nz">info@darfield.co.nz</a></li>
-                <li><a href="mailto:accounts.receivable@darfield.co.nz">accounts.receivable@darfield.co.nz</a></li>
-                <li><a href="mailto:apinvoices@darfield.co.nz">apinvoices@darfield.co.nz</a></li>
-            </ul>
-
-            <p><strong>For Marketing and Sponsorship please email us on:</strong></p>
-            <a href="mailto:info@darfield.co.nz">info@darfield.co.nz</a>
-        </div>
     </div>
-</div>
 
 {% endblock %}
 
 {% block myjs %}
     <script>
-       function validateForm() {
-    var firstName = document.forms["contactForm"]["first_name"].value.trim();
-    var lastName = document.forms["contactForm"]["last_name"].value.trim();
-    var email = document.forms["contactForm"]["email"].value.trim();
-    var phone = document.forms["contactForm"]["phone"].value.trim();
-    var details = document.forms["contactForm"]["enquiry_details"].value.trim();
+        function validateForm() {
+            const firstName = document.forms["contactForm"]["first_name"].value.trim();
+            const lastName = document.forms["contactForm"]["last_name"].value.trim();
+            const email = document.forms["contactForm"]["email"].value.trim();
+            const phone = document.forms["contactForm"]["phone"].value.trim();
+            const details = document.forms["contactForm"]["enquiry_details"].value.trim();
 
-    // Check if fields are empty
-    if (firstName == "" || lastName == "" || email == "" || phone == "" || details == "") {
-        alert("All required fields must be filled out");
-        return false;
-    }
+            // Check if fields are empty
+            if (firstName === "" || lastName === "" || email === "" || phone === "" || details === "") {
+                alert("All required fields must be filled out");
+                return false;
+            }
 
-    // Email validation
-    var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    if (!emailRegex.test(email)) {
-        alert("Please enter a valid email address");
-        return false;
-    }
+            // Email validation
+            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (!emailRegex.test(email)) {
+                alert("Please enter a valid email address");
+                return false;
+            }
 
-    // Phone number validation (basic, only checks for numbers and common separators)
-    var phoneRegex = /^[0-9\-+()\s]+$/;
-    if (!phoneRegex.test(phone)) {
-        alert("Please enter a valid phone number");
-        return false;
-    }
-
-    return true;
-}
-
+            // Phone number validation (basic, only checks for numbers and common separators)
+            var phoneRegex = /^[0-9\-+()\s]+$/;
+            if (!phoneRegex.test(phone)) {
+                alert("Please enter a valid phone number");
+                return false;
+            }
+            return true;
+        }
     </script>
 {% endblock %}

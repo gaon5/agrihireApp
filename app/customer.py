@@ -211,7 +211,6 @@ def update_booking(instance_id):
         return redirect(url_for('index'))
 
 
-
 @app.route('/faq')
 def faq():
     contact_details = "support@example.com"  # This can also come from a database or configuration.
@@ -233,11 +232,7 @@ def contact():
         location = request.form.get('location')
         enquiry_type = request.form.get('enquiry_type')
         enquiry_details = request.form.get('enquiry_details')
-
-        
-        session['msg'] = "'Your enquiry has been submitted successfully!', 'success'"
-
-        return render_template('customer/contact.html', msg=last_msg, error_msg=last_error_msg)
-
-
+# send to database
+        last_msg = "'Your enquiry has been submitted successfully!'"
+        return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
     return render_template('customer/contact.html')
