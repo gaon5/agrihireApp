@@ -160,7 +160,7 @@
             <ul class="pagination justify-content-center">
                 {% if count %}
                     {% for i in range(count) %}
-                        <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}">{{ i + 1 }}</a>
+                        <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}{% if equipment_search %}&equipment={{ equipment_search }}{% endif %}">{{ i + 1 }}</a>
                         </li>
                     {% endfor %}
                 {% endif %}

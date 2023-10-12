@@ -34,18 +34,26 @@ def login():
         password = request.form.get('password')
         account = sql_function.get_account(email)
         if account is not None:
-            if bcrypt.check_password_hash(account['password'], password):
-                # Login successful
-                sql_function.set_last_login_date(account['user_id'])
-                session['loggedIn'] = True
-                session['user_id'] = account['user_id']
-                session['is_admin'] = account['is_admin']
-                session['is_customer'] = account['is_customer']
-                session['is_staff'] = account['is_staff']
-                session['msg'] = 'Login successful'
-                return redirect(url_for('index'))
-        # username or password error
-        last_error_msg = 'username or password error.'
+            user_detail = sql_function.get_user_detail(account['user_id'])
+            if user_detail['state']:
+                if bcrypt.check_password_hash(account['password'], password):
+                    # Login successful
+                    sql_function.set_last_login_date(account['user_id'])
+                    session['loggedIn'] = True
+                    session['user_id'] = account['user_id']
+                    session['is_admin'] = account['is_admin']
+                    session['is_customer'] = account['is_customer']
+                    session['is_staff'] = account['is_staff']
+                    session['msg'] = 'Login successful'
+                    return redirect(url_for('index'))
+                else:
+                    # password error
+                    last_error_msg = 'username or password error.'
+            else:
+                last_error_msg = 'The account has been Inactivated, please get in touch with the staff.'
+        else:
+            # username error
+            last_error_msg = 'username or password error.'
     return render_template('guest/login.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
@@ -172,12 +180,9 @@ def edit_detail():
         permission_level = check_permissions()
         # Mapping to corresponding functions and templates
         details_function_map = {
-            1: {"details": sql_function.get_customer_details, "update": sql_function.update_customer_details,
-                "template": "customer/update_information.html"},
-            2: {"details": sql_function.get_staff_details, "update": sql_function.update_staff_details,
-                "template": "staff/update_information.html"},
-            3: {"details": sql_function.get_admin_details, "update": sql_function.update_admin_details,
-                "template": "admin/update_information.html"}
+            1: {"update": sql_function.update_customer_details, "template": "customer/update_information.html"},
+            2: {"update": sql_function.update_staff_details, "template": "staff/update_information.html"},
+            3: {"update": sql_function.update_admin_details, "template": "admin/update_information.html"}
         }
         if permission_level not in details_function_map:
             session['error_msg'] = 'Incorrect permissions'
@@ -203,7 +208,7 @@ def edit_detail():
                 details_function_map[permission_level]["update"](**details_data)
                 last_msg = "Update successful"
         # Get the latest details
-        details_list = details_function_map[permission_level]["details"](user_id)
+        details_list = sql_function.get_user_detail(user_id)
         if 'birth_date' in details_list:
             details_list['birth_date'] = details_list['birth_date'].strftime('%d %b %Y')
         return render_template(details_function_map[permission_level]["template"], details_list=details_list, title_list=sql_function.title_list,
