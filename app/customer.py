@@ -217,6 +217,26 @@ def customer_cart():
         equipment_list = sql_function.my_cart(user_id)
         for equipment in equipment_list:
             print(equipment)
+            start_time = equipment['start_time']
+            end_time = equipment['end_time']
+            # 计算时间差
+            time_diff = end_time - start_time
+
+            # 获取时间差的总秒数
+            total_seconds = time_diff.total_seconds()
+
+            # 计算具体的天数、小时数、分钟数
+            days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+            hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+            minutes, _ = divmod(remainder, 60)
+            if hours <=4:
+                days = days+0.75
+            else:
+                days = days+1
+            unit_price = float(equipment['price'])
+            total_item_price = unit_price * days
+            equipment['price'] = total_item_price
+            # print(f"{days} days, {hours} hours, {minutes} minutes")
             
         return render_template('customer/customer_cart.html', equipment_list = equipment_list)
     else:
@@ -232,6 +252,8 @@ def add_to_cart():
     # print(request.form)
     last_error_msg = session.get('error_msg', '')
     last_msg = session.get('msg', '')
+    session['msg'] = session['msg'] = ''
+    session['error_msg'] = session['error_msg'] = ''
     if not (start_time and end_time and equipment_id):
         session['error_msg'] = 'Please select the required date and time.'
     else:
