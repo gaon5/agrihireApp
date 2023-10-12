@@ -410,7 +410,7 @@ def add_customer(first_name, last_name, birth_date, title, phone_number, region,
 
 def delete_customer(user_id):
     sql = """UPDATE customer SET state=0 Where user_id=%s"""
-    operate_sql(sql, (user_id))
+    operate_sql(sql, (user_id,))
 
 
 def update_staff_details(first_name, last_name, title, phone_number, email, user_id):

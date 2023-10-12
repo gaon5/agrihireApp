@@ -36,6 +36,10 @@
         .asterisk-inside {
             padding-left: 20px; /* Adjust as needed */
         }
+        .btn_ {
+            font-size: 14px;
+            padding: 3px 6px;
+        }
     </style>
 {% endblock %}
 
@@ -102,7 +106,7 @@
                             <button type="submit" class="btn btn-primary mx-3">Search</button>
                         </div>
                     </form>
-                    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#instructor_Modal" onclick="showLink(-1)">
+                    <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#manage_Modal" onclick="showLink(-1)">
                         Add Customer
                     </button>
                 </dev>
@@ -114,7 +118,7 @@
                         <th scope="col">Name</th>
                         <th scope="col">Register Date</th>
                         <th scope="col">Last Login Date</th>
-                        <th scope="col">Operate</th>
+                        <th scope="col" style="width: 240px">Operate</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -126,10 +130,13 @@
                             <td>{{ item['register_date'] }}</td>
                             <td>{{ item['last_login_date'] }}</td>
                             <td>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#instructor_Modal"
+                                <button type="button" class="btn btn-primary btn_" data-bs-toggle="modal" data-bs-target="#manage_Modal"
                                         onclick="showLink({{ item['user_id'] }})">Edit
                                 </button>
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                <button type="button" class="btn btn-danger btn_" data-bs-toggle="modal" data-bs-target="#manage_Modal2"
+                                        onclick="set_password({{ item['user_id'] }})">Set Password
+                                </button>
+                                <button type="button" class="btn btn-danger btn_" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
                                         onclick="confirmDelete({{ item['user_id'] }})">Delete
                                 </button>
                             </td>
@@ -151,7 +158,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="instructor_Modal" tabindex="-1" aria-labelledby="instructor_Modal" aria-hidden="true">
+    <div class="modal fade" id="manage_Modal" tabindex="-1" aria-labelledby="manage_Modal" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -216,6 +223,36 @@
                                     <input type="text" class="form-control asterisk-inside" name="street_name" id="street_name" placeholder="Enter Street Name" title="Enter Street Name">
                                 </div>
                                 <input type="hidden" id="edit_user_id" name="user_id">
+                                <div class="d-grid gap-2">
+                                    <input type="submit" class="btn btn-warning" value="Update">
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="manage_Modal2" tabindex="-1" aria-labelledby="manage_Modal2" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="pt-3 pb-3">
+                        <div class="container w-75">
+                            <form action="{{ url_for('admin_password') }}" method="post" id="myForm2">
+                                <div class="relative mb-3">
+                                    <label for="set_password" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                    <input type="text" class="form-control asterisk-inside" name="set_password" id="set_password" placeholder="Enter Password"
+                                           title="Enter Password">
+                                </div>
+                                <input type="hidden" id="set_user_id" name="user_id">
                                 <div class="d-grid gap-2">
                                     <input type="submit" class="btn btn-warning" value="Update">
                                 </div>
@@ -308,6 +345,30 @@
                 document.getElementById("myForm1").submit();
             }
         });
+
+        $("#myForm2").validate({
+            rules: {
+                set_password: {
+                    required: true
+                }
+            },
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('text-danger');
+                error.insertAfter(element);
+                element.addClass('is-invalid');
+            },
+            success: function (label, element) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+        $('#myForm2').on('submit', function (event) {
+            event.preventDefault();
+            if ($(this).valid()) {
+                document.getElementById("myForm2").submit();
+            }
+        });
+
         const customer_list = JSON.parse('{{ customer_list|tojson }}');
         function showLink(id) {
             $('#myForm1').trigger('reset');
@@ -355,6 +416,10 @@
 
         function confirmDelete(user_id) {
             document.getElementById("user_id").value = user_id;
+        }
+
+        function set_password(user_id) {
+            document.getElementById("set_user_id").value = user_id;
         }
     </script>
 {% endblock %}

@@ -214,3 +214,22 @@ def delete_user():
     else:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('dashboard'))
+
+
+@app.route('/admin/password', methods=['GET', 'POST'])
+def admin_password():
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 3:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        password = request.form.get('set_password')
+        sql_function.set_password(password, user_id)
+        previous_url = str(request.referrer)
+        return redirect(previous_url)
+    else:
+        session['error_msg'] = "Sorry, we can't find the page you're looking for!."
+        return redirect(url_for('dashboard'))
