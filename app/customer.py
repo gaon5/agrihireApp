@@ -236,7 +236,7 @@ def customer_cart():
             unit_price = float(equipment['price'])
             total_item_price = unit_price * days
             equipment['price'] = total_item_price
-            # print(f"{days} days, {hours} hours, {minutes} minutes")
+            print(f"{days} days, {hours} hours, {minutes} minutes")
             
         return render_template('customer/customer_cart.html', equipment_list = equipment_list)
     else:
