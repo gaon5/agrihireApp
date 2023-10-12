@@ -556,6 +556,43 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
 
+
+def equipment_details():
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                ORDER BY ca.name;"""
+    equipment_details = operate_sql(sql)
+    return equipment_details
+
+
+def updating_equipment_image(image_url, equipment_id):
+    sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
+    operate_sql(sql_img, (equipment_id, image_url))
+
+
+def updating_equipment(name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id):
+    sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, 
+                height = %s, description = %s, detail = %s
+                WHERE equipment_id= %s"""
+    operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
+
+
+def search_equipment_list(search):
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE e.name LIKE %s OR s.name LIKE %s OR ca.name LIKE %s"""
+    result = operate_sql(sql, ('%' + search + '%', '%' + search + '%', '%' + search + '%',))
+    return result
+
+
 def get_maintenance_equipment(today_date):
     details = operate_sql("""SELECT * FROM `equipment_maintenance`;""", close=0)
     # set status to overdue if the maintenance is not completed and the expected return date is in the past
@@ -573,6 +610,7 @@ def get_maintenance_equipment(today_date):
     details = operate_sql(sql)
     return details
 
+
 def complete_maintenance(id):
     # update instance's status in the equipment_maintenance table
     sql="""UPDATE equipment_maintenance
@@ -585,12 +623,15 @@ def complete_maintenance(id):
             WHERE instance_id=%s"""
     operate_sql(sql, (id,))
 
+
 def get_categories():
     return operate_sql("""SELECT * FROM `category`;""", close=0)
+
 
 def insert_category(value):
     sql = """INSERT INTO category (category_id, name) VALUES (NULL, %s)"""
     operate_sql(sql, (value,))
+
 
 def check_category(id):
     sql="""SELECT * FROM category
@@ -599,15 +640,18 @@ def check_category(id):
     details = operate_sql(sql, (id,))
     return details
 
+
 def edit_category(id, name):
     sql = """UPDATE category 
                 SET name = %s
                 WHERE category_id = %s"""
     operate_sql(sql, (name,id))
 
+
 def delete_category(id):
     sql = """DELETE FROM category WHERE category_id=%s"""
     operate_sql(sql, (id,))
+
 
 def get_main_and_sub_categories():
     sql = """SELECT sub_id, sub_category.name AS sub, category.category_id, category.name AS main FROM sub_category 
@@ -616,9 +660,11 @@ def get_main_and_sub_categories():
     details = operate_sql(sql)
     return details
 
+
 def insert_subcategory(id, name):
     sql="""INSERT INTO sub_category (sub_id, category_id, name) VALUES (NULL, %s, %s)"""
     operate_sql(sql, (id, name))
+
 
 def check_subcategory(id):
     sql="""SELECT * FROM sub_category 
@@ -627,17 +673,20 @@ def check_subcategory(id):
     details = operate_sql(sql, (id,))
     return details
 
+
 def change_category(sub_id, main_id):
     sql = """UPDATE sub_category 
                 SET category_id = %s
                 WHERE sub_id = %s"""
     operate_sql(sql, (main_id, sub_id))
 
+
 def edit_subcategory(id, name):
     sql = """UPDATE sub_category 
                 SET name = %s
                 WHERE sub_id = %s"""
     operate_sql(sql, (name,id))
+
 
 def delete_subcategory(id):
     sql = """DELETE FROM sub_category WHERE sub_id=%s"""
