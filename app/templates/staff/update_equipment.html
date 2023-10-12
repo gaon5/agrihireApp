@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center my-5">
+            {% for item in equipment %}
+                <div class="col-lg-4">
+                    <form action="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="equipment_id" id="equipment_id" value="{{ item.equipment_id }}" required/>
+                        <label for="image">Image: </label>
+                        <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                        <label for="ename">Equipment Name: <span style="color:red">*</span></label>
+                        <input type="text" class="form-control" name="ename" id="ename" value="{{ item.name }}" required/>
+                        <label for="price">Price: <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" name="price" id="price" value="{{ item.price }}" autocomplete="off" required/>
+                        <label for="stock">Stock: <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" name="stock" id="stock" value="{{ item.count }}" autocomplete="off" required/>
+                        <div>
+                            <label for="capacity" style="display: block;">License: <span style="color:red">*</span></label>
+                            <select id="license" name="license" style="display: block;">
+                                <option value="yes" {% if item['requires_drive_license'] == 1 %}selected {% endif %}>Yes</option>
+                                <option value="no" {% if item['requires_drive_license'] == 0 %}selected {% endif %}>No</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="length">Length: <span style="color:red">*</span></label>
+                            <input type="text" class="form-control" name="length" id="length" value="{{ item.length }}" autocomplete="off" required
+                                   pattern="^\d+(\.\d+)?$"/>
+                        </div>
+                        <label for="width">Width: <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" name="width" id="width" value="{{ item.width }}" autocomplete="off" required/>
+                        <label for="height">Height: <span style="color:red">*</span></label>
+                        <input type="number" class="form-control" name="height" id="height" value="{{ item.height }}" autocomplete="off" required/>
+                        <div style="margin-top: 10px;"></div>
+                        <div class="col-md-12">
+                            <div class="input-group mb-2">
+                                <label for="description" class="input-group-text">Description: <span style="color:red">*</span></label>
+                                <textarea id="description" class="form-control" name="description" rows="5" cols="33"
+                                          required>{{ item.description }}</textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <label for="detail" class="input-group-text">Detail: <span style="color:red">*</span></label>
+                                <textarea id="detail" class="form-control" name="detail" rows="5" cols="33" required>{{ item.detail }}</textarea>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <input type="reset">
+                            <input type="submit" value="Update">
+                        </div>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
