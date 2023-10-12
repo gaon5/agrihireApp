@@ -215,11 +215,13 @@ def customer_cart():
     if 'loggedIn' in session:
         user_id = session['user_id']
         equipment_list = sql_function.my_cart(user_id)
-        # for equipment in equipment_list:
-        #     print(equipment)
-
-    # cart
-    return render_template('customer/customer_cart.html', equipment_list = equipment_list)
+        for equipment in equipment_list:
+            print(equipment)
+            
+        return render_template('customer/customer_cart.html', equipment_list = equipment_list)
+    else:
+            session['error_msg'] = 'You are not logged in, please login first.'
+            return redirect(url_for('index'))
 
 
 @app.route('/add_to_cart', methods=['POST','get'])
@@ -269,6 +271,9 @@ def delete_item():
 
 @app.route('/edit_details', methods=['POST'])
 def edit_details():
+    if 'loggedIn' in session:
+            user_id = session['user_id']
+            cart_item_id = request.args.get('cart_item_id')
     pass
 
 @app.route('/payment', methods=['POST'])
