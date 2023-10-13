@@ -1,7 +1,5 @@
 from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
-import math
-import re
 from app import app, check_permissions, scheduler, bcrypt, sql_function
 
 
@@ -29,6 +27,9 @@ def login():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        session['error_msg'] = 'You are already logged in.'
+        return redirect(url_for('index'))
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -60,6 +61,9 @@ def login():
 @app.route('/logout')
 def logout():
     # Remove session data, this will log the user out
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are already logout.'
+        return redirect(url_for('index'))
     session.pop('loggedIn', None)
     session.pop('user_id', None)
     session.pop('is_admin', None)
@@ -75,6 +79,9 @@ def register():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        session['error_msg'] = 'You have to logout first.'
+        return redirect(url_for('index'))
     if request.method == 'POST':
         # Get data
         email = request.form.get('email')
@@ -105,6 +112,9 @@ def reset_password():
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     email = request.form.get('email')
+    if 'loggedIn' in session:
+        session['error_msg'] = 'You are already logged in.'
+        return redirect(url_for('index'))
     if email:
         account = sql_function.get_account(email)
         if not account:
@@ -196,7 +206,8 @@ def edit_detail():
                 "phone_number": request.form.get('phone_number'),
                 "user_id": int(request.form.get('user_id'))
             }
-            if permission_level == 1:  # Additional attributes for customers
+            # Additional attributes for customers
+            if permission_level == 1:
                 details_data["birth_date"] = datetime.strptime(request.form.get('birth_date'), '%d %b %Y').strftime('%Y-%m-%d')
                 details_data["region"] = int(request.form.get('region'))
                 details_data["city"] = int(request.form.get('city'))

@@ -69,7 +69,6 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     return temp
 
 
-user_list = operate_sql("""SELECT * FROM `user_account`;""", close=0)
 region_list = operate_sql("""SELECT * FROM `region`;""", close=0)
 title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
 city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
@@ -241,6 +240,18 @@ def get_all_equipment(sql_page):
     return equipment, count
 
 
+def equipment_details():
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                ORDER BY ca.name;"""
+    equipment_details = operate_sql(sql)
+    return equipment_details
+
+
 def get_equipment_by_search(search, sql_page):
     search = "%" + search + "%"
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
@@ -260,6 +271,18 @@ def get_equipment_by_search(search, sql_page):
     count = operate_sql(sql, (search,), fetch=0)
     count = math.ceil(count['count'] / 12)
     return equipment, count
+
+
+def search_equipment_list(search):
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
+                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE e.name LIKE %s OR s.name LIKE %s OR ca.name LIKE %s"""
+    result = operate_sql(sql, ('%' + search + '%', '%' + search + '%', '%' + search + '%',))
+    return result
 
 
 def get_equipment_by_category(category_id, sql_page):
@@ -454,7 +477,7 @@ def stats_dashboard():
     equipment_stat = operate_sql("""SELECT COUNT(equipment_id) FROM hire.equipment;""", close=0)
     booking_stat = operate_sql("""SELECT COUNT(log_id) FROM hire.hire_log;""")
     return customer_stat, staff_stat, equipment_stat, booking_stat
-  
+
 
 def get_bookings(user_id):
     sql = """SELECT ua.user_id, c.customer_id
@@ -475,7 +498,7 @@ def get_bookings(user_id):
     return bookings
 
 
-def delete_booking(instance_id=None, hire_id=None):
+def sql_delete_booking(instance_id=None, hire_id=None):
     if instance_id:
         sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
         operate_sql(sql, (instance_id,))
@@ -557,18 +580,6 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (instance_id,))
 
 
-def equipment_details():
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
-                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
-                LEFT JOIN classify c on e.equipment_id = c.equipment_id
-                LEFT JOIN sub_category s on s.sub_id = c.sub_id
-                LEFT JOIN category ca on ca.category_id = s.category_id
-                ORDER BY ca.name;"""
-    equipment_details = operate_sql(sql)
-    return equipment_details
-
-
 def updating_equipment_image(image_url, equipment_id):
     sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
     operate_sql(sql_img, (equipment_id, image_url))
@@ -581,23 +592,10 @@ def updating_equipment(name, price, count, requires_drive_license, length, width
     operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
 
 
-def search_equipment_list(search):
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
-                e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
-                LEFT JOIN classify c on e.equipment_id = c.equipment_id
-                LEFT JOIN sub_category s on s.sub_id = c.sub_id
-                LEFT JOIN category ca on ca.category_id = s.category_id
-                WHERE e.name LIKE %s OR s.name LIKE %s OR ca.name LIKE %s"""
-    result = operate_sql(sql, ('%' + search + '%', '%' + search + '%', '%' + search + '%',))
-    return result
-
-
 def get_maintenance_equipment(today_date):
     details = operate_sql("""SELECT * FROM `equipment_maintenance`;""", close=0)
     # set status to overdue if the maintenance is not completed and the expected return date is in the past
-    sql = """UPDATE equipment_maintenance 
-                SET maintenance_status_id=2
+    sql = """UPDATE equipment_maintenance SET maintenance_status_id=2
                 WHERE instance_id=%s"""
     for detail in details:
         if detail['maintenance_end_date'] < today_date and detail['maintenance_status_id'] != 3:
@@ -613,19 +611,13 @@ def get_maintenance_equipment(today_date):
 
 def complete_maintenance(id):
     # update instance's status in the equipment_maintenance table
-    sql="""UPDATE equipment_maintenance
-            SET maintenance_status_id=3
+    sql="""UPDATE equipment_maintenance SET maintenance_status_id=3
             WHERE instance_id=%s"""
     operate_sql(sql, (id,))
     # update instance's status to available
-    sql="""UPDATE equipment_instance
-            SET instance_status=1
+    sql="""UPDATE equipment_instance SET instance_status=1
             WHERE instance_id=%s"""
     operate_sql(sql, (id,))
-
-
-def get_categories():
-    return operate_sql("""SELECT * FROM `category`;""", close=0)
 
 
 def insert_category(value):
@@ -720,7 +712,7 @@ def add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time):
     operate_sql(sql, (customer_id, equipment_id, count, start_time, end_time,))
 
 
-def delete_item(cart_item_id):
+def sql_delete_item(cart_item_id):
     sql = """DELETE FROM shopping_cart_item WHERE cart_item_id=%s"""
     operate_sql(sql, (cart_item_id,))
 

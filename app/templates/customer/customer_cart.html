@@ -152,7 +152,9 @@
                             </div>
 
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                <a href="/delete_item?cart_item_id={{ equipment.cart_item_id }}" class="btn btn-danger" style="font-size: 14px">Delete</a>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        onclick="confirmDelete({{ equipment.cart_item_id }})">Delete
+                                </button>
                             </div>
                         {% endfor %}
                     </div>
@@ -204,7 +206,27 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form action="{{ url_for('delete_item') }}" method="post">
+                        <input type="hidden" id="cart_item_id" name="cart_item_id">
+                        <button type="submit" class="btn btn-danger my-1">Yes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 {% endblock %}
 
@@ -340,6 +362,11 @@
 
         // 监听模态框上的保存按钮点击事件
         document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
+
+
+        function confirmDelete(cart_item_id) {
+            document.getElementById("cart_item_id").value = cart_item_id;
+        }
 
     </script>
 

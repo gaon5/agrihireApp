@@ -2,7 +2,6 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 import mysql.connector
 from app import config
-import re
 import uuid
 from flask_apscheduler import APScheduler
 from flask_bcrypt import Bcrypt

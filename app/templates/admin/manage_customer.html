@@ -33,9 +33,11 @@
             transform: translateY(-50%); /* Centering adjustment */
             pointer-events: none; /* Ensure clicks 'pass through' to the input element */
         }
+
         .asterisk-inside {
             padding-left: 20px; /* Adjust as needed */
         }
+
         .btn_ {
             font-size: 14px;
             padding: 3px 6px;
@@ -249,8 +251,8 @@
                             <form action="{{ url_for('admin_password') }}" method="post" id="myForm2">
                                 <div class="relative mb-3">
                                     <label for="set_password" class="asterisk mt-2"><span style="color:red">*</span></label>
-                                    <input type="text" class="form-control asterisk-inside" name="set_password" id="set_password" placeholder="Enter Password"
-                                           title="Enter Password">
+                                    <input type="text" class="form-control asterisk-inside" name="set_password" id="set_password"
+                                           placeholder="Enter Password" title="Enter Password">
                                 </div>
                                 <input type="hidden" id="set_user_id" name="user_id">
                                 <div class="d-grid gap-2">
@@ -370,6 +372,7 @@
         });
 
         const customer_list = JSON.parse('{{ customer_list|tojson }}');
+
         function showLink(id) {
             $('#myForm1').trigger('reset');
             $('#myForm1').find('.is-invalid').removeClass('is-invalid');
@@ -389,7 +392,7 @@
                 $('#myForm1').validate().settings.rules.password = {
                     required: false,
                 }
-                for (let i in customer_list){
+                for (let i in customer_list) {
                     if (id === customer_list[i]['user_id']) {
                         document.getElementById("title").value = customer_list[i]['title_id'];
                         document.getElementById("first_name").value = customer_list[i]['first_name'];
