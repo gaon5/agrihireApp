@@ -135,8 +135,7 @@
                                         </div>
                                     {% endif %}
                                     <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
-                                       class="btn btn-primary" style="font-size: 14px">See Detail
-                                    </a>
+                                       class="btn btn-primary" style="font-size: 14px">See Detail</a>
                                 </div>
                                 <a href="{{ url_for('add_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}" class="image1-switcher position-absolute top-0 end-0 mx-3 my-2"
                                    style="width: 20px;height:20px"></a>
@@ -174,5 +173,4 @@
             {% endfor %}
         {% endif %}
     </script>
-
 {% endblock %}
