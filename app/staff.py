@@ -248,3 +248,21 @@ def customer_list():
     else:
         session['error_msg'] = 'Incorrect permissions'
         return redirect(url_for('index'))
+
+
+@app.route('/equipment_list')
+def equipment_list():
+    breadcrumbs = [{"text": "Equipments List", "url": "/equipment_list"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        if check_permissions() > 1:
+            equipment = sql_function.equipment_details()
+            return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+        else:
+            session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+            return redirect(url_for('index'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
