@@ -67,10 +67,10 @@ def upload_image(file):
     uploaded_image_url = upload_image(request.files['image'])
     """
     file_name = str(uuid.uuid4()) + '.jpg'
-    file.save(f"./static/image/upload_image/{file_name}")
+    file.save(f"./app/static/image/upload_image/{file_name}")
     # file.save(f"/home/leozhao95/mysite2/static/image/upload_image/{filename}")
     image_url = url_for('static', filename=f'image/upload_image/{file_name}')
-    return image_url
+    return image_url[8:]
 
 
 from app import admin, customer, guest, staff

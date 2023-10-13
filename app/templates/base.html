@@ -99,10 +99,6 @@
             flex: 1 0 auto;
         }
 
-        .second-navbar-custom {
-        min-height: 50px; /* or whatever height you want */
-        }
-
         .navbar-toggler {
             border-color: #F3F3E6; /* 更改边框颜色 */
             background-color: #EECD5C; /* 更改背景颜色 */
@@ -114,34 +110,29 @@
 </head>
 
 <body style="background-color: #F3F3E6; display: flex; flex-direction: column; min-height: 100vh;" class="d-flex flex-column">
-    <nav class="navbar navbar-expand-lg fixed-top" style="background-color: #1D1912;">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent1"
-                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-    
-            <div class="collapse navbar-collapse" id="navbarContent1">
-                <div class="col-4 text-left">
+    <nav class="navbar navbar-expand-lg fixed-top d-flex align-items-center" style="background-color: #1D1912;">
+        <div class="container">
+            <div class="row w-100">
+                <div class="col-md-4 col-sm-12 text-md-left text-center align-self-center">
                     <a class="navbar-brand" href="{{ url_for('index') }}">
-                        <img src="{{ url_for('static', filename='image/Logo.jpg') }}" alt="Darfield Outdoor Hire" style="height: 100px; width: auto;">
+                        <img src="{{ url_for('static', filename='image/Logo.png') }}" alt="Darfield Outdoor Hire" style="height: 80px; width: auto;">
                     </a>
                 </div>
 
-                <div class="col-4 text-center">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <div class="col-md-4 col-sm-12 text-md-center text-center align-self-center py-3 pl-3">
+                    <form class="d-flex" action="{{ url_for('search_equipment') }}" method="get">
+                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="equipment" {% if equipment_search %}value="{{ equipment_search }}"{% endif %}>
                         <button class="btn btn-outline-success search-button" type="submit">
                             <i class="fas fa-search search-icon"></i>
                         </button>
                     </form>
                 </div>
-                
-                <div class="col-4 d-flex align-items-center justify-content-end">
+
+                <div class="col-md-4 col-sm-12 text-md-right text-center align-self-center py-3 mt-3">
                     <a class="btn btn-outline-dark" href="{{ url_for('register') }}" style="color:#EECD5C">
-                        Register Right Now!
+                        Register Now!
                     </a>
-                    <a href="{{ url_for('login') }}" class="me-2 icon-link user-icon">
+                    <a href="{{ url_for('login') }}" class="px-2 me-2 icon-link user-icon">
                         <i class="fas fa-user-circle fa-2x"></i>
                     </a>
                     <a href="/customer_cart" class="icon-link cart-icon">
@@ -152,39 +143,49 @@
         </div>
     </nav>
 
-    <nav class="navbar navbar-expand-lg second-navbar-custom" style="height:50px; background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);" id="second-navbar">
-        <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg second-navbar-custom"
+         style=" background-image: linear-gradient(to right, #1d1912, #4b4029, #7d6b41, #b29b5b, #eacd76);" id="second-navbar">
+        <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent2"
                     aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-    
+
             <div class="collapse navbar-collapse" id="navbarContent2">
                 <!-- Other custom text -->
-            <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 1</span>
-            <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 2</span>
-            <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Function 3</span>
-            <a href="#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
-            <a href="/contact" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">Contact Us</a>
-
-            <div class="dropdown">
-                    <span class="dropdown-toggle py-3" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#CBB26B">
-                        Equipment
-                    </span>
-                <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="/equipments">All Equipment</a></li>
-                    <li><a class="dropdown-item" href="/equipments/Landscaping">Landscaping</a></li>
-                    <li><a class="dropdown-item" href="/equipments/Trailers">Trailers</a></li>
-                    <li><a class="dropdown-item" href="/equipments/Earthmoving">Earthmoving</a></li>
-                    <li><a class="dropdown-item" href="/equipments/Building-and-Renovation">Building and Renovation</a></li>
-                    <li><a class="dropdown-item" href="/equipments/Tool-and-Equipment">Tool and Equipment</a></li>
-                </ul>
-            </div>
+                <div class="py-2">
+                    <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 1</span>
+                </div>
+                <div class="py-2">
+                    <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 2</span>
+                </div>
+                <div class="py-2">
+                    <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Function 3</span>
+                </div>
+                <div class="py-2">
+                    <a href="{{ url_for('index') }}#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
+                </div>
+                <div class="py-2">
+                    <a href="/contact" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">Contact Us</a>
+                </div>
+                <div class="dropdown py-2">
+                <span class="dropdown-toggle py-3" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="color:#CBB26B">
+                    Equipment
+                </span>
+                    <ul class="dropdown-menu mt-3" aria-labelledby="dropdownMenuButton">
+                        <li><a class="dropdown-item" href="/equipments">All Equipment</a></li>
+                        <li><a class="dropdown-item" href="/equipments/Landscaping">Landscaping</a></li>
+                        <li><a class="dropdown-item" href="/equipments/Trailers">Trailers</a></li>
+                        <li><a class="dropdown-item" href="/equipments/Earthmoving">Earthmoving</a></li>
+                        <li><a class="dropdown-item" href="/equipments/Building-and-Renovation">Building and Renovation</a></li>
+                        <li><a class="dropdown-item" href="/equipments/Tool-and-Equipment">Tool and Equipment</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
 
-{% if breadcrumbs %}
+    {% if breadcrumbs %}
     <div class="container mt-4">
         <ul class="breadcrumb">
             <li class="breadcrumb-item active"><a href="/">Home</a></li>
@@ -203,17 +204,17 @@
     {% block body %}{% endblock %}
 </div>
 
-<footer style="width: 100%; height: 200px;" class=" text-center position-relative py-4 custom-footer">
+<footer style="width: 100%; height: auto;" class="text-center position-relative py-4 custom-footer">
     <div class="container">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-4">
+                <div class="col-md-4 col-sm-12 text-md-left text-center mb-4">
                     <a class="navbar-brand" href="{{ url_for('index') }}">
-                        <img src="{{ url_for('static', filename='image/Logo.jpg') }}" alt="Darfield Outdoor Hire" style="height: 100px; width: auto;">
+                        <img src="{{ url_for('static', filename='image/Logo.png') }}" alt="Darfield Outdoor Hire" style="height: 80px; width: auto;">
                     </a>
                 </div>
 
-                <div class="col-4 mb-4">
+                <div class="col-md-4 col-sm-12 text-md-center text-center mb-4">
                     <h5 class="mb-3" style="letter-spacing: 2px; color: #eacd76;">Contacts</h5>
                     <ul class="list-unstyled mb-0">
                         <li class="mb-1">
@@ -228,7 +229,7 @@
                     </ul>
                 </div>
 
-                <div class="col-4 mb-4">
+                <div class="col-md-4 col-sm-12 text-md-right text-center mb-4">
                     <h5 class="mb-1" style="color: #eacd76;">Location</h5>
                     <ul style="list-style: none; padding-left: 0">
                         <li style="color: #eacd76;">Detailed Location</li>
@@ -239,7 +240,6 @@
         </div>
     </div>
 </footer>
-
 
 <div class="modal" tabindex="-1" id="alertModal">
     <div class="modal-dialog">
@@ -265,6 +265,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
+<script src="{{ url_for('static', filename='js/jquery/jquery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/validate/jquery.validate.js') }}"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // 获取所有的 .dropdown 元素
@@ -287,7 +290,7 @@
     $(document).ready(function() {
     // Calculate the height of the first navbar
     var firstNavbarHeight = $(".navbar.fixed-top").outerHeight();
-    
+
     // Set the top margin for the second navbar based on the height of the first navbar
     $("#second-navbar").css("margin-top", firstNavbarHeight + "px");
     });

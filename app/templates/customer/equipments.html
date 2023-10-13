@@ -14,7 +14,7 @@
             cursor: pointer;
         }
 
-        .label_style:hover{
+        .label_style:hover {
             font-weight: 700;
         }
 
@@ -98,23 +98,33 @@
 {% block body %}
     <div class="container">
         <div class="row py-3">
-            <div class="col-3">
+            <div class="col-md-3 col-sm-12">
                 <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Category</h5>
                 <ul style="padding: 0; list-style: none;">
                     {% for category in category_list %}
                         <li style="margin: 20px 0;">
                             <div>
                                 <input type="radio" id="{{ category.category_id }}" style="display: none">
-                                <label class="label_style" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
+                                <label class="label_style label_name1" for="{{ category.category_id }}">{{ category.name.replace("-", " ") }}</label>
                             </div>
                         </li>
                     {% endfor %}
                 </ul>
-                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Sub Category</h5>
-                <ul style="padding: 0; list-style: none;" id="sub_category">
-                </ul>
+                {% if sub_list %}
+                    <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Sub Category</h5>
+                    <ul style="padding: 0; list-style: none;">
+                        {% for subcategory in sub_list['subcategories'] %}
+                            <li style="margin: 20px 0;">
+                                <div>
+                                    <input type="radio" id="{{ subcategory }}" style="display: none">
+                                    <label class="label_style label_name2" for="{{ subcategory }}">{{ subcategory.replace("-", " ") }}</label>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
             </div>
-            <div class="col-9">
+            <div class="col-md-9 col-sm-12">
                 <div class="row">
                     {% for equipment in equipments %}
                         <div class="col py-3" style="max-height: 440px;max-width: 247px">
@@ -137,7 +147,8 @@
                                     <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
                                        class="btn btn-primary" style="font-size: 14px">See Detail</a>
                                 </div>
-                                <a href="{{ url_for('add_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}" class="image1-switcher position-absolute top-0 end-0 mx-3 my-2"
+                                <a href="{{ url_for('add_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}"
+                                   class="image1-switcher position-absolute top-0 end-0 mx-3 my-2"
                                    style="width: 20px;height:20px"></a>
                             </div>
                         </div>
@@ -149,7 +160,7 @@
             <ul class="pagination justify-content-center">
                 {% if count %}
                     {% for i in range(count) %}
-                        <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}">{{ i + 1 }}</a>
+                        <li class="page-item"><a class="page-link" href="?page={{ i + 1 }}{% if equipment_search %}&equipment={{ equipment_search }}{% endif %}">{{ i + 1 }}</a>
                         </li>
                     {% endfor %}
                 {% endif %}
@@ -161,11 +172,17 @@
 
 {% block myjs %}
     <script>
-        $('label').on('click', function () {
+        $('.label_name1').on('click', function () {
             const labelContent = $(this).text().trim();
-            console.log(labelContent)
             window.location.href = "/equipments/" + labelContent.replace(/ /g, '-');
         });
+        {% if sub_list %}
+            $('.label_name2').on('click', function () {
+                const labelContent1 = "{{ sub_list['name'] }}"
+                const labelContent2 = $(this).text().trim();
+                window.location.href = "/equipments/" + labelContent1 + "/" + labelContent2.replace(/ /g, '-');
+            });
+        {% endif %}
         {% if wishlist %}
             {% for i in wishlist %}
                 $('#favorite{{ i['equipment_id'] }}').removeClass("image1-switcher").addClass("image2-switcher");

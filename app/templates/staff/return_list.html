@@ -16,20 +16,36 @@
     p {
         text-align: center;
     }
-    .column1 { 
-        width: 100px; 
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        background-color: #e5e5e5;
+        border-bottom: 1px solid #1D1912;
+        font-weight: bold;
     }
-    .column2 { 
-        width: 100px; 
+    .header-cell {
+        text-align: center;
     }
-    .column3 { 
-        width: 100px; 
+    .header-cell:nth-child(1) {
+        flex: 3;  /* 对应My Equipment */
+        
     }
-    .column4 { 
-        width: 100px; 
+    .header-cell:nth-child(2) {
+        flex: 2;  /* 对应My Equipment */
+        
     }
-    .column5 { 
-        width: 100px; 
+    .header-cell:nth-child(3) {
+        flex: 2;  /* 对应My Equipment */
+        
+    }
+    .header-cell:nth-child(4) {
+        flex: 2;  /* 对应My Equipment */
+        
+    }
+    .header-cell:nth-child(5) {
+        flex: 1;  /* 对应My Equipment */
+        
     }
 </style>
 {% endblock %}
@@ -56,36 +72,38 @@
                 </div>
                 <br>
                 {% if return_list %}
-                    <div class="card mt-6">
+                    <div class="table-header">
+                        <div class="header-cell">Equipment Name</div>
+                        <div class="header-cell">Customer ID</div>
+                        <div class="header-cell">Return Time</div>
+                        <div class="header-cell">Notes</div>
+                        <div class="header-cell">Return</div>
+                    </div>
+                    <div class="card mb-3">
                         <div class="card-body">
-                            <table class="table table-bordered table-light table-hover">
-                                <thead>
-                                <tr class="table-dark">
-                                    <th scope="col">Equipment Name</th>
-                                    <th scope="col">Customer ID</th>
-                                    <th scope="col">Return Time</th>
-                                    <th scope="col">Notes</th>
-                                    <th scope="col">Return</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for return in return_list %}
-                                    <tr>
-                                        <td class="column1">{{ return.name }}</td>
-                                        <td class="column2">{{ return.customer_id }}</td>
-                                        <td class="column3">{{ return.expected_return_datetime }}</td>
-                                        <td class="column4">{{ return.notes }}</td>
-                                        <td class="column5">
-                                            <input type="hidden" name="instance_id" id="instance_id" value="{{ return.instance_id }}">
-                                            <input type="hidden" name="equipment_rental_status_id" id="equipment_rental_status_id" value="{{ return.equipment_rental_status_id }}">
-                                            <button type="submit" class="btn btn-primary" name="instance_id" id="instance_id" value="{{ return.instance_id }}">
-                                                Return
-                                            </button>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
+                            {% for return in return_list %}
+                                <div class="row">
+                                    <div class="col-md-4 d-flex align-items-center justify-content-center">
+                                        {{ return.name }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ return.customer_id }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ return.expected_return_datetime }}
+                                    </div>
+                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                        {{ return.notes }}
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                        <input type="hidden" name="instance_id" id="instance_id" value="{{ return.instance_id }}">
+                                        <input type="hidden" name="equipment_rental_status_id" id="equipment_rental_status_id" value="{{ return.equipment_rental_status_id }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            Return
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                 {% else %}
