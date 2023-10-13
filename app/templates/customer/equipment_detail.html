@@ -138,9 +138,12 @@
                         </div>
                         <div class="d-flex justify-content-center pt-3">
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
-                                <input type="text" id="select_date" name="select_date" placeholder="Select Date..">
-                                <input type="text" id="days" name="days" placeholder="Select Date..">
-                                <button type="submit">submit</button>
+                                <input type="text" id="start_time" name="start_time" placeholder="Rental Date & Time">
+                                <input type="text" id="end_time" name="end_time" placeholder="Return Date & Time">
+                                <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
+                                <br>
+                                <button type="button" class="btn btn-primary hire-button mt-3" style="font-size: 14px">Hire Now</button>
+                                <button type="button" class="btn btn-danger add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
                             </form>
                         </div>
                         <a href="{{ url_for('add_favorite', equipment_id=equipment[0]['equipment_id'] ) }}" id="favorite"
@@ -162,18 +165,24 @@
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        flatpickr("#select_date", {
-            disable: ["2023-10-30", "2023-10-10"],
+        flatpickr("#start_time", {
+            disable: ["2023-10-30", "2023-10-10"], //可以添加为设备租借完了的日子
+            enableTime: true, // 启用时间选择
+            noCalendar: false, // 显示日期选择器
+            time_24hr: true, // 使用24小时制时间格式
             minDate: new Date().fp_incr(1),
             maxDate: new Date().fp_incr(91),
-            dateFormat: "d M Y",
+            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
         });
-        flatpickr("#days", {
-            mode: "range",
+
+        flatpickr("#end_time", {
             disable: ["2023-10-30", "2023-10-10"],
+            enableTime: true, // 启用时间选择
+            noCalendar: false, // 显示日期选择器
+            time_24hr: true, // 使用24小时制时间格式
             minDate: new Date().fp_incr(1),
             maxDate: new Date().fp_incr(91),
-            dateFormat: "d M Y",
+            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
         });
 
         const elementsArray = [];
@@ -212,4 +221,55 @@
             $('#favorite').attr('href', '{{ url_for('remove_favorite', equipment_id=equipment[0]['equipment_id']) }}');
         {% endif %}
     </script>
+
+    <script>
+        $('.hire-button, .add-to-cart-button').on('click', function (event) {
+            event.preventDefault();
+
+            // 获取用户在select_date和days输入框中的输入
+            var startTimeValue = $('#start_time').val();
+            var endTimeValue = $('#end_time').val();
+
+            // 将获取到的值赋予隐藏输入框
+            $('input[name="start_time"]').val(startTimeValue);
+            $('input[name="end_time"]').val(endTimeValue);
+
+            var form = $(this).closest('form');
+
+            if ($(this).hasClass('hire-button')) {
+                form.attr('action', '/your_hire_route');
+                form.submit();
+            } else if ($(this).hasClass('add-to-cart-button')) {
+                var currentProduct = $(this).closest('.row');
+                var productImage = currentProduct.find('.img-container img');
+
+                var clonedImage = productImage.clone()
+                    .offset({
+                        top: productImage.offset().top,
+                        left: productImage.offset().left
+                    })
+                    .css({
+                        'opacity': '0.5',
+                        'position': 'absolute',
+                        'height': '150px',
+                        'width': '150px',
+                        'z-index': '100'
+                    })
+                    .appendTo($('body'));
+
+                clonedImage.animate({
+                    'top': $('.cart-icon').offset().top,
+                    'left': $('.cart-icon').offset().left,
+                    'width': 50,
+                    'height': 50
+                }, 1000, function () {
+                    clonedImage.remove();
+                    form.attr('action', '/add_to_cart');
+                    form.submit();
+                });
+            }
+        });
+    </script>
+
+    
 {% endblock %}

@@ -705,3 +705,60 @@ def customer_list():
                 ORDER BY ers.expected_return_datetime ASC;"""
     equipment = operate_sql(sql)
     return equipment
+
+
+def add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,end_time)
+            VALUES (%s,%s,%s,%s,%s)"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    operate_sql(sql, (customer_id, equipment_id, count, start_time, end_time,))
+
+
+def delete_item(cart_item_id):
+    sql = """DELETE FROM shopping_cart_item WHERE cart_item_id=%s"""
+    operate_sql(sql, (cart_item_id,))
+
+
+def my_cart(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT * FROM hire.shopping_cart_item as sci
+                inner join equipment as e on sci.equipment_id = e.equipment_id
+                LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify as c on e.equipment_id = c.equipment_id
+                WHERE sci.customer_id = %s;"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    equipment_in_cart = operate_sql(sql, (customer_id,))
+    return equipment_in_cart
+
+
+def max_count(equipment_id):
+    sql = """SELECT count(*) FROM hire.equipment_instance
+                where equipment_id = %s and instance_status = 1;"""
+    max_count = operate_sql(sql, (equipment_id,))
+    max_amount = list(max_count[0].values())[0]
+    return max_amount
+
+
+def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """UPDATE shopping_cart_item 
+                    SET count = %s, start_time = %s, end_time = %s
+                    WHERE (customer_id = %s) and (cart_item_id = %s)"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))

@@ -240,3 +240,120 @@ def contact():
         last_msg = "'Your enquiry has been submitted successfully!'"
         return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
     return render_template('customer/contact.html')
+
+
+@app.route('/customer_cart')
+def customer_cart():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' in session:
+        user_id = session['user_id']
+        equipment_list = sql_function.my_cart(user_id)
+        total_amount = 0
+        for equipment in equipment_list:
+            start_time = equipment['start_time']
+            end_time = equipment['end_time']
+            # 计算时间差
+            time_diff = end_time - start_time
+
+            # 获取时间差的总秒数
+            total_seconds = time_diff.total_seconds()
+
+            # 计算具体的天数、小时数、分钟数
+            days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+            hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+            minutes, _ = divmod(remainder, 60)
+            if 0 < hours <= 4:
+                days = days + 0.75
+            elif hours == 0:
+                days = days
+            else:
+                days = days + 1
+            unit_price = float(equipment['price'])
+            total_item_price = unit_price * days
+            equipment['price'] = total_item_price
+            total_amount = total_amount + total_item_price
+            print(type(equipment['price']))
+            print(f"{days} days, {hours} hours, {minutes} minutes")
+            max_amount = sql_function.max_count(equipment['equipment_id'])
+            equipment['count'] = max_amount
+
+        return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, msg=last_msg,
+                               error_msg=last_error_msg)
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+
+
+@app.route('/add_to_cart', methods=['POST', 'get'])
+def add_to_cart():
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
+    equipment_id = request.form.get('equipment_id')
+    # print(request.form)
+    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')
+    session['msg'] = session['error_msg'] = ''
+    previous_url = str(request.referrer)
+    if not (start_time and end_time and equipment_id):
+        session['error_msg'] = 'Please select the required date and time.'
+    else:
+        if 'loggedIn' in session:
+            user_id = session['user_id']
+            count = 1
+            try:
+                start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+                end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+                # print(start_time)
+                # print(end_time)
+                if start_time >= end_time:
+                    session['error_msg'] = 'Start time must be before end time.'
+                    return redirect(previous_url)
+                else:
+                    sql_function.add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time)
+                    session['msg'] = "Add to cart successfully"
+                    return redirect(previous_url)
+            except ValueError:
+                session['error_msg'] = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
+                return redirect(previous_url)
+        else:
+            session['error_msg'] = 'You are not logged in, please login first.'
+            return redirect(url_for('index'))
+    return redirect(previous_url)
+
+
+@app.route('/delete_item', methods=['get'])
+def delete_item():
+    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')
+    session['msg'] = session['error_msg'] = ''
+    cart_item_id = request.args.get('cart_item_id')
+    sql_function.delete_item(cart_item_id)
+    session['msg'] = "Delete successfully"
+    previous_url = str(request.referrer)
+    return redirect(previous_url)
+
+
+@app.route('/edit_details', methods=['post'])
+def edit_details():
+    if 'loggedIn' in session:
+        user_id = session['user_id']
+        data = request.get_json()
+        # 从数据中提取特定的值
+        cart_item_id = data.get('cart_item_id')
+        quantity = data.get('quantity')
+        start_time = data.get('start_time')
+        end_time = data.get('end_time')
+
+        sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
+        session['msg'] = "Update successfully"
+        return redirect(url_for('customer_cart'))
+    else:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+
+
+@app.route('/payment', methods=['POST'])
+def payment():
+    pass
