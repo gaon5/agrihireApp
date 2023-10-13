@@ -7,7 +7,24 @@
 
 
 {% block mycss %}
+    <style>
+        .relative {
+            position: relative;
+        }
 
+        .asterisk {
+            color: red;
+            position: absolute;
+            top: 10px; /* Center vertically */
+            left: 10px; /* Distance from the left edge of the input box. Adjust as needed */
+            transform: translateY(-50%); /* Centering adjustment */
+            pointer-events: none; /* Ensure clicks 'pass through' to the input element */
+        }
+
+        .asterisk-inside {
+            padding-left: 20px; /* Adjust as needed */
+        }
+    </style>
 {% endblock %}
 
 
@@ -20,47 +37,32 @@
                 <h5 style="text-align: center;">Click the fields to change details and press "Update" button to submit changes</h5>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ url_for('edit_detail') }}" method="post" id="myForm" onsubmit="return validateForm()">
-                            <div class="input-group mb-3">
-                                <label for="title" class="input-group-text">
-                                    Title <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="title" id="title" required>
+                        <form action="{{ url_for('edit_detail') }}" method="post" id="myForm1">
+                            <div class="relative mb-3">
+                                <label for="title" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <select class="form-control asterisk-inside" name="title" id="title" title="Enter Title">
                                     <option value="" selected="selected" disabled>Choose Title</option>
                                     {% for title in title_list %}
                                         <option value="{{ title.title_id }}">{{ title.title }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="input-group mb-3">
-                                <label for="first_name" class="input-group-text">
-                                    First Name <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" value="{{ details_list.first_name }}" required>
+                            <div class="relative mb-3">
+                                <label for="first_name" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="first_name" id="first_name" value="{{ details_list.first_name }}" placeholder="Enter First Name" title="Enter First Name">
                             </div>
-                            <p id="first_name_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="last_name" class="input-group-text">
-                                    Last Name <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="last_name" id="last_name" value="{{ details_list.last_name }}" required>
+                            <div class="relative mb-3">
+                                <label for="last_name" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="last_name" id="last_name" value="{{ details_list.last_name }}" placeholder="Enter Last Name" title="Enter Last Name">
                             </div>
-                            <p id="last_name_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="email" class="input-group-text">
-                                    Email <span style="color:red">*</span>
-                                </label>
-                                <input type="email" class="form-control" name="email" id="email" value="{{ details_list.email }}" required>
+                            <div class="relative mb-3">
+                                <label for="email" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="email" class="form-control asterisk-inside" name="email" id="email" value="{{ details_list.email }}" placeholder="Enter Email" title="Enter Email">
                             </div>
-                            <p id="email_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="phone_number" class="input-group-text">
-                                    Phone Number <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}"
-                                       required>
+                            <div class="relative mb-3">
+                                <label for="phone_number" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}" placeholder="Enter Phone Number" title="Enter Phone Number">
                             </div>
-                            <p id="phone_number_msg" style="color: red"></p>
                             <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
                             <div class="d-grid gap-2">
                                 <input type="submit" class="btn btn-warning" value="Update">
@@ -80,54 +82,39 @@
         // set default value of title
         title.value = {{ details_list.title_id }};
 
-        //validate name, email and phone number
-        const first_name_msg = document.getElementById('first_name_msg');
-        const last_name_msg = document.getElementById('last_name_msg');
-        const email_msg = document.getElementById('email_msg');
-        const phone_number_msg = document.getElementById('phone_number_msg');
-        const first_name = document.getElementById('first_name');
-        const last_name = document.getElementById('last_name')
-        const email = document.getElementById('email');
-        const phone_number = document.getElementById('phone_number');
-
-        function validateForm() {
-            const namePattern = /^[a-zA-Z]+$/;
-            const phonePattern = /^\d{7,11}$/;
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            if (!namePattern.test(first_name.value)) {
-                first_name_msg.innerText = "First name should contain only letters.";
-                first_name.classList.add("is-invalid");
-                return false;
-            } else {
-                first_name.classList.remove("is-invalid");
-                first_name_msg.innerText = "";
+        $("#myForm1").validate({
+            rules: {
+                title: {
+                    required: true
+                },
+                first_name: {
+                    required: true
+                },
+                last_name: {
+                    required: true
+                },
+                email: {
+                    required: true
+                },
+                phone_number: {
+                    required: true
+                },
+            },
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('text-danger');
+                error.insertAfter(element);
+                element.addClass('is-invalid');
+            },
+            success: function (label, element) {
+                $(element).removeClass('is-invalid');
             }
-            if (!namePattern.test(last_name.value)) {
-                last_name_msg.innerText = "Last name should contain only letters.";
-                last_name.classList.add("is-invalid");
-                return false;
-            } else {
-                last_name.classList.remove("is-invalid");
-                last_name_msg.innerText = "";
+        });
+        $('#myForm1').on('submit', function (event) {
+            event.preventDefault();
+            if ($(this).valid()) {
+                document.getElementById("myForm1").submit();
             }
-            if (!emailPattern.test(email.value)) {
-                email.classList.add("is-invalid");
-                email_msg.innerText = "Invalid email. Please enter the correct format (Example: nicholas123@gmail.com).";
-                return false;
-            } else {
-                email.classList.remove("is-invalid");
-                email_msg.innerText = "";
-            }
-            if (!phonePattern.test(phone_number.value)) {
-                phone_number.classList.add("is-invalid");
-                phone_number_msg.innerText = "Invalid phone number. Please enter 7 to 11 numbers only.";
-                return false;
-            } else {
-                phone_number.classList.remove("is-invalid");
-                phone_number_msg.innerText = "";
-            }
-            //submit form if only all validations are passed
-            return true;
-        }
+        });
     </script>
 {% endblock %}

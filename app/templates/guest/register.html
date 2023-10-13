@@ -64,60 +64,47 @@
     <div class="container">
         <div class="form-section">
             <h2 class="mb-4" style="color: brown;">Customer Sign Up</h2>
-
-            <form class="mt-4" action="{{ url_for('register') }}" method="post">
-
+            <form class="mt-4" action="{{ url_for('register') }}" method="post" id="myForm1">
                 <div class="row g-6">
-                    <div class="col-md-5 extra-margin">
+                    <div class="col-md-5 col-sm-12 extra-margin">
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <input type="email" class="form-control asterisk-inside" id="email" name="email" placeholder="Enter your email"
-                                   value="{{ request.form['email'] }}" required>
-
+                            <input type="email" class="form-control asterisk-inside" id="email" name="email" placeholder="Enter your email" value="{{ request.form['email'] }}" >
                         </div>
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <input type="password" class="form-control asterisk-inside" id="password" name="password" placeholder="Enter your password"
-                                   value="{{ request.form['password'] }}" required>
-
+                            <input type="password" class="form-control asterisk-inside" id="password" name="password" placeholder="Enter your password"  value="{{ request.form['password'] }}" >
                         </div>
-
-                        <div class="mb-3 relative" style="margin-bottom: 5px;"> <!-- Reduced margin-bottom -->
+                        <!-- Reduced margin-bottom -->
+                        <div class="mb-3 relative" style="margin-bottom: 5px;">
                             <span class="asterisk mt-2">*</span>
-                            <input type="password" class="form-control asterisk-inside" id="confirm_password" name="confirm_password"
-                                   placeholder="Confirm your password" value="{{ request.form['confirm_password'] }}" required>
-                            <div id="password-strength" class="tip-text" style="margin-top: 5px;"> <!-- Reduced margin-top -->
+                            <input type="password" class="form-control asterisk-inside" id="confirm_password" name="confirm_password" placeholder="Confirm your password" value="{{ request.form['confirm_password'] }}" >
+                            <!-- Reduced margin-top -->
+                            <div id="password-strength" class="tip-text" style="margin-top: 5px;">
                                 Password has to be at least 8 characters in length...
                             </div>
                         </div>
-
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="text" class="form-control asterisk-inside" id="given_name" name="given_name" placeholder="Enter your given name"
-                                   value="{{ request.form['given_name'] }}" required>
-
+                                   value="{{ request.form['given_name'] }}" >
                         </div>
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="text" class="form-control asterisk-inside" id="surname" name="surname" placeholder="Enter your surname"
-                                   value="{{ request.form['surname'] }}" required>
+                                   value="{{ request.form['surname'] }}" >
                             <div id="name-char-limit" class="tip-text" style="margin-top: 5px;">The name fields can only accept 30 characters combined
                                 (characters left: <span id="char-count">30</span>)
                             </div>
                         </div>
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="tel" class="form-control asterisk-inside" id="phone_number" name="phone_number"
-                                   placeholder="Enter your phone number" value="{{ request.form['phone_number'] }}" required>
+                                   placeholder="Enter your phone number" value="{{ request.form['phone_number'] }}" >
                         </div>
-
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <select class="form-select asterisk-inside" name="region_id" id="region_id" onchange="update_region()" required>
+                            <select class="form-select asterisk-inside" name="region_id" id="region_id" onchange="update_region()" >
                                 <option value="" {% if not request.form['region_id'] %}selected="selected"{% endif %} disabled>Choose Region</option>
                                 {% for region in regions %}
                                     <option value="{{ region['region_id'] }}"
@@ -125,28 +112,22 @@
                                 {% endfor %}
                             </select>
                         </div>
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <select class="form-select asterisk-inside" name="city_id" id="city_id" required>
+                            <select class="form-select asterisk-inside" name="city_id" id="city_id" >
                                 <option value="" selected="selected" disabled>Choose city</option>
                             </select>
                         </div>
-
-
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="text" class="form-control asterisk-inside" id="address" name="address" placeholder="Enter your address"
-                                   value="{{ request.form['address'] }}" required>
+                                   value="{{ request.form['address'] }}" >
                         </div>
-
-
                     </div>
-
-                    <div class="col-md-6"> <!-- Right Column -->
+                    <div class="col-md-6 col-sm-12"> <!-- Right Column -->
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <select class="form-select asterisk-inside" id="title" name="title" value="{{ request.form['title'] }}" required>
+                            <select class="form-select asterisk-inside" id="title" name="title" value="{{ request.form['title'] }}" >
                                 <option value="" {% if not request.form['title'] %}selected="selected"{% endif %} disabled>Choose Title</option>
                                 {% for title in titles %}
                                     <option value="{{ title['title_id'] }}"
@@ -156,39 +137,35 @@
                         </div>
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
-                            <select class="form-select asterisk-inside" id="question" name="question" value="{{ request.form['question'] }}" required>
+                            <select class="form-select asterisk-inside" id="question" name="question" value="{{ request.form['question'] }}" >
                                 <option selected="selected" disabled>Choose A Security Question</option>
                                 {% for question in questions %}
                                     <option value="{{ question['question_id'] }}">{{ question['question'] }}</option>
                                 {% endfor %}
                             </select>
-
                         </div>
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="text" class="form-control asterisk-inside" id="answer" name="answer" placeholder="Enter your answer"
-                                   value="{{ request.form['answer'] }}" required>
-
+                                   value="{{ request.form['answer'] }}" >
                         </div>
                         <div class="mb-3 relative">
-                            <div class="mb-1 form-check form-check-inline small-checkbox"> <!-- Reduced margin-bottom here -->
-                                <input type="checkbox" class="form-check-input" id="agreeCheckbox" required>
+                            <!-- Reduced margin-bottom here -->
+                            <div class="mb-1 form-check form-check-inline small-checkbox">
                                 <label class="form-check-label tip-text" for="agreeCheckbox">Yes, I agree to receive exclusive offers, updates, and
                                     promotions.</label>
+                                <input type="checkbox" class="form-check-input" id="agreeCheckbox" name="agreeCheckbox">
                             </div>
                             <div class="mb-3 form-check form-check-inline small-checkbox" style="margin-top: 0;">
-                                <input type="checkbox" class="form-check-input" id="readAgreementCheckbox" required>
                                 <label class="form-check-label tip-text" for="readAgreementCheckbox">I have read and agree to the <a
                                         href="#">Terms and Conditions</a> of the Online Booking Request.</label>
+                                <input type="checkbox" class="form-check-input" id="readAgreementCheckbox" name="readAgreementCheckbox">
                             </div>
                         </div>
-
                         <div class="text-end">
                             <button type="submit" class="btn btn-danger" style="background-color: brown; color: rgb(243, 238, 238);">REQUEST TO SIGN UP
                             </button>
                         </div>
-
-
                     </div>
                 </div>
             </form>
@@ -200,28 +177,6 @@
 
 {% block myjs %}
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let form = document.querySelector('form');
-
-            form.addEventListener('submit', function (event) {
-
-                // New Zealand Phone Number Validation
-                let phoneNumber = document.getElementById('phone_number').value;
-                let phonePattern = /^((\(\d{3}\) ?)|(\d{3}[-\s]?))?\d{3}[-\s]?\d{4}$/; // New Zealand Phone Number Pattern
-
-                if (!phonePattern.test(phoneNumber)) {
-                    alert('Please enter a valid New Zealand phone number e.g. (021) 123 4567 or 021 123 4567');
-                    event.preventDefault();
-                }
-
-                // Address Validation
-                let address = document.getElementById('address').value;
-                if (address.trim() === '') {
-                    alert('Address is required');
-                    event.preventDefault();
-                }
-            });
-        });
         const city_list = JSON.parse('{{ cities|tojson }}');
         const region = document.getElementById('region_id');
         const city = document.getElementById('city_id');
@@ -241,6 +196,76 @@
                 }
             }
         }
+
+        $("#myForm1").validate({
+            rules: {
+                email: {
+                    required: true
+                },
+                password: {
+                    required: true
+                },
+                confirm_password: {
+                    required: true
+                },
+                given_name: {
+                    required: true
+                },
+                surname: {
+                    required: true
+                },
+                phone_number: {
+                    required: true
+                },
+                region_id: {
+                    required: true
+                },
+                city_id: {
+                    required: true
+                },
+                address: {
+                    required: true
+                },
+                title: {
+                    required: true
+                },
+                question: {
+                    required: true
+                },
+                answer: {
+                    required: true
+                },
+                agreeCheckbox: {
+                    required: true
+                },
+                readAgreementCheckbox: {
+                    required: true
+                },
+            },
+            messages: {
+                agreeCheckbox: {
+                    required: 'You must agree to the terms and conditions',
+                },
+                readAgreementCheckbox: {
+                    required: 'You must agree to the terms and conditions',
+                },
+            },
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('text-danger');
+                error.insertAfter(element);
+                element.addClass('is-invalid');
+            },
+            success: function (label, element) {
+                $(element).removeClass('is-invalid');
+            }
+        });
+        $('#myForm1').on('submit', function (event) {
+            event.preventDefault();
+            if ($(this).valid()) {
+                document.getElementById("myForm1").submit();
+            }
+        });
     </script>
 {% endblock %}
 

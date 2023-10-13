@@ -21,7 +21,8 @@ CREATE TABLE IF NOT EXISTS `category`
 (
     `category_id` int(11)      NOT NULL AUTO_INCREMENT,
     `name`        varchar(255) NOT NULL,
-    PRIMARY KEY (`category_id`)
+    PRIMARY KEY (`category_id`),
+    UNIQUE KEY `name` (`name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
@@ -365,7 +366,8 @@ CREATE TABLE IF NOT EXISTS `sub_category`
     `category_id` int(11)      NOT NULL,
     `name`        varchar(255) NOT NULL,
     PRIMARY KEY (`sub_id`),
-    KEY `category_id` (`category_id`)
+    KEY `category_id` (`category_id`),
+    UNIQUE KEY `name` (`name`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
