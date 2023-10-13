@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+
+{% endblock %}
+
+
+{% block mycss %}
+<style>
+    #navigation-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    p {
+        text-align: center;
+    }
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        background-color: #e5e5e5;
+        border-bottom: 1px solid #1D1912;
+        font-weight: bold;
+    }
+    .header-cell {
+        text-align: center;
+    }
+    .header-cell:nth-child(1) {
+        width: 14px;
+        margin-left: 22px;
+
+    }
+    .header-cell:nth-child(2) {
+        width: 80px;
+        
+    }
+    .header-cell:nth-child(3) {
+        width: 70px;
+        
+    }
+    .header-cell:nth-child(4) {
+        width: 70px;
+        
+    }
+    .header-cell:nth-child(5) {
+        width: 3px;  
+
+    }
+    .header-cell:nth-child(6) {
+        width: 160px; 
+
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-8" style="text-align: center">
+                <br>
+                <h1>Maintenance List</h1>
+                <br></br>
+            </div>
+        </div>
+    </div>
+    <br></br>
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <form action="{{ url_for('maintenance_list') }}" method="post">
+                <br>
+                {% if maintenance_list %}
+                    <div class="table-header">
+                        <div class="header-cell">Instance</div>
+                        <div class="header-cell">Start Date</div>
+                        <div class="header-cell">End Date</div>
+                        <div class="header-cell">Type</div>
+                        <div class="header-cell">Status</div>
+                        <div class="header-cell">Notes</div>
+                        <div class="header-cell"></div>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            {% for maintenance in maintenance_list %}
+                                <div class="row">
+                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.instance_id }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.start_date }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.end_date }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.type }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.status }}
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                        {{ maintenance.notes }}
+                                    </div>
+                                    {% if maintenance.status != 'Completed' %}
+                                        <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                            <input type="hidden" name="instance_id" id="instance_id" value="{{ maintenance.instance_id }}">
+                                            <button type="submit" class="btn btn-primary">
+                                                Available
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <p>There is no equipment for pickup</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block myjs %}
+{% endblock %}
