@@ -57,7 +57,7 @@
                             </div>
                             <div class="relative mb-3">
                                 <label for="email" class="asterisk mt-2"><span style="color:red">*</span></label>
-                                <input type="email" class="form-control asterisk-inside" name="email" id="email" value="{{ details_list.email }}" placeholder="Enter Email" title="Enter Email">
+                                <input type="email" class="form-control asterisk-inside" name="email" id="email" value="{{ details_list.email }}" placeholder="Enter Email">
                             </div>
                             <div class="relative mb-3">
                                 <label for="phone_number" class="asterisk mt-2"><span style="color:red">*</span></label>
@@ -82,22 +82,37 @@
         // set default value of title
         title.value = {{ details_list.title_id }};
 
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
+
+        $.validator.addMethod("phoneNZ", function (value, element) {
+            return this.optional(element) || /^02\d{7,10}$/.test(value);
+        }, "Please enter a valid New Zealand mobile number");
+
         $("#myForm1").validate({
             rules: {
-                title: {
-                    required: true
-                },
-                first_name: {
-                    required: true
-                },
-                last_name: {
-                    required: true
-                },
+                title: "required",
+                first_name: "required",
+                last_name: "required",
                 email: {
-                    required: true
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
                 },
                 phone_number: {
-                    required: true
+                    required: true,
+                    phoneNZ: true
+                },
+            },
+            messages: {
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                phone_number: {
+                    required: "Please enter the phone number",
+                    phoneNZ: "Please enter a valid New Zealand mobile number"
                 },
             },
             errorElement: 'div',

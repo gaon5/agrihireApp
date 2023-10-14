@@ -53,18 +53,18 @@
             <div class="col-md-8">
                 <div class="card p-4">
                     <h3>Make an Enquiry</h3>
-                    <form name="contactForm" action="{{ url_for('contact') }}" method="post" onsubmit="return validateForm()" class="mt-4">
+                    <form name="contactForm" action="{{ url_for('contact') }}" method="post" id="myForm1" class="mt-4">
                         <div class="mb-3">
-                            <input type="text" name="first_name" class="form-control" placeholder="* First Name" required>
+                            <input type="text" name="first_name" class="form-control" placeholder="* First Name">
                         </div>
                         <div class="mb-3">
-                            <input type="text" name="last_name" class="form-control" placeholder="* Last Name" required>
+                            <input type="text" name="last_name" class="form-control" placeholder="* Last Name">
                         </div>
                         <div class="mb-3">
-                            <input type="email" name="email" class="form-control" placeholder="* Email Address" required>
+                            <input type="email" name="email" class="form-control" placeholder="* Email Address">
                         </div>
                         <div class="mb-3">
-                            <input type="tel" name="phone" class="form-control" placeholder="* Phone Number" required>
+                            <input type="tel" name="phone" class="form-control" placeholder="* Phone Number">
                         </div>
                         <div class="mb-3">
                             <input type="text" name="location" class="form-control" placeholder="Location">
@@ -77,7 +77,7 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <textarea name="enquiry_details" class="form-control" placeholder="* Your Enquiry" required></textarea>
+                            <textarea name="enquiry_details" class="form-control" placeholder="* Your Enquiry"></textarea>
                         </div>
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">SEND ENQUIRY</button>
@@ -111,33 +111,55 @@
 
 {% block myjs %}
     <script>
-        function validateForm() {
-            const firstName = document.forms["contactForm"]["first_name"].value.trim();
-            const lastName = document.forms["contactForm"]["last_name"].value.trim();
-            const email = document.forms["contactForm"]["email"].value.trim();
-            const phone = document.forms["contactForm"]["phone"].value.trim();
-            const details = document.forms["contactForm"]["enquiry_details"].value.trim();
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
 
-            // Check if fields are empty
-            if (firstName === "" || lastName === "" || email === "" || phone === "" || details === "") {
-                alert("All required fields must be filled out");
-                return false;
-            }
+        $.validator.addMethod("phoneNZ", function (value, element) {
+            return this.optional(element) || /^02\d{7,10}$/.test(value);
+        }, "Please enter a valid New Zealand mobile number");
 
-            // Email validation
-            var emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            if (!emailRegex.test(email)) {
-                alert("Please enter a valid email address");
-                return false;
+        $("#myForm1").validate({
+            rules: {
+                first_name: "required",
+                last_name: "required",
+                email: {
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+                },
+                phone: {
+                    required: true,
+                    phoneNZ: true
+                },
+                enquiry_type: "required",
+                enquiry_details: "required",
+            },
+            messages: {
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                phone_number: {
+                    required: "Please enter the phone number",
+                    phoneNZ: "Please enter a valid New Zealand mobile number"
+                },
+            },
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('text-danger');
+                error.insertAfter(element);
+                element.addClass('is-invalid');
+            },
+            success: function (label, element) {
+                $(element).removeClass('is-invalid');
             }
-
-            // Phone number validation (basic, only checks for numbers and common separators)
-            var phoneRegex = /^[0-9\-+()\s]+$/;
-            if (!phoneRegex.test(phone)) {
-                alert("Please enter a valid phone number");
-                return false;
+        });
+        $('#myForm1').on('submit', function (event) {
+            event.preventDefault();
+            if ($(this).valid()) {
+                document.getElementById("myForm1").submit();
             }
-            return true;
-        }
+        });
     </script>
 {% endblock %}

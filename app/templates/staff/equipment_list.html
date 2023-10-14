@@ -52,7 +52,7 @@
                                 <p class="text-muted mb-0">{{ item.sub_name }}</p>
                             </td>
                             <td>
-                                <img src="{{ url_for('static', filename=item.image_url) }}" class="img-thumbnail" width="100" height="100">
+                                <img src="{{ url_for('static', filename=item.image_url) }}" alt="" class="img-thumbnail" width="100" height="100">
                             </td>
                             <td>
                                 <a href="{{ url_for('more_detail', detail_id=item.equipment_id) }}">{{ item.e_name }}</a>

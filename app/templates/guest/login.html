@@ -71,13 +71,37 @@
 
 {% block myjs %}
     <script>
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
+
+        // Add the 'pwcheck' custom validation method
+        $.validator.addMethod("pwcheck", function (value) {
+            return /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value);
+        }, "Password must contain uppercase and lowercase letters and numbers.");
+
         $("#myForm1").validate({
             rules: {
                 email: {
-                    required: true
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
                 },
                 password: {
-                    required: true
+                    required: true,
+                    minlength: 8,
+                    pwcheck: true
+                },
+            },
+            messages: {
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                password: {
+                    required: "Please enter password",
+                    minlength: "Password needs to be at least 8 characters",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
                 },
             },
             errorElement: 'div',

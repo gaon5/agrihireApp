@@ -66,17 +66,17 @@
                         <!-- Length -->
                         <div class="relative mb-3">
                             <label for="length" class="asterisk mt-2"><span style="color:red">*</span></label>
-                            <input type="text" class="form-control asterisk-inside" name="length" id="length" value="{{ item.length }}" autocomplete="off" pattern="^\d+(\.\d+)?$" placeholder="Enter Length">
+                            <input type="number" class="form-control asterisk-inside" name="length" id="length" value="{{ item.length }}" autocomplete="off" pattern="^\d+(\.\d+)?$" placeholder="Enter Length (CM)">
                         </div>
                         <!-- Width -->
                         <div class="relative mb-3">
                             <label for="width" class="asterisk mt-2"><span style="color:red">*</span></label>
-                            <input type="number" class="form-control asterisk-inside" name="width" id="width" value="{{ item.width }}" autocomplete="off" placeholder="Enter Width">
+                            <input type="number" class="form-control asterisk-inside" name="width" id="width" value="{{ item.width }}" autocomplete="off" placeholder="Enter Width (CM)">
                         </div>
                         <!-- Height -->
                         <div class="relative mb-3">
                             <label for="height" class="asterisk mt-2"><span style="color:red">*</span></label>
-                            <input type="number" class="form-control asterisk-inside" name="height" id="height" value="{{ item.height }}" autocomplete="off" placeholder="Enter Height">
+                            <input type="number" class="form-control asterisk-inside" name="height" id="height" value="{{ item.height }}" autocomplete="off" placeholder="Enter Height (CM)">
                         </div>
                         <!-- Description -->
                         <div class="relative mb-3">
@@ -103,30 +103,16 @@
     <script>
         $("#myForm1").validate({
             rules: {
-                ename: {
-                    required: true
-                },
-                price: {
-                    required: true
-                },
+                ename: "required",
+                price: "required",
                 stock: {
                     required: true
                 },
-                length: {
-                    required: true
-                },
-                width: {
-                    required: true
-                },
-                height: {
-                    required: true
-                },
-                description: {
-                    required: true
-                },
-                detail: {
-                    required: true
-                },
+                length: "required",
+                width: "required",
+                height: "required",
+                description: "required",
+                detail: "required",
             },
             errorElement: 'div',
             errorPlacement: function (error, element) {

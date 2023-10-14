@@ -40,7 +40,7 @@
         }
 
         .header-cell:nth-child(3) {
-            width: 0px
+            width: 0
         }
 
         .header-cell:nth-child(4) {
@@ -60,7 +60,7 @@
             </div>
         </div>
     </div>
-    <br></br>
+    <br>
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-5">
@@ -91,7 +91,7 @@
             </div>
         </div>
     </div>
-    <br></br>
+    <br>
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-5">
@@ -100,7 +100,7 @@
                         <h5>Change Main Category</h5><br>
                         <form action="{{ url_for('manage_subcategory') }}" method="post">
                             <div class="input-group mb-3">
-                                <select class="form-control" name="sub_category_id" id="sub_category_id" onchange="update_category()" required>
+                                <select class="form-control" name="sub_category_id" id="sub_category_id" required>
                                     <option value="" selected="selected" disabled>Choose a sub category</option>
                                     {% for subcategory in subcategory_list %}
                                         <option value="{{ subcategory.sub_id }}">{{ subcategory.sub }} ({{ subcategory.main }})</option>
@@ -126,7 +126,7 @@
             </div>
         </div>
     </div>
-    <br></br>
+    <br>
     <div class="row justify-content-center">
         <div class="col-md-4">
             <br>

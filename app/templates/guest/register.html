@@ -197,52 +197,72 @@
             }
         }
 
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
+
+        // Add the 'pwcheck' custom validation method
+        $.validator.addMethod("pwcheck", function (value) {
+            return /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value);
+        }, "Password must contain uppercase and lowercase letters and numbers.");
+
+        $.validator.addMethod("phoneNZ", function (value, element) {
+            return this.optional(element) || /^02\d{7,10}$/.test(value);
+        }, "Please enter a valid New Zealand mobile number");
+
         $("#myForm1").validate({
             rules: {
                 email: {
-                    required: true
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
                 },
                 password: {
-                    required: true
+                    required: true,
+                    minlength: 8,
+                    pwcheck: true
                 },
                 confirm_password: {
-                    required: true
+                    required: true,
+                    minlength: 8,
+                    equalTo: "#password",
+                    pwcheck: true
                 },
-                given_name: {
-                    required: true
-                },
-                surname: {
-                    required: true
-                },
+                given_name: "required",
+                surname: "required",
                 phone_number: {
-                    required: true
+                    required: true,
+                    phoneNZ: true
                 },
-                region_id: {
-                    required: true
-                },
-                city_id: {
-                    required: true
-                },
-                address: {
-                    required: true
-                },
-                title: {
-                    required: true
-                },
-                question: {
-                    required: true
-                },
-                answer: {
-                    required: true
-                },
-                agreeCheckbox: {
-                    required: true
-                },
-                readAgreementCheckbox: {
-                    required: true
-                },
+                region_id: "required",
+                city_id: "required",
+                address: "required",
+                title: "required",
+                question: "required",
+                answer: "required",
+                agreeCheckbox: "required",
+                readAgreementCheckbox: "required",
             },
             messages: {
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                password: {
+                    required: "Please enter password",
+                    minlength: "Password needs to be at least 8 characters",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
+                confirm_password: {
+                    required: "Please enter new password again",
+                    minlength: "Confirm password requires at least 8 characters",
+                    equalTo: "The passwords entered twice are inconsistent",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
+                phone_number: {
+                    required: "Please enter the phone number",
+                    phoneNZ: "Please enter a valid New Zealand mobile number"
+                },
                 agreeCheckbox: {
                     required: 'You must agree to the terms and conditions',
                 },
