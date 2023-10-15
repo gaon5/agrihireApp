@@ -2,7 +2,7 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 import math
 import re
-from app import app, check_permissions, sql_function, bcrypt
+from app import app, check_permissions, sql_function
 
 
 @app.route('/equipments', defaults={'category': None, 'sub': None})
@@ -128,7 +128,7 @@ def equipment_detail(category, sub, detail_id):
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
 def user_wishlist():
-    breadcrumbs = [{"text": "Equipments", "url": "/equipments"}, {"text": "Wishlist", "url": "/user_wishlist"}]
+    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Wishlist", "url": "/user_wishlist"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -174,7 +174,7 @@ def remove_favorite(equipment_id):
 
 @app.route('/bookings')
 def bookings():
-    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Bookings", "url": "/bookings"}]
+    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Bookings", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -186,13 +186,13 @@ def bookings():
         return redirect(url_for('index'))
 
 
-@app.route('/delete_booking/<int:instance_id>/<int:hire_id>', methods=['POST'])
-def delete_booking(instance_id, hire_id):
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
+@app.route('/delete_booking', methods=['POST'])
+def delete_booking():
     session['msg'] = session['error_msg'] = ''
+    instance_id = request.form.get('instance_id')
+    hire_id = request.form.get('hire_id')
     if 'loggedIn' in session:
-        sql_function.delete_booking(instance_id, hire_id)
+        sql_function.sql_delete_booking(instance_id, hire_id)
         session['msg'] = "Booking deleted successfully"
         return redirect(url_for('bookings'))
     else:
@@ -200,12 +200,11 @@ def delete_booking(instance_id, hire_id):
         return redirect(url_for('index'))
 
 
-@app.route('/update_booking/<int:instance_id>', methods=['POST'])
-def update_booking(instance_id):
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
+@app.route('/update_booking', methods=['POST'])
+def update_booking():
     session['msg'] = session['error_msg'] = ''
     end_date = request.form.get('end_date')
+    instance_id = request.form.get('instance_id')
     if 'loggedIn' in session:
         sql_function.update_booking_end_date(instance_id, end_date)
         session['msg'] = "Booking updated successfully"
@@ -217,13 +216,12 @@ def update_booking(instance_id):
 
 @app.route('/faq')
 def faq():
-    contact_details = "support@example.com"  # This can also come from a database or configuration.
-    return render_template('customer/faq.html', contact=contact_details)
+    return render_template('customer/faq.html')
 
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    breadcrumbs = [{"text": "contact", "url": "/contact"}]
+    breadcrumbs = [{"text": "Contact Us", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -238,52 +236,51 @@ def contact():
         enquiry_details = request.form.get('enquiry_details')
 # send to database
         last_msg = "'Your enquiry has been submitted successfully!'"
-        return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
-    return render_template('customer/contact.html')
+    return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/customer_cart')
 def customer_cart():
+    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Cart", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    if 'loggedIn' in session:
-        user_id = session['user_id']
-        equipment_list = sql_function.my_cart(user_id)
-        total_amount = 0
-        for equipment in equipment_list:
-            start_time = equipment['start_time']
-            end_time = equipment['end_time']
-            # 计算时间差
-            time_diff = end_time - start_time
-
-            # 获取时间差的总秒数
-            total_seconds = time_diff.total_seconds()
-
-            # 计算具体的天数、小时数、分钟数
-            days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
-            hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-            minutes, _ = divmod(remainder, 60)
-            if 0 < hours <= 4:
-                days = days + 0.75
-            elif hours == 0:
-                days = days
-            else:
-                days = days + 1
-            unit_price = float(equipment['price'])
-            total_item_price = unit_price * days
-            equipment['price'] = total_item_price
-            total_amount = total_amount + total_item_price
-            print(type(equipment['price']))
-            print(f"{days} days, {hours} hours, {minutes} minutes")
-            max_amount = sql_function.max_count(equipment['equipment_id'])
-            equipment['count'] = max_amount
-
-        return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, msg=last_msg,
-                               error_msg=last_error_msg)
-    else:
+    if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+    user_id = session['user_id']
+    equipment_list = sql_function.my_cart(user_id)
+    total_amount = 0
+    for equipment in equipment_list:
+        start_time = equipment['start_time']
+        end_time = equipment['end_time']
+        # 计算时间差
+        time_diff = end_time - start_time
+
+        # 获取时间差的总秒数
+        total_seconds = time_diff.total_seconds()
+
+        # 计算具体的天数、小时数、分钟数
+        days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+        hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+        minutes, _ = divmod(remainder, 60)
+        if 0 < hours <= 4:
+            days = days + 0.75
+        elif hours == 0:
+            days = days
+        else:
+            days = days + 1
+        unit_price = float(equipment['price'])
+        total_item_price = unit_price * days
+        equipment['price'] = total_item_price
+        total_amount = total_amount + total_item_price
+        print(type(equipment['price']))
+        print(f"{days} days, {hours} hours, {minutes} minutes")
+        max_amount = sql_function.max_count(equipment['equipment_id'])
+        equipment['count'] = max_amount
+
+    return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
+                           error_msg=last_error_msg)
 
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
@@ -291,45 +288,38 @@ def add_to_cart():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     equipment_id = request.form.get('equipment_id')
-    # print(request.form)
-    last_error_msg = session.get('error_msg', '')
-    last_msg = session.get('msg', '')
     session['msg'] = session['error_msg'] = ''
     previous_url = str(request.referrer)
     if not (start_time and end_time and equipment_id):
         session['error_msg'] = 'Please select the required date and time.'
-    else:
-        if 'loggedIn' in session:
-            user_id = session['user_id']
-            count = 1
-            try:
-                start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-                end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-                # print(start_time)
-                # print(end_time)
-                if start_time >= end_time:
-                    session['error_msg'] = 'Start time must be before end time.'
-                    return redirect(previous_url)
-                else:
-                    sql_function.add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time)
-                    session['msg'] = "Add to cart successfully"
-                    return redirect(previous_url)
-            except ValueError:
-                session['error_msg'] = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
-                return redirect(previous_url)
+        return redirect(previous_url)
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    try:
+        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+        # print(start_time, end_time)
+        if start_time >= end_time:
+            session['error_msg'] = 'Start time must be before end time.'
+            return redirect(previous_url)
         else:
-            session['error_msg'] = 'You are not logged in, please login first.'
-            return redirect(url_for('index'))
-    return redirect(previous_url)
+            sql_function.add_equipment_into_cart(session['user_id'], equipment_id, 1, start_time, end_time)
+            session['msg'] = "Add to cart successfully"
+            return redirect(previous_url)
+    except ValueError:
+        session['error_msg'] = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
+        return redirect(previous_url)
 
 
-@app.route('/delete_item', methods=['get'])
+@app.route('/delete_item', methods=['POST'])
 def delete_item():
-    last_error_msg = session.get('error_msg', '')
-    last_msg = session.get('msg', '')
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
     session['msg'] = session['error_msg'] = ''
-    cart_item_id = request.args.get('cart_item_id')
-    sql_function.delete_item(cart_item_id)
+    cart_item_id = request.form.get('cart_item_id')
+    sql_function.sql_delete_item(cart_item_id)
     session['msg'] = "Delete successfully"
     previous_url = str(request.referrer)
     return redirect(previous_url)
@@ -337,21 +327,20 @@ def delete_item():
 
 @app.route('/edit_details', methods=['post'])
 def edit_details():
-    if 'loggedIn' in session:
-        user_id = session['user_id']
-        data = request.get_json()
-        # 从数据中提取特定的值
-        cart_item_id = data.get('cart_item_id')
-        quantity = data.get('quantity')
-        start_time = data.get('start_time')
-        end_time = data.get('end_time')
-
-        sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
-        session['msg'] = "Update successfully"
-        return redirect(url_for('customer_cart'))
-    else:
+    if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+    user_id = session['user_id']
+    data = request.get_json()
+    # 从数据中提取特定的值
+    cart_item_id = data.get('cart_item_id')
+    quantity = data.get('quantity')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
+
+    sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
+    session['msg'] = "Update successfully"
+    return redirect(url_for('customer_cart'))
 
 
 @app.route('/payment', methods=['POST'])

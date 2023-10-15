@@ -33,9 +33,11 @@
             transform: translateY(-50%); /* Centering adjustment */
             pointer-events: none; /* Ensure clicks 'pass through' to the input element */
         }
+
         .asterisk-inside {
             padding-left: 20px; /* Adjust as needed */
         }
+
         .btn_ {
             font-size: 14px;
             padding: 3px 6px;
@@ -52,13 +54,25 @@
                     <li style="margin: 20px 0;">
                         <div>
                             <input type="radio" style="display: none">
-                            <label class="label_style" for="" onclick="window.location.href = '/admin/manage_customer'">Manage Customer</label>
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_customer') }}'">Manage Customer</label>
                         </div>
                     </li>
                     <li style="margin: 20px 0;">
                         <div>
                             <input type="radio" style="display: none">
-                            <label class="label_style" for="" onclick="window.location.href = '/admin/manage_staff'">Manage Staff</label>
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_staff') }}'">Manage Staff</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_category') }}'">Manage Category</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_subcategory') }}'">Manage Sub Category</label>
                         </div>
                     </li>
                     <li style="margin: 20px 0;">
@@ -97,7 +111,7 @@
                 </ul>
             </div>
             <div class="col-md-9 col-sm-12">
-                <dev class="d-flex">
+                <div class="d-flex">
                     <form class="d-flex" action="{{ url_for('manage_staff') }}" method="get">
                         <div class="form-group">
                             <input type="text" class="form-control mx-3" placeholder="Search" name="search" {% if staff_search %}value="{{ staff_search }}"{% endif %}>
@@ -109,7 +123,7 @@
                     <button type="button" class="btn btn-primary mx-3" data-bs-toggle="modal" data-bs-target="#manage_Modal" onclick="showLink(-1)">
                         Add Staff
                     </button>
-                </dev>
+                </div>
                 <table class="table table-hover mt-3">
                     <thead>
                     <tr>
@@ -134,7 +148,7 @@
                                         onclick="showLink({{ item['user_id'] }})">Edit
                                 </button>
                                 <button type="button" class="btn btn-danger btn_" data-bs-toggle="modal" data-bs-target="#manage_Modal2"
-                                        onclick="set_password({{ item['user_id'] }})">Set Password
+                                        onclick="set_password_({{ item['user_id'] }})">Set Password
                                 </button>
                                 <button type="button" class="btn btn-danger btn_" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
                                         onclick="confirmDelete({{ item['user_id'] }})">Delete
@@ -181,7 +195,11 @@
                                 </div>
                                 <div class="relative mb-3">
                                     <label for="password" class="asterisk mt-2"><span style="color:red">*</span></label>
-                                    <input type="text" class="form-control asterisk-inside" name="password" id="password" placeholder="Enter Password" title="Enter Password">
+                                    <input type="password" class="form-control asterisk-inside" name="password" id="password" placeholder="Enter Password" title="Enter Password">
+                                </div>
+                                <div class="relative mb-3">
+                                    <label for="confirm_password" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                    <input type="password" class="form-control asterisk-inside" name="confirm_password" id="confirm_password" placeholder="Confirm Password" title="Confirm Password">
                                 </div>
                                 <div class="relative mb-3">
                                     <label for="first_name" class="asterisk mt-2"><span style="color:red">*</span></label>
@@ -193,7 +211,7 @@
                                 </div>
                                 <div class="relative mb-3">
                                     <label for="email" class="asterisk mt-2"><span style="color:red">*</span></label>
-                                    <input type="email" class="form-control asterisk-inside" name="email" id="email" placeholder="Enter Email" title="Enter Email">
+                                    <input type="email" class="form-control asterisk-inside" name="email" id="email" placeholder="Enter Email">
                                 </div>
                                 <div class="relative mb-3">
                                     <label for="phone_number" class="asterisk mt-2"><span style="color:red">*</span></label>
@@ -201,7 +219,7 @@
                                 </div>
                                 <input type="hidden" id="edit_user_id" name="user_id">
                                 <div class="d-grid gap-2">
-                                    <input type="submit" class="btn btn-warning" value="Update">
+                                    <input type="submit" class="btn btn-warning" value="Submit">
                                 </div>
                             </form>
                         </div>
@@ -225,13 +243,16 @@
                         <div class="container w-75">
                             <form action="{{ url_for('admin_password') }}" method="post" id="myForm2">
                                 <div class="relative mb-3">
-                                    <label for="password" class="asterisk mt-2"><span style="color:red">*</span></label>
-                                    <input type="text" class="form-control asterisk-inside" name="password" id="password" placeholder="Enter Password"
-                                           title="Enter Password">
+                                    <label for="set_password" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                    <input type="text" class="form-control asterisk-inside" name="set_password" id="set_password" placeholder="Enter Password" title="Enter Password">
+                                </div>
+                                <div class="relative mb-3">
+                                    <label for="set_confirm_password" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                    <input type="password" class="form-control asterisk-inside" name="set_confirm_password" id="set_confirm_password" placeholder="Confirm Password" title="Confirm Password">
                                 </div>
                                 <input type="hidden" id="set_user_id" name="user_id">
                                 <div class="d-grid gap-2">
-                                    <input type="submit" class="btn btn-warning" value="Update">
+                                    <input type="submit" class="btn btn-warning" value="Submit">
                                 </div>
                             </form>
                         </div>
@@ -272,20 +293,61 @@
         function confirmDelete(user_id) {
             document.getElementById("user_id").value = user_id;
         }
+
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
+
+        // Add the 'pwcheck' custom validation method
+        $.validator.addMethod("pwcheck", function (value) {
+            return /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value);
+        }, "Password must contain uppercase and lowercase letters and numbers.");
+
+        $.validator.addMethod("phoneNZ", function (value, element) {
+            return this.optional(element) || /^02\d{7,10}$/.test(value);
+        }, "Please enter a valid New Zealand mobile number");
+
         $("#myForm1").validate({
             rules: {
                 title: "required",
                 password: {
                     required: false
                 },
+                confirm_password: {
+                    required: false
+                },
                 first_name: "required",
                 last_name: "required",
                 email: {
-                    required: true
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
                 },
                 phone_number: {
-                    required: true
+                    required: true,
+                    phoneNZ: true
                 }
+            },
+            messages: {
+                password: {
+                    required: "Please enter password",
+                    minlength: "Password needs to be at least 8 characters",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
+                confirm_password: {
+                    required: "Please enter new password again",
+                    minlength: "Confirm password requires at least 8 characters",
+                    equalTo: "The passwords entered twice are inconsistent",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                phone_number: {
+                    required: "Please enter the phone number",
+                    phoneNZ: "Please enter a valid New Zealand mobile number"
+                },
             },
             errorElement: 'div',
             errorPlacement: function (error, element) {
@@ -306,9 +368,30 @@
 
         $("#myForm2").validate({
             rules: {
-                password: {
-                    required: true
-                }
+                set_password: {
+                    required: true,
+                    minlength: 8,
+                    pwcheck: true
+                },
+                set_confirm_password: {
+                    required: true,
+                    minlength: 8,
+                    equalTo: "#set_password",
+                    pwcheck: true
+                },
+            },
+            messages: {
+                set_password: {
+                    required: "Please enter password",
+                    minlength: "Password needs to be at least 8 characters",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
+                set_confirm_password: {
+                    required: "Please enter new password again",
+                    minlength: "Confirm password requires at least 8 characters",
+                    equalTo: "The passwords entered twice are inconsistent",
+                    pwcheck: "Password must contain uppercase and lowercase letters and numbers"
+                },
             },
             errorElement: 'div',
             errorPlacement: function (error, element) {
@@ -328,25 +411,43 @@
         });
 
         const staff_list = JSON.parse('{{ staff_list|tojson }}');
+
         function showLink(id) {
             $('#myForm1').trigger('reset');
             $('#myForm1').find('.is-invalid').removeClass('is-invalid');
             $('#myForm1').find('.text-danger').remove();
             const password = $('#password');
-            const label = password.prev('label');
+            const confirm_password = $('#confirm_password');
+            const label1 = password.prev('label');
+            const label2 = confirm_password.prev('label');
             if (id === -1) {
                 password.show();
-                label.show();
+                confirm_password.show();
+                label1.show();
+                label2.show();
                 $('#myForm1').validate().settings.rules.password = {
                     required: true,
+                    minlength: 8,
+                    pwcheck: true
+                }
+                $('#myForm1').validate().settings.rules.confirm_password = {
+                    required: true,
+                    minlength: 8,
+                    equalTo: "#password",
+                    pwcheck: true
                 }
             } else {
                 password.hide();
-                label.hide();
+                confirm_password.hide();
+                label1.hide();
+                label2.hide();
                 $('#myForm1').validate().settings.rules.password = {
                     required: false,
                 }
-                for (let i in staff_list){
+                $('#myForm1').validate().settings.rules.confirm_password = {
+                    required: false,
+                }
+                for (let i in staff_list) {
                     if (id === staff_list[i]['user_id']) {
                         document.getElementById("title").value = staff_list[i]['title_id'];
                         document.getElementById("first_name").value = staff_list[i]['first_name'];
@@ -358,7 +459,8 @@
                 document.getElementById("edit_user_id").value = id;
             }
         }
-        function set_password(user_id){
+
+        function set_password_(user_id) {
             document.getElementById("set_user_id").value = user_id;
         }
     </script>

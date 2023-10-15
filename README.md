@@ -1,5 +1,9 @@
 # COMP639_group_6_project_2
 
-
-
-Nick was here
+    email:
+    admin@hire.com
+    staff@hire.com
+    customer@hire.com
+    
+    password:
+    Userpassword1

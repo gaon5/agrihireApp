@@ -7,7 +7,24 @@
 
 
 {% block mycss %}
+    <style>
+        .relative {
+            position: relative;
+        }
 
+        .asterisk {
+            color: red;
+            position: absolute;
+            top: 10px; /* Center vertically */
+            left: 10px; /* Distance from the left edge of the input box. Adjust as needed */
+            transform: translateY(-50%); /* Centering adjustment */
+            pointer-events: none; /* Ensure clicks 'pass through' to the input element */
+        }
+
+        .asterisk-inside {
+            padding-left: 20px; /* Adjust as needed */
+        }
+    </style>
 {% endblock %}
 
 
@@ -20,78 +37,54 @@
                 <h5 style="text-align: center;">Click the fields to change details and press "Update" button to submit changes</h5>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ url_for('edit_detail') }}" method="post" id="myForm" onsubmit="return validateForm()">
-                            <div class="input-group mb-3">
-                                <label for="title" class="input-group-text">
-                                    Title <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="title" id="title" required>
+                        <form action="{{ url_for('edit_detail') }}" method="post" id="myForm1">
+                            <div class="relative mb-3">
+                                <label for="title" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <select class="form-control asterisk-inside" name="title" id="title">
                                     <option value="" selected="selected" disabled>Choose Title</option>
                                     {% for title in title_list %}
                                         <option value="{{ title.title_id }}">{{ title.title }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="input-group mb-3">
-                                <label for="first_name" class="input-group-text">
-                                    First Name <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="first_name" id="first_name" value="{{ details_list.first_name }}" required>
+                            <div class="relative mb-3">
+                                <label for="first_name" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="first_name" id="first_name" value="{{ details_list.first_name }}" placeholder="Enter First Name" title="Enter First Name">
                             </div>
-                            <p id="first_name_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="last_name" class="input-group-text">
-                                    Last Name <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="last_name" id="last_name" value="{{ details_list.last_name }}" required>
+                            <div class="relative mb-3">
+                                <label for="last_name" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="last_name" id="last_name" value="{{ details_list.last_name }}" placeholder="Enter Last Name" title="Enter Last Name">
                             </div>
-                            <p id="last_name_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="email" class="input-group-text">
-                                    Email <span style="color:red">*</span>
-                                </label>
-                                <input type="email" class="form-control" name="email" id="email" value="{{ details_list.email }}" required>
+                            <div class="relative mb-3">
+                                <label for="email" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="email" class="form-control asterisk-inside" name="email" id="email" value="{{ details_list.email }}" placeholder="Enter Email">
                             </div>
-                            <p id="email_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="phone_number" class="input-group-text">
-                                    Phone Number <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}"
-                                       required>
+                            <div class="relative mb-3">
+                                <label for="phone_number" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="phone_number" id="phone_number" value="{{ details_list.phone_number }}" placeholder="Enter Phone Number" title="Enter Phone Number">
                             </div>
-                            <p id="phone_number_msg" style="color: red"></p>
-                            <div class="input-group mb-3">
-                                <label for="birth_date" class="input-group-text">
-                                    Date of Birth <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="birth_date" id="birth_date" value="{{ details_list.birth_date }}" required>
+                            <div class="relative mb-3">
+                                <label for="birth_date" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="birth_date" id="birth_date" value="{{ details_list.birth_date }}" placeholder="Enter Date of Birth" title="Enter Date of Birth">
                             </div>
-                            <div class="input-group mb-3">
-                                <label for="region" class="input-group-text">
-                                    Region <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="region" id="region" onchange="update_region()" required>
+                            <div class="relative mb-3">
+                                <label for="region" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <select class="form-control asterisk-inside" name="region" id="region" onchange="update_region()">
                                     <option value="" selected="selected" disabled>Choose Region</option>
                                     {% for region in region_list %}
                                         <option value="{{ region.region_id }}">{{ region.region }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="input-group mb-3">
-                                <label for="city" class="input-group-text">
-                                    City <span style="color:red">*</span>
-                                </label>
-                                <select class="form-control" name="city" id="city" required>
+                            <div class="relative mb-3">
+                                <label for="city" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <select class="form-control asterisk-inside" name="city" id="city">
                                     <option value="" selected="selected" disabled>Choose City</option>
                                 </select>
                             </div>
-                            <div class="input-group mb-3">
-                                <label for="street_name" class="input-group-text">
-                                    Street <span style="color:red">*</span>
-                                </label>
-                                <input type="text" class="form-control" name="street_name" id="street_name" value="{{ details_list.street_name }}"
-                                       required>
+                            <div class="relative mb-3">
+                                <label for="street_name" class="asterisk mt-2"><span style="color:red">*</span></label>
+                                <input type="text" class="form-control asterisk-inside" name="street_name" id="street_name" value="{{ details_list.street_name }}" placeholder="Enter Street" title="Enter Street">
                             </div>
                             <input type="hidden" id="user_id" name="user_id" value="{{ details_list.user_id }}">
                             <div class="d-grid gap-2">
@@ -114,7 +107,7 @@
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        //birth date validation
+        //birthdate validation
         flatpickr("#birth_date", {
             minDate: "01 01 1900",
             maxDate: "30 12 2004",
@@ -125,6 +118,7 @@
         const city_list = JSON.parse('{{ city_list|tojson }}');
         const region = document.getElementById('region');
         const city = document.getElementById('city');
+        const title = document.getElementById('city');
         region.value = {{ details_list.region_id }};
         title.value = {{ details_list.title_id }};
         for (const i in city_list) {
@@ -138,7 +132,7 @@
         city.value = {{ details_list.city_id }};
 
         function update_region() {
-            city.innerHTML = '<option value="" disabled>---Choose city---</option>';
+            city.innerHTML = '<option value="" disabled>Choose city</option>';
             for (const i in city_list) {
                 if (String(city_list[i].region_id) === region.value) {
                     const option = document.createElement('option');
@@ -149,54 +143,58 @@
             }
         }
 
-        //validate name, email and phone number
-        const first_name_msg = document.getElementById('first_name_msg');
-        const last_name_msg = document.getElementById('last_name_msg');
-        const email_msg = document.getElementById('email_msg');
-        const phone_number_msg = document.getElementById('phone_number_msg');
-        const first_name = document.getElementById('first_name');
-        const last_name = document.getElementById('last_name')
-        const email = document.getElementById('email');
-        const phone_number = document.getElementById('phone_number');
+        // Add the 'regex' custom validation method
+        $.validator.addMethod("regex", function (value, element, regexpr) {
+            return regexpr.test(value);
+        }, "Invalid value.");
 
-        function validateForm() {
-            const namePattern = /^[a-zA-Z]+$/;
-            const phonePattern = /^\d{7,11}$/;
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            if (!namePattern.test(first_name.value)) {
-                first_name_msg.innerText = "First name should contain only letters.";
-                first_name.classList.add("is-invalid");
-                return false;
-            } else {
-                first_name.classList.remove("is-invalid");
-                first_name_msg.innerText = "";
+        $.validator.addMethod("phoneNZ", function (value, element) {
+            return this.optional(element) || /^02\d{7,10}$/.test(value);
+        }, "Please enter a valid New Zealand mobile number");
+
+        $("#myForm1").validate({
+            rules: {
+                title: "required",
+                first_name: "required",
+                last_name: "required",
+                email: {
+                    required: true,
+                    regex: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+                },
+                phone_number: {
+                    required: true,
+                    phoneNZ: true
+                },
+                birth_date: "required",
+                region: "required",
+                city: "required",
+                street_name: "required",
+            },
+            messages: {
+                email: {
+                    required: "Please enter email address",
+                    regex: "Please enter a valid email address"
+                },
+                phone_number: {
+                    required: "Please enter the phone number",
+                    phoneNZ: "Please enter a valid New Zealand mobile number"
+                },
+            },
+            errorElement: 'div',
+            errorPlacement: function (error, element) {
+                error.addClass('text-danger');
+                error.insertAfter(element);
+                element.addClass('is-invalid');
+            },
+            success: function (label, element) {
+                $(element).removeClass('is-invalid');
             }
-            if (!namePattern.test(last_name.value)) {
-                last_name_msg.innerText = "Last name should contain only letters.";
-                last_name.classList.add("is-invalid");
-                return false;
-            } else {
-                last_name.classList.remove("is-invalid");
-                last_name_msg.innerText = "";
+        });
+        $('#myForm1').on('submit', function (event) {
+            event.preventDefault();
+            if ($(this).valid()) {
+                document.getElementById("myForm1").submit();
             }
-            if (!emailPattern.test(email.value)) {
-                email.classList.add("is-invalid");
-                email_msg.innerText = "Invalid email. Please enter the correct format (Example: nicholas123@gmail.com).";
-                return false;
-            } else {
-                email.classList.remove("is-invalid");
-                email_msg.innerText = "";
-            }
-            if (!phonePattern.test(phone_number.value)) {
-                phone_number.classList.add("is-invalid");
-                phone_number_msg.innerText = "Invalid phone number. Please enter 7 to 11 numbers only.";
-                return false;
-            } else {
-                phone_number.classList.remove("is-invalid");
-                phone_number_msg.innerText = "";
-            }
-            //submit form if only all validations are passed
-            return true;
-        }
+        });
     </script>
 {% endblock %}

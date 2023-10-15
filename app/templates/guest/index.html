@@ -9,7 +9,7 @@
 {% block mycss %}
     <style>
         .bg-container {
-            background-image: url('static/image/background3.jpg'); /* 替换为您的图像URL */
+            background-image: url('{{ url_for('static', filename='image/background3.jpg') }}'); /* 替换为您的图像URL */
             background-size: cover; /* 背景图像覆盖整个元素 */
             background-position: center; /* 背景图像居中 */
             color: #EECD5C; /* 设置文本颜色为白色，或者您喜欢的其他颜色 */
