@@ -353,4 +353,15 @@ def edit_details():
 
 @app.route('/payment', methods=['POST'])
 def payment():
-    pass
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    user_id = session['user_id']
+    equipment_list = sql_function.check_cart(user_id)
+    if not equipment_list :
+        pass ## add driver license
+    else:
+        pass ## payment
+
+
+

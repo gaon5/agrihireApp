@@ -752,3 +752,19 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
                     SET count = %s, start_time = %s, end_time = %s
                     WHERE (customer_id = %s) and (cart_item_id = %s)"""
     operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))
+
+def check_cart(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT * FROM hire.shopping_cart_item as sci
+                inner join equipment as e on sci.equipment_id = e.equipment_id
+                LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify as c on e.equipment_id = c.equipment_id
+                WHERE sci.customer_id = %s and e.requires_drive_license = 1;"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    equipment_require_licence = operate_sql(sql, (customer_id,))
+    return equipment_require_licence
