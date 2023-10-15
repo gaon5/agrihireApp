@@ -318,11 +318,13 @@ def delete_item():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     session['msg'] = session['error_msg'] = ''
-    data = request.json
+    data = request.get_json()
+    print(data)
     cart_item_id = data.get('cart_item_id')
     print(cart_item_id)
     sql_function.sql_delete_item(cart_item_id)
-    return jsonify(message="Delete Successfully"), 200
+    session['msg'] = "Delete successfully"
+    return jsonify(message="Test Response"), 200
 
 
 

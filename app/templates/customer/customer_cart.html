@@ -364,7 +364,7 @@
         document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
 
 
-        function postDelete(item_id) {
+        function confirmDelete(item_id) {
             fetch('/delete_item', {
                 method: 'POST',
                 headers: {
@@ -376,9 +376,9 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.message === "Delete Successfully") {
-                    location.reload();
-                }
+                if (data.message === "Delete successfully") {
+                location.reload();
+            }
             })
             .catch(error => {
                 console.error('Error:', error);
