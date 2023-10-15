@@ -128,6 +128,11 @@ def manage_staff():
         email = request.form.get('email')
         phone_number = request.form.get('phone_number')
         user_id = request.form.get('user_id')
+        user_detail = sql_function.get_account(email)
+        if user_detail:
+            if int(user_id) != user_detail['user_id']:
+                session['error_msg'] = 'Email already exists!'
+                return redirect(str(request.referrer))
         if user_id:
             last_msg = "Updated successfully"
             sql_function.update_staff_details(first_name, last_name, title, phone_number, email, user_id)
@@ -173,6 +178,11 @@ def manage_customer():
         city = request.form.get('city')
         street_name = request.form.get('street_name')
         user_id = request.form.get('user_id')
+        user_detail = sql_function.get_account(email)
+        if user_detail:
+            if int(user_id) != user_detail['user_id']:
+                session['error_msg'] = 'Email already exists!'
+                return redirect(str(request.referrer))
         if user_id:
             last_msg = "Updated successfully"
             sql_function.update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, user_id)

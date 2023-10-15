@@ -128,16 +128,27 @@
                 </form>
             </div>
 
-            <div class="col-md-4 col-sm-12 text-md-right text-center align-self-center py-3 mt-3">
-                <a class="btn btn-outline-dark" href="{{ url_for('register') }}" style="color:#EECD5C">
-                    Register Now!
-                </a>
-                <a href="{{ url_for('login') }}" class="px-2 me-2 icon-link user-icon">
-                    <i class="fas fa-user-circle fa-2x"></i>
-                </a>
-                <a href="/customer_cart" class="icon-link cart-icon">
-                    <i class="fas fa-shopping-cart fa-2x"></i>
-                </a>
+            <div class="col-md-4 col-sm-12 text-center  py-3">
+                {% if check_permissions() > 0 %}
+                    <a class="btn btn-outline-dark" href="{{ url_for('logout') }}" style="color:#EECD5C; margin-bottom: 12px; width: 135px">
+                        Logout
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="px-2 mt-2 icon-link user-icon">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                {% elif check_permissions() == 0 %}
+                    <a class="btn btn-outline-dark" href="{{ url_for('register') }}" style="color:#EECD5C; margin-bottom: 12px; width: 135px">
+                        Register Now!
+                    </a>
+                    <a href="{{ url_for('login') }}" class="px-2  mt-2 icon-link user-icon">
+                        <i class="fas fa-user-circle fa-2x"></i>
+                    </a>
+                {% endif %}
+                {% if check_permissions() <= 1 %}
+                    <a href="{{ url_for('customer_cart') }}" class="icon-link cart-icon">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -154,14 +165,47 @@
         <div class="collapse navbar-collapse" id="navbarContent2">
             <!-- Other custom text -->
             <div class="py-2">
-                <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 1</span>
+                <a href="{{ url_for('index') }}" style="text-decoration: none"><span class="custom-text ms-2 mx-2" style="color:#EECD5C">Home</span></a>
             </div>
-            <div class="py-2">
-                <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Function 2</span>
-            </div>
-            <div class="py-2">
-                <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Function 3</span>
-            </div>
+            {% if check_permissions() == 1 %}
+                <div class="py-2">
+                    <a href="{{ url_for('dashboard') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Personal Center</span>
+                    </a>
+                </div>
+                <div class="py-2">
+                    <a href="{{ url_for('user_wishlist') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Wishlist</span>
+                    </a>
+                </div>
+                <div class="py-2">
+                    <a href="{{ url_for('customer_cart') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Shopping Cart</span>
+                    </a>
+                </div>
+                <div class="py-2">
+                    <a href="{{ url_for('bookings') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Bookings</span>
+                    </a>
+                </div>
+                <div class="py-2">
+                    <a href="#" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#CBB26B">Payments</span>
+                    </a>
+                </div>
+            {% elif check_permissions() == 2 %}
+                <div class="py-2">
+                    <a href="{{ url_for('dashboard') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Dashboard</span>
+                    </a>
+                </div>
+            {% elif check_permissions() == 3 %}
+                <div class="py-2">
+                    <a href="{{ url_for('dashboard') }}" style="text-decoration: none">
+                        <span class="custom-text ms-2 mx-2" style="color:#EECD5C">Dashboard</span>
+                    </a>
+                </div>
+            {% endif %}
             <div class="py-2">
                 <a href="{{ url_for('index') }}#about-us" class="custom-text ms-2 mx-2" style="color:#CBB26B; text-decoration: none;">About Us</a>
             </div>

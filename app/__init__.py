@@ -15,6 +15,7 @@ scheduler.init_app(app)
 bcrypt = Bcrypt(app)
 
 
+@app.template_global()
 def check_permissions():
     """
     Check user permissions based on session variables and return a permission level.
@@ -34,6 +35,8 @@ def check_permissions():
     # Check user's permissions and assign a permission level
     permission_level = check_permissions()
     """
+    if 'loggedIn' not in session:
+        return 0
     is_customer = session['is_customer']
     is_staff = session['is_staff']
     is_admin = session['is_admin']
@@ -43,8 +46,6 @@ def check_permissions():
         return 2
     elif is_customer == 1:
         return 1
-    else:
-        return 0
 
 
 def upload_image(file):

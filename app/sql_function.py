@@ -197,16 +197,16 @@ def set_last_login_date(user_id):
     operate_sql(sql, (today, user_id,))
 
 
-def register_account(email, password, title, given_name, surname, question, answer):
+def register_account(email, password, title, given_name, surname, question, answer, phone_number, region_id, city_id, address, birth_date):
     today = datetime.today().date()
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     sql = """INSERT INTO user_account (email, password, is_customer, register_date, last_login_date) 
                 VALUES (%s, %s, 1, %s, %s);"""
     operate_sql(sql, (email, hashed_password, today, today), close=0)
     account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
-    sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state) 
-                VALUES (%s,%s,%s,%s,%s,%s,1);"""
-    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer))
+    sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state,phone_number,region_id,city_id,street_name,birth_date) 
+                VALUES (%s,%s,%s,%s,%s,%s,1,%s,%s,%s,%s,%s);"""
+    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%Y-%m-%d').date()))
 
 
 def get_customer_question(user_id):
@@ -427,8 +427,7 @@ def update_customer_details(first_name, last_name, birth_date, title, phone_numb
 
 
 def add_customer(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, password):
-    register_account(email, password, title, last_name, first_name, 1, "1")
-#     birth_date, phone_number, region, city, street_name
+    register_account(email, password, title, last_name, first_name, 1, "1", phone_number, region, city, street_name, birth_date)
 
 
 def delete_customer(user_id):
@@ -454,12 +453,12 @@ def add_staff(first_name, last_name, title, phone_number, email, password):
     account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
     sql = """INSERT INTO staff (user_id,title_id,first_name,last_name,phone_number,state) 
                     VALUES (%s,%s,%s,%s,%s,1);"""
-    operate_sql(sql, (account['user_id'], title, given_name, surname, phone_number,))
+    operate_sql(sql, (account['user_id'], title, first_name, last_name, phone_number,))
 
 
 def delete_staff(user_id):
     sql = """UPDATE staff SET state=0 Where user_id=%s"""
-    operate_sql(sql, (user_id))
+    operate_sql(sql, (user_id,))
 
 
 def update_admin_details(first_name, last_name, title, phone_number, email, user_id):

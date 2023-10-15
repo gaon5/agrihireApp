@@ -21,7 +21,7 @@
 {% endblock %}
 
 {% block body %}
-    <form class="form-inline my-2 my-lg-0" action="/search_result" method="POST">
+    <form class="form-inline my-2 my-lg-0" action="{{ url_for('search_result') }}" method="POST">
         <div class="input-group">
             <input type="search" id="s1" class="form-control rounded" placeholder="Search by Equipment Name, Category, Sub Category..."
                    name="equipmentsearch" aria-label="Search" aria-describedby="search-addon" autocomplete="off"/>

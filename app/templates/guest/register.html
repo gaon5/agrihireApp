@@ -85,6 +85,10 @@
                             </div>
                         </div>
                         <div class="mb-3 relative">
+                            <label class="asterisk mt-2">*</label>
+                            <input type="text" class="form-control asterisk-inside" name="birth_date" id="birth_date" placeholder="Enter Birth Date" title="Enter Birth Date">
+                        </div>
+                        <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <input type="text" class="form-control asterisk-inside" id="given_name" name="given_name" placeholder="Enter your given name"
                                    value="{{ request.form['given_name'] }}" >
@@ -170,13 +174,21 @@
                 </div>
             </form>
         </div>
-        <p class="mt-3"><a href="{{ url_for('login') }}">Back to Login</a></p>
+{#        <p class="mt-3"><a href="{{ url_for('login') }}">Back to Login</a></p>#}
     </div>
 {% endblock %}
 
 
 {% block myjs %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        //birthdate validation
+        flatpickr("#birth_date", {
+            minDate: "1930-01-01",
+            maxDate: "2003-12-31",
+            dateFormat: "d M Y",
+        });
+
         const city_list = JSON.parse('{{ cities|tojson }}');
         const region = document.getElementById('region_id');
         const city = document.getElementById('city_id');
@@ -228,6 +240,7 @@
                     equalTo: "#password",
                     pwcheck: true
                 },
+                birth_date: "required",
                 given_name: "required",
                 surname: "required",
                 phone_number: {

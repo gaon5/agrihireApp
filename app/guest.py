@@ -88,6 +88,11 @@ def register():
         password = request.form.get('password')
         given_name = request.form.get('given_name')
         surname = request.form.get('surname')
+        phone_number = request.form.get('phone_number')
+        region_id = request.form.get('region_id')
+        city_id = request.form.get('city_id')
+        address = request.form.get('address')
+        birth_date = request.form.get('birth_date')
         title = request.form.get('title')
         question = request.form.get('question')
         answer = request.form.get('answer')
@@ -98,7 +103,7 @@ def register():
             return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list,
                                    breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
         # Insert account data into database
-        sql_function.register_account(email, password, title, given_name, surname, question, answer)
+        sql_function.register_account(email, password, title, given_name, surname, question, answer, phone_number, region_id, city_id, address, birth_date)
         session['msg'] = 'Registration success!'
         return redirect(url_for('login'))
     return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs,
@@ -170,6 +175,9 @@ def dashboard():
                                    equipment_stat=equipment_stat, booking_stat=booking_stat, msg=last_msg, error_msg=last_error_msg)
         elif session['is_staff'] == 1:
             return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+        elif session['is_customer'] == 1:
+            breadcrumbs = [{"text": "Personal Center", "url": "#"}]
+            return render_template('customer/dashboard.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
         else:
             session['error_msg'] = 'Incorrect permissions'
             return redirect(url_for('index'))

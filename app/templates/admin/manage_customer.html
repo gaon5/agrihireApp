@@ -312,7 +312,15 @@
 
 
 {% block myjs %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        //birthdate validation
+        flatpickr("#birth_date", {
+            minDate: "1930-01-01",
+            maxDate: "2003-12-31",
+            dateFormat: "d M Y",
+        });
+
         const city_list = JSON.parse('{{ city_list|tojson }}');
         const region = document.getElementById('region');
         const city = document.getElementById('city');

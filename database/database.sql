@@ -52,6 +52,22 @@ CREATE TABLE IF NOT EXISTS `classify`
   DEFAULT CHARSET = utf8mb4;
 
 
+DROP TABLE IF EXISTS `contact`;
+CREATE TABLE IF NOT EXISTS `contact`
+(
+    `contact_id`      int(11)      NOT NULL AUTO_INCREMENT,
+    `first_name`      varchar(11)  NOT NULL,
+    `last_name`       varchar(11)  NOT NULL,
+    `email`           varchar(11)  NOT NULL,
+    `phone`           varchar(15)  NOT NULL,
+    `location`        varchar(255) NOT NULL,
+    `enquiry_type`    varchar(11)  NOT NULL,
+    `enquiry_details` varchar(255) NOT NULL,
+    PRIMARY KEY (`contact_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+
 DROP TABLE IF EXISTS `customer`;
 CREATE TABLE IF NOT EXISTS `customer`
 (
@@ -255,6 +271,17 @@ CREATE TABLE IF NOT EXISTS `maintenance_type`
     `maintenance_type_id` int(11)      NOT NULL AUTO_INCREMENT,
     `name`                varchar(255) NOT NULL,
     PRIMARY KEY (`maintenance_type_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4;
+
+
+DROP TABLE IF EXISTS `news`;
+CREATE TABLE IF NOT EXISTS `news`
+(
+    `news_id` int(11) NOT NULL AUTO_INCREMENT,
+    `news`    text,
+    `time`    datetime DEFAULT NULL,
+    PRIMARY KEY (`news_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;
 
