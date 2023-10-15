@@ -364,8 +364,25 @@
         document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
 
 
-        function confirmDelete(cart_item_id) {
-            document.getElementById("cart_item_id").value = cart_item_id;
+        function postDelete(item_id) {
+            fetch('/delete_item', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart_item_id: item_id
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Delete Successfully") {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
     </script>

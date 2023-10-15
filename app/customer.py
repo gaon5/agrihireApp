@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request, redirect, render_template, session
+from flask import Flask, url_for, request, redirect, render_template, session, jsonify
 from datetime import date, datetime, timedelta
 import math
 import re
@@ -318,10 +318,12 @@ def delete_item():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     session['msg'] = session['error_msg'] = ''
-    cart_item_id = request.form.get('cart_item_id')
+    data = request.json
+    cart_item_id = data.get('cart_item_id')
+    print(cart_item_id)
     sql_function.sql_delete_item(cart_item_id)
-    session['msg'] = "Delete successfully"
-    return redirect(url_for('customer_cart'))
+    return jsonify(message="Delete Successfully"), 200
+
 
 
 @app.route('/edit_details', methods=['POST', 'GET'])
