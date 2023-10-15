@@ -274,8 +274,8 @@ def customer_cart():
         total_item_price = unit_price * days
         equipment['price'] = total_item_price
         total_amount = total_amount + total_item_price
-        print(type(equipment['price']))
-        print(f"{days} days, {hours} hours, {minutes} minutes")
+        # print(type(equipment['price']))
+        # print(f"{days} days, {hours} hours, {minutes} minutes")
         max_amount = sql_function.max_count(equipment['equipment_id'])
         equipment['count'] = max_amount
 
@@ -321,26 +321,30 @@ def delete_item():
     cart_item_id = request.form.get('cart_item_id')
     sql_function.sql_delete_item(cart_item_id)
     session['msg'] = "Delete successfully"
-    previous_url = str(request.referrer)
-    return redirect(previous_url)
+    return redirect(url_for('customer_cart'))
 
 
-@app.route('/edit_details', methods=['post'])
+@app.route('/edit_details', methods=['POST', 'GET'])
 def edit_details():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
+    print(user_id)
     data = request.get_json()
+    print(data)
     # 从数据中提取特定的值
     cart_item_id = data.get('cart_item_id')
     quantity = data.get('quantity')
     start_time = data.get('start_time')
     end_time = data.get('end_time')
-
-    sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
-    session['msg'] = "Update successfully"
-    return redirect(url_for('customer_cart'))
+    print(start_time)
+    if not (start_time and end_time and cart_item_id and quantity):
+        session['error_msg'] = 'Please select the required date and time and quantity.'
+    else:
+        sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
+        session['msg'] = "Update successfully"
+        return redirect(url_for('customer_cart'))
 
 
 @app.route('/payment', methods=['POST'])

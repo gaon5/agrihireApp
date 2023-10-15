@@ -751,5 +751,4 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
     sql = """UPDATE shopping_cart_item 
                     SET count = %s, start_time = %s, end_time = %s
                     WHERE (customer_id = %s) and (cart_item_id = %s)"""
-    # print(sql % (customer_id,equipment_id,count,start_time,duration))
     operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))
