@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+    Upload lisence
+{% endblock %}
+
+
+{% block mycss %}
+<style>
+    .title {
+        color: #1D1912; /* 字体颜色 */
+        font-family: 'Poppins', sans-serif; /* 字体 */
+        font-size: 24px; /* 字体大小 */
+        margin-left: 15%; /* 左侧距离 */
+        margin-right: 15%; /* 右侧距离 */
+        border-bottom: 3px solid #1D1912; /* 3px深色横线 */
+        padding-bottom: 10px; /* 为了使横线与文字之间有些间距 */
+    }
+</style>
+    
+{% endblock %}
+
+
+{% block body %}
+    <p class="title">
+        My Driver Lisence
+    </p>
+
+    <div class="mb-3 mt-3">
+        <label for="plate" class="form-label">Car Plate:</label>
+        <input type="text" class="form-control" id="plate" placeholder="Enter Plate number" name="plate_number" required>
+        
+      </div>
+      <div class="mb-3">
+        <label for="lisence" class="form-label">Driver Lisence:</label>
+        <input type="file" id="myFile" name="filename">
+        <button type="button"> Submit </button>
+      </div>
+
+
+{% endblock %}
+
+
+{% block myjs %}
+
+{% endblock %}

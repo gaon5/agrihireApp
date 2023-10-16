@@ -32,17 +32,17 @@
         }
 
         .header-cell:nth-child(1) {
-            flex: 3;
-
-        }
-
-        .header-cell:nth-child(2) {
             flex: 1;
 
         }
 
+        .header-cell:nth-child(2) {
+            flex: 3;
+
+        }
+
         .header-cell:nth-child(3) {
-            flex: 2;
+            flex: 1;
 
         }
 
@@ -62,6 +62,10 @@
         }
 
         .header-cell:nth-child(7) {
+            flex: 1;
+
+        }
+        .header-cell:nth-child(8) {
             flex: 1;
 
         }
@@ -111,6 +115,7 @@
         <div style="margin-left: 15%; margin-right: 15%;">
 
             <div class="table-header">
+                <div class="header-cell"></div>
                 <div class="header-cell">My Equipment</div>
                 <div class="header-cell">Quantity</div>
                 <div class="header-cell">Rental Date</div>
@@ -124,6 +129,10 @@
                 <div class="card-body">
                     <div class="row">
                         {% for equipment in equipment_list %}
+                            <div class="col-md-1 d-flex align-items-center">
+                                <input type="checkbox" class="equipment-checkbox" data-cart-item-id="{{ equipment.cart_item_id }}">
+                            </div>
+
                             <div class="col-md-3 d-flex align-items-center">
                                 <img src="{{ url_for('static', filename=equipment.image_url) }}" alt="Equipment Image" class="img-fluid"
                                      style="max-width: 80px;">
@@ -142,7 +151,7 @@
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
                                 <span id="endTime_{{ loop.index }}" data-end-time="{{ equipment.end_time }}">{{ equipment.end_time }}</span>
                             </div>
-                            <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
                                 <span id="itemPrice_{{ loop.index }}" data-original-price="{{ equipment.price }}">{{ equipment.price }}</span>
                             </div>
 
@@ -164,8 +173,9 @@
             <div class="total-bar">
                 <span class="total-price">Total Price: </span>
                 <span class="total-amount">{{ total_amount }} </span>
-                <form action="{{ url_for('payment') }}" method="get">
-                    <button type="submit" class="btn btn-primary">Next Step</button>
+                <form id="cartItemsForm" method="POST" action="/payment">
+                    <input type="hidden" id="selectedCartItemIds" name="selectedCartItemIds">
+                    <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
                 </form>
             </div>
         </div>
@@ -220,7 +230,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <form action="{{ url_for('delete_item') }}" method="post">
-                        <input type="hidden" id="cart_item_id" name="cart_item_id">
+                        <input type="hidden" id="cart_item_id_modal" name="cart_item_id">
                         <button type="submit" class="btn btn-danger my-1">Yes</button>
                     </form>
                 </div>
@@ -364,26 +374,45 @@
         document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
 
 
-        function confirmDelete(item_id) {
-            fetch('/delete_item', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    cart_item_id: item_id
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === "Delete successfully") {
-                location.reload();
-            }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        function confirmDelete(cart_item_id) {
+            document.getElementById("cart_item_id_modal").value = cart_item_id;
         }
+
+                // 此函数将遍历所有的复选框并收集已选中的ID
+        function getSelectedCartItemIds() {
+            // 创建一个数组来存储选中的ID
+            var selectedIds = [];
+
+            // 获取所有的复选框元素
+            var checkboxes = document.querySelectorAll('.equipment-checkbox');
+
+            // 遍历复选框
+            checkboxes.forEach(function(checkbox) {
+                // 如果复选框被选中
+                if (checkbox.checked) {
+                    // 获取此复选框的data-cart-item-id属性值
+                    var cartItemId = checkbox.getAttribute('data-cart-item-id');
+
+                    // 将ID添加到数组中
+                    selectedIds.push(cartItemId);
+                }
+            });
+
+            // 最后，返回包含所有已选中ID的数组
+            return selectedIds;
+        }
+
+        document.getElementById('cartItemsForm').onsubmit = function() {
+            var selectedIds = getSelectedCartItemIds();
+
+            // 更新隐藏字段的值
+            document.getElementById('selectedCartItemIds').value = selectedIds.join(',');
+
+            return true; // 允许表单提交
+        };
+        
+
+
 
     </script>
 

@@ -278,6 +278,8 @@ def customer_cart():
         # print(f"{days} days, {hours} hours, {minutes} minutes")
         max_amount = sql_function.max_count(equipment['equipment_id'])
         equipment['count'] = max_amount
+        equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
+        equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
 
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
@@ -318,15 +320,11 @@ def delete_item():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     session['msg'] = session['error_msg'] = ''
-    data = request.get_json()
-    print(data)
-    cart_item_id = data.get('cart_item_id')
-    print(cart_item_id)
+    cart_item_id = request.form.get('cart_item_id')
+    # print(cart_item_id)
     sql_function.sql_delete_item(cart_item_id)
     session['msg'] = "Delete successfully"
-    return jsonify(message="Test Response"), 200
-
-
+    return redirect(url_for('customer_cart'))
 
 @app.route('/edit_details', methods=['POST', 'GET'])
 def edit_details():
@@ -334,9 +332,9 @@ def edit_details():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
-    print(user_id)
+    # print(user_id)
     data = request.get_json()
-    print(data)
+    # print(data)
     # 从数据中提取特定的值
     cart_item_id = data.get('cart_item_id')
     quantity = data.get('quantity')
@@ -351,17 +349,29 @@ def edit_details():
         return redirect(url_for('customer_cart'))
 
 
-@app.route('/payment', methods=['POST'])
+@app.route('/payment', methods=['POST','GET'])
 def payment():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
-    equipment_list = sql_function.check_cart(user_id)
-    if not equipment_list :
-        pass ## add driver license
+    selectedItemList = request.form.get('selectedCartItemIds').split(',')
+    # print(selectedItemList)
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if selectedItemList == []:
+        session['error_msg'] = 'Please choose the equipment in your cart to place order.'
+        return redirect(url_for('customer_cart'))
     else:
-        pass ## payment
-
+        equipment_list = sql_function.check_cart(user_id)
+        print(equipment_list)
+        if equipment_list :
+            session['msg'] = "Please provide your driver lisence"
+            return render_template('customer/driver_lisence.html', msg=last_msg, error_msg=last_error_msg)
+        else:
+            for each in selectedItemList:
+                print(each)
+    return redirect(url_for('customer_cart'))
 
 
