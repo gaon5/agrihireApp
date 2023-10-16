@@ -49,7 +49,6 @@ def check_out_list():
     return render_template('staff/check_out_list.html', pickup_list=pickup_list, the_date=the_date, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
 
-
 # route for return list
 @app.route('/staff/return_list', methods=['GET', 'POST'])
 def return_list():
@@ -114,7 +113,7 @@ def maintenance_list():
     if request.method == 'POST':
         instance_id = request.form['instance_id']
         sql_function.complete_maintenance(instance_id)
-        last_msg = "Maintenance marked completed"
+        last_msg = "Maintenance finished"
     # get today's date
     the_date = date.today()
     # get every equipment which is under maintenance

@@ -21,14 +21,24 @@ def manage_category():
         # if add button is pressed, insert a new category
         if 'add' in request.form:
             new_category = request.form['new_category']
-            sql_function.insert_category(new_category)
-            last_msg = "New category added"
+            # check the input name is not repeated
+            flag = sql_function.validate_category(new_category)
+            if flag:
+                last_error_msg = 'Cannot add this category. Please make sure the category is different from the others'
+            else:
+                sql_function.insert_category(new_category)
+                last_msg = "New category added"
         # if the edit button is pressed, update the name of the category
         elif 'edit' in request.form:
             category_name = request.form['category_name']
             category_id = request.form['category_id']
-            sql_function.edit_category(category_id, category_name)
-            last_msg = "Category edited"
+            # check the input name is not repeated
+            flag = sql_function.validate_category(category_name)
+            if flag:
+                last_error_msg = 'Cannot update this category. Please make sure the category is different from the others'
+            else:
+                sql_function.edit_category(category_id, category_name)
+                last_msg = "Category edited"
         # otherwise, the delete button is pressed and delete the selected category
         else:
             category_id = request.form['category_id']
@@ -43,7 +53,7 @@ def manage_category():
                 last_msg = "Category deleted"
     # get every category from the database
     # category_list   category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
-    category_list = sql_function.category_list
+    category_list = sql_function.get_category_list()
     return render_template('admin/manage_category.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,
                            category_list=category_list)
 
@@ -67,8 +77,13 @@ def manage_subcategory():
         if 'add' in request.form:
             main_category_id = request.form['main_category_id']
             new_sub_category = request.form['new_sub_category']
-            sql_function.insert_subcategory(main_category_id, new_sub_category)
-            last_msg = "New sub category added"
+            # Check the sub category name is not repeated
+            flag = sql_function.validate_subcategory(new_sub_category, main_category_id)
+            if flag:
+                last_error_msg = 'Cannot add this sub category. Please make sure the sub category is different from the others'
+            else:
+                sql_function.insert_subcategory(main_category_id, new_sub_category)
+                last_msg = "New sub category added"
         # if the change button is pressed, change the main category of the sub category
         elif 'change' in request.form:
             sub_category_id = request.form['sub_category_id']
@@ -79,8 +94,14 @@ def manage_subcategory():
         elif 'edit' in request.form:
             subcategory_name = request.form['subcategory_name']
             subcategory_id = request.form['subcategory_id']
-            sql_function.edit_subcategory(subcategory_id, subcategory_name)
-            last_msg = "Sub category edited"
+            category_id = request.form['category_id']
+            # Check the sub category name is not repeated
+            flag = sql_function.validate_subcategory(subcategory_name, category_id)
+            if flag:
+                last_error_msg = 'Cannot update this sub category. Please make sure the sub category is different from the others'
+            else:
+                sql_function.edit_subcategory(subcategory_id, subcategory_name)
+                last_msg = "Sub category edited"
         # otherwise, the delete button is pressed and delete the selected category
         else:
             subcategory_id = request.form['subcategory_id']
@@ -94,7 +115,7 @@ def manage_subcategory():
                 sql_function.delete_subcategory(subcategory_id)
                 last_msg = "Sub category deleted"
     # get every category from the database
-    category_list = sql_function.get_categories()
+    category_list = sql_function.get_category_list()
     # get every sub category and respective main categories from the database
     subcategory_list = sql_function.get_main_and_sub_categories()
     return render_template('admin/manage_subcategory.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,

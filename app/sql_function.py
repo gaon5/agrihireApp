@@ -74,7 +74,7 @@ title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
 city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
 question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
 category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
-sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
+sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
 
 category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
 for sub in sub_category_list:
@@ -603,7 +603,8 @@ def get_maintenance_equipment(today_date):
     sql = """SELECT instance_id, maintenance_start_date AS start_date, maintenance_end_date AS end_date, maintenance_type.name AS type, maintenance_status.name AS status, notes FROM equipment_maintenance
                 INNER JOIN maintenance_type ON maintenance_type.maintenance_type_id = equipment_maintenance.maintenance_type_id
                 INNER JOIN maintenance_status ON maintenance_status.maintenance_status_id = equipment_maintenance.maintenance_status_id
-                ORDER BY maintenance_start_date"""
+                WHERE NOT equipment_maintenance.maintenance_status_id = 3
+                ORDER BY maintenance_start_date;"""
     details = operate_sql(sql)
     return details
 
@@ -618,11 +619,14 @@ def complete_maintenance(id):
             WHERE instance_id=%s"""
     operate_sql(sql, (id,))
 
+# call a function to get category list so that the website always display LATEST information (don't delete this )
+def get_category_list():
+    category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
+    return category_list
 
 def insert_category(value):
     sql = """INSERT INTO category (category_id, name) VALUES (NULL, %s)"""
     operate_sql(sql, (value,))
-
 
 def check_category(id):
     sql="""SELECT * FROM category
@@ -631,13 +635,19 @@ def check_category(id):
     details = operate_sql(sql, (id,))
     return details
 
+def validate_category(input):
+    category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
+    result = False
+    for category in category_list:
+        if input.lower() == category['name'].lower():
+            result = True
+    return result
 
 def edit_category(id, name):
     sql = """UPDATE category 
                 SET name = %s
                 WHERE category_id = %s"""
     operate_sql(sql, (name,id))
-
 
 def delete_category(id):
     sql = """DELETE FROM category WHERE category_id=%s"""
@@ -651,7 +661,6 @@ def get_main_and_sub_categories():
     details = operate_sql(sql)
     return details
 
-
 def insert_subcategory(id, name):
     sql="""INSERT INTO sub_category (sub_id, category_id, name) VALUES (NULL, %s, %s)"""
     operate_sql(sql, (id, name))
@@ -664,6 +673,13 @@ def check_subcategory(id):
     details = operate_sql(sql, (id,))
     return details
 
+def validate_subcategory(input, category_id):
+    sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
+    result = False
+    for sub in sub_category_list:
+        if sub['category_id'] == int(category_id) and sub['name'].lower() == input.lower():
+            result = True
+    return result
 
 def change_category(sub_id, main_id):
     sql = """UPDATE sub_category 

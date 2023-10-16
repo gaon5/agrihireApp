@@ -54,12 +54,14 @@
 
         .header-cell:nth-child(5) {
             width: 3px;
-
         }
 
         .header-cell:nth-child(6) {
             width: 160px;
 
+        }
+        #row {
+            margin: 5px;
         }
     </style>
 {% endblock %}
@@ -78,22 +80,22 @@
     <br>
     <div class="row justify-content-center">
         <div class="col-md-7">
-            <form action="{{ url_for('maintenance_list') }}" method="post">
-                <br>
-                {% if maintenance_list %}
-                    <div class="table-header">
-                        <div class="header-cell">Instance</div>
-                        <div class="header-cell">Start Date</div>
-                        <div class="header-cell">End Date</div>
-                        <div class="header-cell">Type</div>
-                        <div class="header-cell">Status</div>
-                        <div class="header-cell">Notes</div>
-                        <div class="header-cell"></div>
-                    </div>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            {% for maintenance in maintenance_list %}
-                                <div class="row">
+            <br>
+            {% if maintenance_list %}
+                <div class="table-header">
+                    <div class="header-cell">Instance</div>
+                    <div class="header-cell">Start Date</div>
+                    <div class="header-cell">End Date</div>
+                    <div class="header-cell">Type</div>
+                    <div class="header-cell">Status</div>
+                    <div class="header-cell">Notes</div>
+                    <div class="header-cell"></div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        {% for maintenance in maintenance_list %}
+                            <form action="{{ url_for('maintenance_list') }}" method="post">
+                                <div class="row" id="row">
                                     <div class="col-md-1 d-flex align-items-center justify-content-center">
                                         {{ maintenance.instance_id }}
                                     </div>
@@ -109,25 +111,23 @@
                                     <div class="col-md-2 d-flex align-items-center justify-content-center">
                                         {{ maintenance.status }}
                                     </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                    <div class="col-md-2 d-flex align-items-center justify-content-left">
                                         {{ maintenance.notes }}
                                     </div>
-                                    {% if maintenance.status != 'Completed' %}
-                                        <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                            <input type="hidden" name="instance_id" id="instance_id" value="{{ maintenance.instance_id }}">
-                                            <button type="submit" class="btn btn-primary">
-                                                Available
-                                            </button>
-                                        </div>
-                                    {% endif %}
+                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                        <input type="hidden" name="instance_id" id="instance_id" value="{{ maintenance.instance_id }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            Finish
+                                        </button>
+                                    </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </form>
+                        {% endfor %}
                     </div>
-                {% else %}
-                    <p>There is no equipment for pickup</p>
-                {% endif %}
-            </form>
+                </div>
+            {% else %}
+                <p>There is no equipment for pickup</p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
