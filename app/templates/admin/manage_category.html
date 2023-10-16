@@ -36,11 +36,10 @@
         }
 
         .header-cell:nth-child(2) {
-            width: 0
-        }
-
-        .header-cell:nth-child(3) {
             width: 350px
+        }
+        #row {
+            margin: 5px;
         }
     </style>
 {% endblock %}
@@ -80,25 +79,24 @@
     </div>
     <br>
     <div class="row justify-content-center">
-        <div class="col-md-3">
+        <div class="col-md-5">
             <br>
             {% if category_list %}
                 <div class="table-header">
                     <div class="header-cell">Main Category</div>
-                    <div class="header-cell"></div>
                     <div class="header-cell"></div>
                 </div>
                 <div class="card mb-2">
                     <div class="card-body">
                         {% for category in category_list %}
                             <form action="{{ url_for('manage_category') }}" method="post">
-                                <div class="row">
-                                    <div class="col-md-6 d-flex align-items-center justify-content-center">
+                                <div class="row" id="row">
+                                    <div class="col-md-8 d-flex align-items-center justify-content-center">
                                         <input type="text" class="form-control" name="category_name" id="category_name" value="{{ category.name }}" required>
                                     </div>
                                     <div class="col-md-2 d-flex align-items-center justify-content-center">
                                         <button type="submit" class="btn btn-primary" id="edit" name="edit" value="edit">
-                                            Edit
+                                            Change
                                         </button>
                                     </div>
                                     <div class="col-md-2 d-flex align-items-center justify-content-center">
