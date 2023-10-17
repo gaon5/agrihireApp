@@ -55,9 +55,6 @@
             flex: 2; 
 
         }
-        #row {
-            margin: 5px;
-        }
     </style>
 {% endblock %}
 
@@ -96,7 +93,7 @@
                     <div class="card-body">
                         {% for return in return_list %}
                             <form action="{{ url_for('return_list') }}" method="post">
-                                <div class="row" id="row">
+                                <div class="row" style="margin: 5px;">
                                     <div class="col-md-4 d-flex align-items-center justify-content-center">
                                         {{ return.name }}
                                     </div>
