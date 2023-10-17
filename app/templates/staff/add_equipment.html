@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block mycss %}
+    <style>
+        .relative {
+            position: relative;
+        }
+
+        .asterisk {
+            color: red;
+            position: absolute;
+            top: 10px; /* Center vertically */
+            left: 10px; /* Distance from the left edge of the input box. Adjust as needed */
+            transform: translateY(-50%); /* Centering adjustment */
+            pointer-events: none; /* Ensure clicks 'pass through' to the input element */
+        }
+
+        .asterisk-inside {
+            padding-left: 20px; /* Adjust as needed */
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center my-5">
+            <div class="col-lg-4">
+                <form action="{{ url_for('add_equipment') }}" method="POST" enctype="multipart/form-data">
+                    <!-- Main Image -->
+                    <div class="relative mb-3">
+                        <label for="mainimage" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="file" class="form-control asterisk-inside" name="mainimage" id="mainimage" accept="image/*">
+                    </div>
+                    <!-- Image -->
+                    <div class="relative mb-3">
+                        <label for="image" class="asterisk mt-2"></label>
+                        <input type="file" class="form-control asterisk-inside" name="image" id="image" accept="image/*" multiple="true">
+                    </div>
+                    <!-- Equipment Name -->
+                    <div class="relative mb-3">
+                        <label for="ename" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="text" class="form-control asterisk-inside" name="ename" id="ename" placeholder="Enter Equipment Name">
+                    </div>
+                    <!-- Price -->
+                    <div class="relative mb-3">
+                        <label for="price" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="number" class="form-control asterisk-inside" name="price" id="price" autocomplete="off" placeholder="Enter Price">
+                    </div>
+                    <!-- Stock -->
+                    <div class="relative mb-3">
+                        <label for="stock" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="number" class="form-control asterisk-inside" name="stock" id="stock" autocomplete="off" placeholder="Enter Stock">
+                    </div>
+                    <!-- Min Threshold -->
+                    <div class="relative mb-3">
+                    <label for="min" class="asterisk mt-2"><span style="color:red">*</span></label>
+                    <input type="number" class="form-control asterisk-inside" name="min" id="min" autocomplete="off" placeholder="Enter minumum stock threshold">
+                    </div>
+                    <!-- License -->
+                    <div class="relative mb-3">
+                        <label for="license" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <select class="form-control asterisk-inside" name="license" id="license">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <!-- Length -->
+                    <div class="relative mb-3">
+                        <label for="length" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="number" class="form-control asterisk-inside" name="length" id="length" autocomplete="off" pattern="^\d+(\.\d+)?$" placeholder="Enter Length (CM)">
+                    </div>
+                    <!-- Width -->
+                    <div class="relative mb-3">
+                        <label for="width" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="number" class="form-control asterisk-inside" name="width" id="width" autocomplete="off" placeholder="Enter Width (CM)">
+                    </div>
+                    <!-- Height -->
+                    <div class="relative mb-3">
+                        <label for="height" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <input type="number" class="form-control asterisk-inside" name="height" id="height" autocomplete="off" placeholder="Enter Height (CM)">
+                    </div>
+                    <!-- Description -->
+                    <div class="relative mb-3">
+                        <label for="description" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <textarea id="description" class="form-control asterisk-inside" name="description" rows="5" placeholder="Enter Description"></textarea>
+                    </div>
+                    <!-- Detail -->
+                    <div class="relative mb-3">
+                        <label for="detail" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <textarea id="detail" class="form-control asterisk-inside" name="detail" rows="5" placeholder="Enter Detail"></textarea>
+                    </div>
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2">
+                        <input type="submit" class="btn btn-warning" value="Add">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -139,9 +139,10 @@ def more_detail(detail_id):
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
     equipment = sql_function.get_equipment_by_id(detail_id)
+    image = sql_function.get_image_by_id(detail_id)
     # for item in equipment:
     #     print(item['equipment_id'])
-    return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
+    return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, image=image, equipment=equipment, msg=last_msg,
                            error_msg=last_error_msg)
 
 
@@ -186,6 +187,49 @@ def update_equipment(detail_id):
     return render_template('staff/update_equipment.html', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
 
+@app.route('/staff/add_equipment', methods=['GET','POST'])
+def add_equipment():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Add Equipment", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 2:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    if request.method == 'POST':
+        main_image = request.files['mainimage']
+        image = request.files['image']
+        equipment = request.form.get('ename')
+        price = request.form.get('price')
+        stock = request.form.get('stock')
+        threshold = request.form.get('min')
+        driver_license = request.form.get('license')
+        length = request.form.get('length')
+        width = request.form.get('width')
+        height = request.form.get('height')
+        description = request.form.get('description')
+        detail = request.form.get('detail')
+        capitalize_name = equipment.title()
+        if main_image.filename:
+            priority = 1
+            image_url = upload_image(main_image)
+            sql_function.add_equipment(image_url,priority,capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
+        elif image.filename:
+            priority = 0
+            image_url = upload_image(image)
+            sql_function.add_equipment(image_url,priority,capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
+        else: 
+            if driver_license == 'yes':
+                driver_license = 1
+            elif driver_license == 'no':
+                driver_license = 0
+        sql_function.add_equipment(image_url,priority, capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
+        session['msg'] = 'Equipment has been added!'
+        return redirect(url_for('add_equipment', equipment=equipment))
+    return render_template('staff/add_equipment.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 @app.route('/staff/search_result', methods=['GET', 'POST'])
 def search_result():

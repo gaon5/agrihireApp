@@ -4,7 +4,9 @@
     {% for item in equipment %}
         <div class="container" style="min-height: 800px">
             <h1 class="my-4">{{ item.name }}</h1>
-            <img src="{{ url_for('static', filename=item.image_url) }}" alt="" class="img-thumbnail" width="300" height="300">
+            {% for pic in image %}
+            <img src="{{ url_for('static', filename=pic.image_url) }}" alt="" class="img-thumbnail" width="300" height="300">
+            {% endfor %}
             <p>Price: ${{ item.price }}</p>
             <p>Stock: {{ item.count }}</p>
             {% if item['requires_drive_license'] == 1 %}

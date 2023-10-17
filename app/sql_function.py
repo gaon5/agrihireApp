@@ -247,6 +247,7 @@ def equipment_details():
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 LEFT JOIN sub_category s on s.sub_id = c.sub_id
                 LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE ei.priority = 1
                 ORDER BY ca.name;"""
     equipment_details = operate_sql(sql)
     return equipment_details
@@ -326,12 +327,14 @@ def get_equipment_by_sub(sub_id, sql_page):
 
 
 def get_equipment_by_id(equipment_id):
-    sql = """SELECT * FROM equipment e
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
-                LEFT JOIN classify c on e.equipment_id = c.equipment_id
-                WHERE e.equipment_id=%s;"""
+    sql = """SELECT * FROM equipment WHERE equipment_id=%s;"""
     equipment = operate_sql(sql, (equipment_id,))
     return equipment
+
+def get_image_by_id(equipment_id):
+    sql_img = """SELECT * FROM equipment_img WHERE equipment_id = %s;"""
+    image = operate_sql(sql_img, (equipment_id,))
+    return image
 
 
 def get_equipment_by_wishlist(user_id, sql_page):
@@ -589,7 +592,29 @@ def updating_equipment(name, price, count, requires_drive_license, length, width
                 height = %s, description = %s, detail = %s
                 WHERE equipment_id= %s"""
     operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
+  
+# def add_equipment_image(equipment_id, image_url, priority):
+#     sql_img = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s)"""
+#     operate_sql(sql_img, (equipment_id, image_url, priority))
 
+def add_equipment(image_url, name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, detail):
+    sql = """INSERT INTO hire.equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
+    detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s)"""
+    operate_sql(sql, (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail), close= 0)
+    operate_sql("""SET @equipment_id=LAST_INSERT_ID();""", fetch=0, close=0)
+    sql_img = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (@equipment_id, %s, %s);"""
+    operate_sql(sql_img, (image_url, priority))
+
+def add_staff(first_name, last_name, title, phone_number, email, password):
+    today = datetime.today().date()
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    sql = """INSERT INTO user_account (email, password, is_staff, register_date, last_login_date) 
+                    VALUES (%s, %s, 1, %s, %s);"""
+    operate_sql(sql, (email, hashed_password, today, today), close=0)
+    account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
+    sql = """INSERT INTO staff (user_id,title_id,first_name,last_name,phone_number,state) 
+                    VALUES (%s,%s,%s,%s,%s,1);"""
+    operate_sql(sql, (account['user_id'], title, first_name, last_name, phone_number,))
 
 def get_maintenance_equipment(today_date):
     details = operate_sql("""SELECT * FROM `equipment_maintenance`;""", close=0)

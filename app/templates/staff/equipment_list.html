@@ -21,6 +21,8 @@
 {% endblock %}
 
 {% block body %}
+<a role="button" id="add" class="btn btn-primary" href="{{ url_for('add_equipment') }}">Add</a>
+
     <form class="form-inline my-2 my-lg-0" action="{{ url_for('search_result') }}" method="POST">
         <div class="input-group">
             <input type="search" id="s1" class="form-control rounded" placeholder="Search by Equipment Name, Category, Sub Category..."
