@@ -813,3 +813,23 @@ def get_annual_payment(end_date):
                 WHERE (payment.status_id = 1) AND (payment.datetime > DATE_SUB(%s, INTERVAL 1 YEAR) AND payment.datetime <= %s)"""
     sql_list = operate_sql(sql, (end_date, end_date))
     return sql_list
+
+def get_monthly_maintenances(start_date):
+    sql = """SELECT maintenance_id, maintenance_cost, category.name AS category_name FROM equipment_maintenance
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (maintenance_start_date >= %s AND maintenance_start_date < DATE_ADD(%s, INTERVAL 1 MONTH))"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_annual_maintenances(start_date):
+    sql = """SELECT maintenance_id, maintenance_cost, maintenance_start_date, category.name AS category_name FROM equipment_maintenance
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (maintenance_start_date >= %s AND maintenance_start_date < DATE_ADD(%s, INTERVAL 1 YEAR));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
