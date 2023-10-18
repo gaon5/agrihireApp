@@ -2,7 +2,7 @@
 
 
 {% block mytitle %}
-    Maintenance Report
+    Equipment Report
 {% endblock %}
 
 
@@ -15,14 +15,14 @@
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-4">
-                <h1 style="text-align: center">Maintenance Report</h1>
+                <h1 style="text-align: center">Equipment Utilization Report</h1>
             </div>
         </div>
     </div>
     <div class="container mt-3">
         <div class="row justify-content-center">
             <div class="col-md-4">
-                <form action="{{ url_for('maintenance_report') }}" method="post">
+                <form action="{{ url_for('equipment_report') }}" method="post">
                     <select class="form-control" name="report_type" id="report_type" onchange="this.form.submit();" required>
                         <option value="" selected="selected" disabled>---Choose a report type---</option>
                         <option value="month">Monthly Report</option>
@@ -36,7 +36,7 @@
         <div class="container mt-3">
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <form action="{{ url_for('maintenance_report') }}" method="post">
+                    <form action="{{ url_for('equipment_report') }}" method="post">
                         <label for="month">Select a year and month for the monthly report:</label>
                         <select class="form-control" name="month_year" id="month_year" required>
                             <option value="" selected="selected" disabled>---Choose a year---</option>
@@ -60,7 +60,7 @@
         <div class="container mt-3">
             <div class="row justify-content-center">
                 <div class="col-md-4">
-                    <form action="{{ url_for('maintenance_report') }}" method="post">
+                    <form action="{{ url_for('equipment_report') }}" method="post">
                         <label for="month">Select a year for the annual report:</label>
                         <select class="form-control" name="year" id="year" onchange="this.form.submit();" required>
                             <option value="" selected="selected" disabled>---Choose a year---</option>
@@ -85,25 +85,25 @@
                 <div class="container mt-3">
                     <div class="row justify-content-center">
                         <div class="col-md-5">
-                            <h5 style="text-align: center">Number of Maintenance per Category</h5>
+                            <h5 style="text-align: center">Number of Booking per Category</h5>
                             <canvas style="text-align: center;" id="myChart1"></canvas>
                             {% if number_list %}
                                 <br>
-                                <h5 style="text-align: center">Monthly Maintanence Number</h5>
+                                <h5 style="text-align: center">Monthly Booking Number</h5>
                                 <canvas style="text-align: center" id="myChart3"></canvas>
                             {% endif %}
                             <br>
                             <h3 style="text-align: center">Total number: {{ total_number }} </h3>
                             <br></br>
-                            <h5 style="text-align: center">Maintenance Cost per Category</h5>
+                            <h5 style="text-align: center">Booking Hours per Category</h5>
                             <canvas style="text-align: center;" id="myChart2"></canvas>
-                            {% if cost_list %}
+                            {% if hour_list %}
                                 <br>
-                                <h5 style="text-align: center">Monthly Maintenance Cost</h5>
+                                <h5 style="text-align: center">Monthly Booking Hours</h5>
                                 <canvas style="text-align: center" id="myChart4"></canvas>
                             {% endif %}
                             <br>
-                            <h3 style="text-align: center">Total cost: ${{ total_cost }} </h3>
+                            <h3 style="text-align: center">Total hours: {{ total_hour }} </h3>
                         </div>
                     </div>
                 </div>
@@ -120,6 +120,7 @@
 
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         const ctx1 = document.getElementById('myChart1');
         const category_list = JSON.parse('{{ category_list|tojson }}');
@@ -130,7 +131,7 @@
             data: {
                 labels: category_list,
                 datasets: [{
-                    label: 'No. of Equipment',
+                    label: 'No. of Booking',
                     data: category_total_number,
                     borderWidth: 0
                 }]
@@ -138,15 +139,15 @@
         });
 
         const ctx2 = document.getElementById('myChart2');
-        const category_total_cost = JSON.parse('{{ category_total_cost|tojson }}');
+        const category_total_hour = JSON.parse('{{ category_total_hour|tojson }}');
 
         new Chart(ctx2, {
             type: 'pie',
             data: {
                 labels: category_list,
                 datasets: [{
-                    label: 'NZ dollars',
-                    data: category_total_cost,
+                    label: 'hours',
+                    data: category_total_hour,
                     borderWidth: 0
                 }]
             }
@@ -161,7 +162,7 @@
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'No. of Equipment',
+                    label: 'No. of Booking',
                     data: number_list,
                     borderWidth: 1
                 }]
@@ -176,15 +177,15 @@
         });
 
         const ctx4 = document.getElementById('myChart4');
-        const cost_list = JSON.parse('{{ cost_list|tojson }}');
+        const hour_list = JSON.parse('{{ hour_list|tojson }}');
 
         new Chart(ctx4, {
             type: 'bar',
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'NZ dollars',
-                    data: cost_list,
+                    label: 'hours',
+                    data: hour_list,
                     borderWidth: 1
                 }]
             },
@@ -196,6 +197,5 @@
                 }
             }
         });
-
     </script>
 {% endblock %}

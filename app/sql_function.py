@@ -833,3 +833,23 @@ def get_annual_maintenances(start_date):
                 WHERE (maintenance_start_date >= %s AND maintenance_start_date < DATE_ADD(%s, INTERVAL 1 YEAR));"""
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
+
+def get_monthly_bookings(start_date):
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (rental_start_datetime >= %s AND rental_start_datetime < DATE_ADD(%s, INTERVAL 1 MONTH));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_annual_bookings(start_date):
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (rental_start_datetime >= %s AND rental_start_datetime < DATE_ADD(%s, INTERVAL 1 YEAR));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
