@@ -38,9 +38,6 @@
         .header-cell:nth-child(2) {
             width: 350px
         }
-        #row {
-            margin: 5px;
-        }
     </style>
 {% endblock %}
 
@@ -90,7 +87,7 @@
                     <div class="card-body">
                         {% for category in category_list %}
                             <form action="{{ url_for('manage_category') }}" method="post">
-                                <div class="row" id="row">
+                                <div class="row" style="margin: 5px;">
                                     <div class="col-md-8 d-flex align-items-center justify-content-center">
                                         <input type="text" class="form-control" name="category_name" id="category_name" value="{{ category.name }}" required>
                                     </div>

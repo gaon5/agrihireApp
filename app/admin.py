@@ -1,6 +1,7 @@
 from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta
 from app import app, check_permissions, scheduler, sql_function
+import calendar
 
 
 # route for managing categories
@@ -259,3 +260,301 @@ def admin_password():
     else:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('dashboard'))
+
+# App route for financial report
+@app.route('/admin/financial_report', methods=['GET', 'POST'])
+def financial_report():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Financial Report", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 3:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    # default variables
+    title = ''
+    year_list = []
+    for i in range(2020,2025):
+        year_list.append(i)
+    month_list = []
+    for month in range(1, 13):
+        month_list.append(calendar.month_name[month])
+    details_list = []
+    revenue_list = []
+    category_list = []
+    category_total = []
+    method_list = []
+    method_total = []
+    financial_months = []
+    income_list = []
+    total_revenue = 0
+    month_flag = False
+    year_flag = False
+    # if the user choose a report type
+    if request.form.get('report_type'):
+        report_type = request.form.get('report_type')
+        if report_type == 'month':
+            month_flag = True
+        else:
+            year_flag = True
+    # if the user chooses monthly report
+    elif request.form.get('month_year'):
+        # convert month name into number
+        month_number = '{:02d}'.format(month_list.index(request.form.get('month')) + 1)
+        # combine year and month into a date string
+        start_date = request.form.get('month_year') + '-' + month_number + '-01'
+        # get every payment details in a certain month
+        details_list = sql_function.get_monthly_details(start_date)
+        revenue_list = sql_function.get_monthly_payment(start_date)
+        title = 'Monthly Report on {} {}'.format(request.form.get('month'),request.form.get('month_year'))
+    # if the user chooses annual report
+    elif request.form.get('year'):
+        # get the ending date of the financial year
+        financial_date = request.form.get('year') + '-03-31'
+        # get every payment details in a financial year
+        details_list = sql_function.get_annual_details(financial_date)
+        revenue_list = sql_function.get_annual_payment(financial_date)
+        title = 'Annual Report between 1st April {} and 31st March {}'.format(int(request.form.get('year'))-1,request.form.get('year'))
+        financial_months = ['04','05','06','07','08','09','10','11','12','01','02','03']
+        # get payment details for each month
+        for i in range(1, 13):
+            income_list.append(0)
+        for i in range(0, len(financial_months), 1):
+            for revenue in revenue_list:
+                if revenue['payment_datetime'].date().strftime('%Y-%m-%d')[5:7] == financial_months[i]:
+                    income_list[i] += revenue['price']
+        # Reconstruct month_list
+        financial_months = []
+        for i in range(4,13,1):
+            string = ''
+            string = calendar.month_name[i] + ' ' + str(int(request.form.get('year'))-1)
+            financial_months.append(string)
+        for i in range(1,4,1):
+            string = ''
+            string = calendar.month_name[i] + ' ' + request.form.get('year')
+            financial_months.append(string)
+    # build up category list
+    for detail in details_list:
+        if detail['category_name'] not in category_list:
+            category_list.append(detail['category_name'])
+            category_total.append(0)
+    # build up every category total payment
+    for detail in details_list:
+        for i in range(0, len(category_list), 1):
+            if category_list[i] == detail['category_name']:
+                category_total[i] += detail['price']
+    # build up method list
+    for revenue in revenue_list:
+        if revenue['payment_type'] not in method_list:
+            method_list.append(revenue['payment_type'])
+            method_total.append(0)
+    # build up every method total payment
+    for revenue in revenue_list:
+        for i in range(0, len(method_list), 1):
+            if method_list[i] == revenue['payment_type']:
+                method_total[i] += revenue['price']
+    # get the total revenue of the month
+    for revenue in revenue_list:
+        total_revenue += revenue['price']     
+    return render_template('admin/financial_report.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,
+                           month_flag=month_flag, year_flag=year_flag, month_list=month_list, year_list=year_list,
+                           category_list=category_list, category_total=category_total, method_list=method_list, method_total=method_total, total_revenue=total_revenue,
+                           financial_months=financial_months, income_list=income_list,
+                           title=title)
+
+# App route for maintenance report
+@app.route('/admin/maintenance_report', methods=['GET', 'POST'])
+def maintenance_report():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Maintenance Report", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 3:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    # default variables
+    title = ''
+    details_list = []
+    year_list = []
+    for i in range(2020,2025):
+        year_list.append(i)
+    month_list = []
+    for month in range(1, 13):
+        month_list.append(calendar.month_name[month])
+    month_flag = False
+    year_flag = False
+    category_list = []
+    category_total_number = []
+    category_total_cost = []
+    total_number = 0
+    total_cost = 0
+    number_list = [] 
+    cost_list = []
+    months = []
+    # if the user choose a report type
+    if request.form.get('report_type'):
+        report_type = request.form.get('report_type')
+        if report_type == 'month':
+            month_flag = True
+        else:
+            year_flag = True
+    # if the user chooses monthly report
+    elif request.form.get('month_year'):
+        # convert month name into number
+        month_number = '{:02d}'.format(month_list.index(request.form.get('month')) + 1)
+        # combine year and month into a date string
+        start_date = request.form.get('month_year') + '-' + month_number + '-01'
+        # get every maintenance details in a certain month
+        details_list = sql_function.get_monthly_maintenances(start_date)
+        title = 'Monthly Report on {} {}'.format(request.form.get('month'),request.form.get('month_year'))
+    # if the user chooses annual report
+    elif request.form.get('year'):
+        # get the ending date of the financial year
+        start_date = request.form.get('year') + '-01-01'
+        # get every maintenance details in a year
+        details_list = sql_function.get_annual_maintenances(start_date)
+        title = 'Annual Report between 1st January {} and 31st December {}'.format(request.form.get('year'),request.form.get('year'))
+        months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+        # get number of maintenance and maintenance costs for each month
+        for i in range(1, 13):
+            number_list.append(0)
+            cost_list.append(0)
+        for i in range(0, len(month_list), 1):
+            for detail in details_list:
+                if detail['maintenance_start_date'].strftime('%Y-%m-%d')[5:7] == months[i]:
+                    number_list[i] += 1
+                    cost_list[i] += detail['maintenance_cost']
+        # Reconstruct month_list
+        months = []
+        for i in range(1,13,1):
+            string = ''
+            string = calendar.month_name[i] + ' ' + request.form.get('year')
+            months.append(string)
+    # build up the category list
+    for detail in details_list:
+        if detail['category_name'] not in category_list:
+            category_list.append(detail['category_name'])
+            category_total_number.append(0)
+            category_total_cost.append(0)
+    # get number of maintenance and maintenance cost for each category
+    for i in range(0, len(category_list), 1):
+        for detail in details_list:
+            if detail['category_name'] == category_list[i]:
+                category_total_number[i] += 1
+                category_total_cost[i] += detail['maintenance_cost']
+                total_number += 1
+                total_cost += detail['maintenance_cost']
+    return render_template('admin/maintenance_report.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,
+                           month_flag=month_flag, year_flag=year_flag, month_list=month_list, year_list=year_list,
+                           category_list=category_list, category_total_number=category_total_number, category_total_cost=category_total_cost,
+                           total_number=total_number, total_cost=total_cost,
+                           number_list=number_list, cost_list=cost_list, months=months,
+                           title=title)
+
+# App route for maintenance report
+@app.route('/admin/equipment_report', methods=['GET', 'POST'])
+def equipment_report():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Maintenance Report", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 3:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    # default variables
+    title = ''
+    details_list = []
+    year_list = []
+    for i in range(2020,2025):
+        year_list.append(i)
+    month_list = []
+    for month in range(1, 13):
+        month_list.append(calendar.month_name[month])
+    month_flag = False
+    year_flag = False
+    category_list = []
+    category_total_number = []
+    category_total_hour = []
+    total_number = 0
+    total_hour = 0
+    number_list = [] 
+    hour_list = []
+    months = []
+    # if the user choose a report type
+    if request.form.get('report_type'):
+        report_type = request.form.get('report_type')
+        if report_type == 'month':
+            month_flag = True
+        else:
+            year_flag = True
+    # if the user chooses monthly report
+    elif request.form.get('month_year'):
+        # convert month name into number
+        month_number = '{:02d}'.format(month_list.index(request.form.get('month')) + 1)
+        # combine year and month into a date string
+        start_date = request.form.get('month_year') + '-' + month_number + '-01'
+        # get every booking details in a certain month
+        details_list = sql_function.get_monthly_bookings(start_date)
+        title = 'Monthly Report on {} {}'.format(request.form.get('month'),request.form.get('month_year'))
+    # if the user chooses annual report
+    elif request.form.get('year'):
+        # get the ending date of the financial year
+        start_date = request.form.get('year') + '-01-01'
+        # get every booking details in a year
+        details_list = sql_function.get_annual_bookings(start_date)
+        title = 'Annual Report between 1st January {} and 31st December {}'.format(request.form.get('year'),request.form.get('year'))
+        months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+        # get number of maintenance and maintenance costs for each month
+        for i in range(1, 13):
+            number_list.append(0)
+            hour_list.append(0)
+        for i in range(0, len(month_list), 1):
+            for detail in details_list:
+                if detail['rental_start_datetime'].strftime('%Y-%m-%d')[5:7] == months[i]:
+                    number_list[i] += 1
+                    if detail['rental_start_datetime'].date() == detail['expected_return_datetime'].date():
+                        hour_list[i] += 1
+                    else:
+                        difference = (detail['expected_return_datetime'].date() - detail['rental_start_datetime'].date()).days
+                        hour_list[i] += difference
+        # Reconstruct month_list
+        months = []
+        for i in range(1,13,1):
+            string = ''
+            string = calendar.month_name[i] + ' ' + request.form.get('year')
+            months.append(string)
+    # build up the category list
+    for detail in details_list:
+        if detail['category_name'] not in category_list:
+            category_list.append(detail['category_name'])
+            category_total_number.append(0)
+            category_total_hour.append(0)
+    # get number of booking and booking hours for each category
+    for i in range(0, len(category_list), 1):
+        for detail in details_list:
+            if detail['category_name'] == category_list[i]:
+                category_total_number[i] += 1
+                total_number += 1
+                # if rental start date is equal to end date, make it a day
+                if detail['rental_start_datetime'].date() == detail['expected_return_datetime'].date():
+                    category_total_hour[i] += 1
+                    total_hour += 1
+                else:
+                    difference = (detail['expected_return_datetime'].date() - detail['rental_start_datetime'].date()).days
+                    category_total_hour[i] += difference
+                    total_hour += difference
+    return render_template('admin/equipment_report.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,
+                           month_flag=month_flag, year_flag=year_flag, month_list=month_list, year_list=year_list,
+                           category_list=category_list, category_total_number=category_total_number, category_total_hour=category_total_hour,
+                           total_number=total_number, total_hour=total_hour,
+                           number_list=number_list, hour_list=hour_list, months=months,
+                           title=title)

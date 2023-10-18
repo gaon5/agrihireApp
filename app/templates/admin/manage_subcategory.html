@@ -46,10 +46,6 @@
         .header-cell:nth-child(4) {
             width: 595px
         }
-
-        #row {
-            margin: 5px;
-        }
     </style>
 {% endblock %}
 
@@ -145,7 +141,7 @@
                     <div class="card-body">
                         {% for subcategory in subcategory_list %}
                             <form action="{{ url_for('manage_subcategory') }}" method="post">
-                                <div class="row" id="row">
+                                <div class="row" style="margin: 5px;">
                                     <div class="col-md-5 d-flex align-items-center justify-content-center">
                                         <input type="text" class="form-control" name="subcategory_name" id="subcategory_name" value="{{ subcategory.sub }}"
                                                required>
