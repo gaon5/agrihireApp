@@ -460,7 +460,7 @@ def maintenance_report():
 # App route for maintenance report
 @app.route('/admin/equipment_report', methods=['GET', 'POST'])
 def equipment_report():
-    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Maintenance Report", "url": "#"}]
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment Report", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
