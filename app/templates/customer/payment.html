@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block mytitle %}
+    Upload license
+{% endblock %}
+
+{% block mycss %}
+<style>
+    .title {
+        color: #1D1912;
+        font-family: 'Poppins', sans-serif;
+        font-size: 24px;
+        margin-left: 15%;
+        margin-right: 15%;
+        border-bottom: 3px solid #1D1912;
+        padding-bottom: 10px;
+    }
+    .radio-toolbar {
+        margin: 10px;
+    }
+    .radio-toolbar input[type="radio"] {
+        display: none; /* 隐藏原生的单选按钮 */
+    }
+    .radio-toolbar label {
+        display: inline-block;
+        background-color: #7d6b41;
+        padding: 10px 20px;
+        font-family: sans-serif, Arial;
+        font-size: 16px;
+        border: 2px solid #1d1912;
+        border-radius: 4px;
+        color: #EECD5C;
+    }
+    .radio-toolbar input[type="radio"]:checked + label {
+        background-color: #4b4029;
+        border-color: #1d1912;
+    }
+    .image-container {
+        display: flex;  /* 使用Flexbox */
+        justify-content: center;  /* 水平居中图像 */
+        align-items: center;  /* 垂直居中图像 */
+        height: 100%;  /* 设置高度为容器的高度 */
+    }
+
+    .img-responsive {
+        max-width: 100%;  /* 最大宽度是容器宽度的100% */
+        height: auto;  /* 自动设置高度以保持纵横比 */
+    }
+    .custom-horizontal-line {
+        border-bottom: 3px solid #1D1912; /* 定义线条粗细和颜色 */
+        width: 100%; /* 使线条宽度与容器相同 */
+        margin-bottom: 20px; /* 如果需要，可以增加一些边距 */
+    }
+
+    .total-price {
+        margin-right: 15%; /* 与页面右侧对齐 */
+        font-size: 24px; /* 字体大小 */
+        font-weight: bold; /* 粗体字 */
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .total-amount {
+        font-size: 24px; /* 字体大小 */
+        font-weight: bold; /* 粗体字 */
+        font-family: 'Poppins', sans-serif;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <p class="title">
+        My Payment
+    </p>
+
+    <div class="container" style="padding-left: 10%; padding-right: 10%;">
+        <form action="{{ url_for('complete_payment') }}" method="POST">  <!-- 注意这里的表单开始标签已经提前，确保所有需要的数据都在表单内 -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="my-4" style="margin-top:20px;">Choose The Payment Method</h1>
+                    <div class="my-3 radio-toolbar">
+                        <span class="form-label">Payment Method:</span><span class="text-danger">*</span><br>
+                        
+                        {% for method in methods %}
+                            <!-- 改用radio按钮的name确保提交所选的方法 -->
+                            <input type="radio" id="{{ method }}" name="paymentMethod" value="{{ method }}">
+                            <label for="{{ method }}">{{ method }}</label>
+                        {% endfor %}
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="row gx-0 image-container">
+                        <div class="col-md-12 mb-3">
+                            <img src="{{ url_for('static', filename='image/CVC.png') }}" class="img-fluid img-responsive" alt="CVC">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 使用JSON将selectedItemList转换为字符串 -->
+            <input type="hidden" name="selectedItemList" value="{{ selectedItemList }}">
+            <input type="hidden" name="price" value="{{ price }}">
+            <!-- 不再需要单独的method字段，因为已通过radio按钮选择 -->
+        
+            <div class="custom-horizontal-line"></div>
+            <div class="total-bar">
+                <span class="total-price">Total Price: </span>
+                <span class="total-amount">{{ price }} </span>
+            </div>
+    
+            <button type="submit" class="btn btn-primary">Pay Now</button>
+        </form>  <!-- 注意表单的结束标签也已经提前 -->
+        
+        <a href="{{ url_for('customer_cart') }}" class="btn btn-primary">Back to My Cart</a>
+        
+    </div>
+{% endblock %}
+
+{% block myjs %}
+
+{% endblock %}

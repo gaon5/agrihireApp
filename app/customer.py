@@ -2,6 +2,7 @@ from flask import Flask, url_for, request, redirect, render_template, session, j
 from datetime import date, datetime, timedelta
 import math
 import re
+import json
 from app import app, check_permissions, sql_function
 
 
@@ -276,8 +277,8 @@ def customer_cart():
         total_amount = total_amount + total_item_price
         # print(type(equipment['price']))
         # print(f"{days} days, {hours} hours, {minutes} minutes")
-        max_amount = sql_function.max_count(equipment['equipment_id'])
-        equipment['count'] = max_amount
+        print(equipment['quantity'])
+        print(equipment['max_count'])
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
 
@@ -332,18 +333,20 @@ def edit_details():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
-    # print(user_id)
-    data = request.get_json()
-    # print(data)
-    # 从数据中提取特定的值
-    cart_item_id = data.get('cart_item_id')
-    quantity = data.get('quantity')
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
+    quantity = request.form.get('quantity')
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
+    cart_item_id = request.form.get('cart_item_id')
     print(start_time)
+    print(end_time)
+    print(quantity)
+    print(cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
+        return redirect(url_for('customer_cart'))
     else:
+        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
         session['msg'] = "Update successfully"
         return redirect(url_for('customer_cart'))
@@ -356,22 +359,51 @@ def payment():
         return redirect(url_for('index'))
     user_id = session['user_id']
     selectedItemList = request.form.get('selectedCartItemIds').split(',')
+    selected_items_json = json.dumps(selectedItemList)
+    price = request.form.get('totalAmountFinal')
     # print(selectedItemList)
+    # print(price)
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    if selectedItemList == []:
+    if selectedItemList == ['']:
         session['error_msg'] = 'Please choose the equipment in your cart to place order.'
         return redirect(url_for('customer_cart'))
     else:
         equipment_list = sql_function.check_cart(user_id)
-        print(equipment_list)
-        if equipment_list :
-            session['msg'] = "Please provide your driver lisence"
-            return render_template('customer/driver_lisence.html', msg=last_msg, error_msg=last_error_msg)
-        else:
-            for each in selectedItemList:
-                print(each)
-    return redirect(url_for('customer_cart'))
+        for each in selectedItemList:
+                if each in equipment_list :
+                    session['msg'] = "Please provide your driver lisence"
+                    return render_template('customer/driver_lisence.html', msg=last_msg, error_msg=last_error_msg)
+                else:
+                    break
+            
+        check_instance = 
+        methods = sql_function.payment_method()
+        return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
+                               price = price, selectedItemList = selected_items_json, methods = methods)
 
 
+@app.route('/complete_payment', methods=['POST'])
+def complete_payment():
+    # 检查请求是否包含POST数据
+    if request.method == 'POST':
+        # 获取表单数据
+        selected_items_json = request.form.get('selectedItemList')  # 这是一个JSON字符串
+        selected_items = json.loads(selected_items_json)  # 将JSON字符串转换回Python列表
+        
+        price = request.form['price']  # 获取价格
+        payment_method = request.form['paymentMethod']  # 获取用户选择的支付方式
+        print(selected_items)
+        print(price)
+        print(payment_method)
+        user_id = session['user_id']
+        hire_id = sql_function.hire_list_update(price,user_id)
+        print(hire_id)
+        sql_function.payment_update(hire_id,payment_method)
+
+        return redirect(url_for('customer_cart'))
+
+    else:
+        # 例如，重定向到首页或错误页面
+        return redirect(url_for('customer_cart'))
