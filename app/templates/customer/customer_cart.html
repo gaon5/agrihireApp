@@ -355,9 +355,9 @@
         }
 
                 // 此函数将遍历所有的复选框并收集已选中的ID
-        function getSelectedCartItemIds() {
+        function getSelectedCartItems() {
             // 创建一个数组来存储选中的ID
-            var selectedIds = [];
+            let selectedItems = [];
 
             // 获取所有的复选框元素
             var checkboxes = document.querySelectorAll('.equipment-checkbox');
@@ -368,14 +368,24 @@
                 if (checkbox.checked) {
                     // 获取此复选框的data-cart-item-id属性值
                     var cartItemId = checkbox.getAttribute('data-cart-item-id');
+                    let rowDiv = checkbox.closest('.row');
 
-                    // 将ID添加到数组中
-                    selectedIds.push(cartItemId);
+                    // 在这个row中查找数量输入元素
+                    let quantityInput = rowDiv.querySelector('input[type="number"]');
+
+                    // 获取输入的数量
+                    let quantity = parseInt(quantityInput.value, 10);
+
+                    // 将ID和数量添加到数组中
+                    selectedItems.push({
+                        id: cartItemId,
+                        quantity: quantity
+                    });
                 }
             });
 
             // 最后，返回包含所有已选中ID的数组
-            return selectedIds;
+            return selectedItems;
         }
 
         function updateTotalAmount() {
@@ -421,16 +431,26 @@
         }
 
         document.getElementById('cartItemsForm').onsubmit = function() {
-            var selectedIds = getSelectedCartItemIds();
+            let selectedItems = getSelectedCartItems();
             let price = document.querySelector(".total-amount").textContent;
 
+            // 获取所有选中的ID和数量
+            let selectedIds = selectedItems.map(item => item.id).join(',');
+            let selectedQuantities = selectedItems.map(item => item.quantity).join(',');
+
             // 更新隐藏字段的值
-            document.getElementById('selectedCartItemIds').value = selectedIds.join(',');
+            document.getElementById('selectedCartItemIds').value = selectedIds;
+            // 新增一个隐藏字段来存储数量
+            let quantityInput = document.createElement('input');
+            quantityInput.type = 'hidden';
+            quantityInput.name = 'selectedQuantities';
+            quantityInput.value = selectedQuantities;
+            document.getElementById('cartItemsForm').appendChild(quantityInput);
+
             document.getElementById("totalAmountFinal").value = price;
 
             return true; // 允许表单提交
         };
-
 
     </script>
 

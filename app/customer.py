@@ -358,30 +358,49 @@ def payment():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
-    selectedItemList = request.form.get('selectedCartItemIds').split(',')
-    selected_items_json = json.dumps(selectedItemList)
-    price = request.form.get('totalAmountFinal')
-    # print(selectedItemList)
-    # print(price)
+    selected_ids = request.form.get('selectedCartItemIds')
+    selected_quantities = request.form.get('selectedQuantities')
+    total_amount_final = request.form.get('totalAmountFinal')
+
+    # 将字符串形式的ids和quantities转换为列表
+    selected_ids_list = [int(id) for id in selected_ids.split(',') if id]
+    selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
+    # print(selected_ids_list)
+    # print(selected_quantities_list)
+    # print(total_amount_final)
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    if selectedItemList == ['']:
+    methods = sql_function.payment_method()
+    if selected_ids_list == ['']:
         session['error_msg'] = 'Please choose the equipment in your cart to place order.'
         return redirect(url_for('customer_cart'))
     else:
         equipment_list = sql_function.check_cart(user_id)
-        for each in selectedItemList:
-                if each in equipment_list :
-                    session['msg'] = "Please provide your driver lisence"
-                    return render_template('customer/driver_lisence.html', msg=last_msg, error_msg=last_error_msg)
-                else:
-                    break
-            
-        check_instance = 
-        methods = sql_function.payment_method()
+        for each in selected_ids_list:
+            booking_equipment_id = sql_function.booking_equipment(each)
+            # print(booking_equipment_id)
+            # print(equipment_list)
+            if booking_equipment_id in equipment_list :
+                session['msg'] = "Please provide your driver lisence"
+                return render_template('customer/driver_lisence.html', msg=last_msg, 
+                       error_msg=last_error_msg, 
+                       price=total_amount_final, 
+                       selectedItemList=selected_ids_list, 
+                       selected_quantities_list=selected_quantities, 
+                       methods=methods)
+
+        for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
+            booking_equipment_id = sql_function.booking_equipment(selected_id)
+            max_count = sql_function.max_count(booking_equipment_id)
+            # print(max_count)
+
+            if selected_quantity > max_count:
+                session['error_msg'] = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
+                return redirect(url_for('customer_cart'))
+        
         return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
-                               price = price, selectedItemList = selected_items_json, methods = methods)
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities, methods = methods)
 
 
 @app.route('/complete_payment', methods=['POST'])
@@ -397,6 +416,11 @@ def complete_payment():
         print(selected_items)
         print(price)
         print(payment_method)
+        selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
+        selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
+
+        # 打印调试信息，或进行其他处理
+        print(selected_quantities)
         user_id = session['user_id']
         hire_id = sql_function.hire_list_update(price,user_id)
         print(hire_id)
@@ -407,3 +431,27 @@ def complete_payment():
     else:
         # 例如，重定向到首页或错误页面
         return redirect(url_for('customer_cart'))
+    
+@app.route('/driver_lisence', methods=['POST'])
+def driver_lisence():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    session['msg'] = "Received your driver lisence"
+    selected_ids = request.form.get('selected_ids')
+    selected_ids_list = [int(id) for id in selected_ids.split(',')]
+
+    selected_quantities = request.form.get('selected_quantities')
+    selected_quantities_list = [int(qty) for qty in selected_quantities.split(',')]
+
+    total_amount_final = request.form.get('total_amount_final')
+    methods_str = request.form.get('methods')
+    # 将字符串转换回列表
+    methods_list = methods_str.split(',')
+    print(selected_ids_list)
+    print(selected_quantities_list)
+    print(methods_list)
+    print(total_amount_final)
+
+    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities, methods = methods_list)

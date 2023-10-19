@@ -50,8 +50,12 @@
                     </div>
                 </div>
                 <br>
-                <form id="lisence" method="POST" action="/payment">
+                <form id="lisence" method="POST" action="/driver_lisence">
                     <input type="hidden" id="driver_lisence" name="driver_lisence">
+                    <input type="hidden" name="total_amount_final" value="{{ price }}">
+                    <input type="hidden" name="selected_ids" value="{{ selectedItemList|join(',') }}">
+                    <input type="hidden" name="selected_quantities" value="{{ selected_quantities_list|join(',') }}">
+                    <input type="hidden" name="methods" value="{{ methods|join(',') }}">
                     <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
                 </form>
             </div>

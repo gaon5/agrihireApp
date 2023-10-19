@@ -753,15 +753,31 @@ def check_cart(user_id):
                 WHERE ua.user_id = %s;"""
     customer = operate_sql(sql, (user_id,), fetch=0, close=0)
     customer_id = customer['customer_id']
-    sql = """SELECT * FROM hire.shopping_cart_item as sci
+    sql = """SELECT sci.equipment_id FROM hire.shopping_cart_item as sci
                 inner join equipment as e on sci.equipment_id = e.equipment_id
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
                 WHERE sci.customer_id = %s and e.requires_drive_license = 1;"""
     # print(sql % (customer_id,equipment_id,count,start_time,duration))
     equipment_require_licence = operate_sql(sql, (customer_id,))
-    return equipment_require_licence
+    equipment_id_list = [item['equipment_id'] for item in equipment_require_licence]
+    return equipment_id_list
 
+def booking_equipment(cart_item_id):
+    sql = """SELECT equipment_id
+                FROM hire.shopping_cart_item
+                WHERE cart_item_id = %s"""
+    booking_equipment = operate_sql(sql, (cart_item_id,))
+    booking_equipment_id = booking_equipment[0]['equipment_id']
+    return booking_equipment_id
+
+def max_count(booking_equipment_id):
+    sql = """SELECT count(*) FROM hire.equipment_instance
+                WHERE equipment_id = %s AND instance_status = 1;"""
+    max_count = operate_sql(sql, (booking_equipment_id,))
+    max = max_count[0]['count(*)']
+    return max
+    
 def payment_method():
     sql = """SELECT * FROM hire.payment_type;"""
     payment_method = operate_sql(sql)
