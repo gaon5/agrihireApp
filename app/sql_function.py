@@ -593,22 +593,29 @@ def updating_equipment(name, price, count, requires_drive_license, length, width
                 WHERE equipment_id= %s"""
     operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
 
-def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, image_url, priority):
+def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, images):
     sql_data = get_cursor()
     sql = """INSERT INTO hire.equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
-            detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s);"""
-    value = (name, price, count ,length, width, height, requires_drive_license, min_stock_threshold, description, detail)
+                detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s);"""
+    value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail)
+    print(sql % value)
     sql_data.execute(sql, value)
     sql_data.execute("""SET @equipment_id = LAST_INSERT_ID();""")
-    sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (LAST_INSERT_ID(), %s, %s);"""
-    value = (image_url, priority)
-    sql_data.execute(sql, value)
+    for i in images:
+        sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (@equipment_id, %s, %s);"""
+        value = (i[0], i[1])
+        print(sql % value)
+        sql_data.execute(sql, value)
+    for i in range(int(count)):
+        sql_data.execute("""INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (@equipment_id, 1)""")
     # sql = """INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (LAST_INSERT_ID(), 1)"""
     # sql_data.execute(sql)
 
 
 def deleting_equipment(equipment_id):
     sql_img = "DELETE FROM hire.equipment_img WHERE equipment_id = %s;"
+    operate_sql(sql_img, (equipment_id,))
+    sql_img = "DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"
     operate_sql(sql_img, (equipment_id,))
     sql_equipment = "DELETE FROM hire.equipment WHERE equipment_id = %s;"
     operate_sql(sql_equipment, (equipment_id,))

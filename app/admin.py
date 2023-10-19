@@ -57,6 +57,7 @@ def manage_category():
     return render_template('admin/manage_category.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg,
                            category_list=category_list)
 
+
 # route for managing categories
 @app.route('/admin/manage_subcategory', methods=['GET', 'POST'])
 def manage_subcategory():

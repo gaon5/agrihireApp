@@ -214,26 +214,21 @@ def add_equipment():
         detail = request.form.get('detail')
         capitalize_name = equipment.title()
         images = []
+        if main_image.filename:
+            images.append([upload_image(main_image), 1])
+        if image.filename:
+            images.append([upload_image(image), 0])
         if driver_license == 'yes':
             driver_license = 1
         elif driver_license == 'no':
             driver_license = 0
         else: 
             raise ValueError("Invalid value for driver's license")
-        if main_image.filename:
-            main_image_url = upload_image(main_image)
-            images.append((main_image_url, 1))    
-            if image.filename:
-                image_url = upload_image(image)
-                images.append((image_url,0))
-                for image_url, priority in images:
-                    sql_function.add_equipment(capitalize_name, price, stock, length, width, height, driver_license,threshold,description, detail, image_url,priority)
-        else: 
-            last_error_msg = 'There was a problem adding equipment'
+        sql_function.add_equipment(capitalize_name, price, stock, length, width, height, driver_license,threshold,description, detail, images)
         session['msg'] = 'Equipment has been added!'
         return redirect(url_for('add_equipment', equipment=equipment))
     return render_template('staff/add_equipment.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
-    
+
 @app.route('/staff/delete_equipment/<equipment_id>', methods=['GET','POST'])
 def delete_equipment(equipment_id):
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Delete Equipment", "url": "#"}]
