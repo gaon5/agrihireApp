@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block mytitle %}
+    Payment
+{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Payment Details</h1>
+        
+        <!-- Booking Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                Booking Information
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Equipment Name:</strong> {{ booking['name'] }}</li>
+                <li class="list-group-item"><strong>Original Booking Date:</strong> {{ booking['datetime'] }}</li>
+                <li class="list-group-item"><strong>Price Per Day:</strong> {{ booking['price'] }}</li>
+                <li class="list-group-item"><strong>Hire Start:</strong> {{ booking['rental_start_datetime'] }}</li>
+                <li class="list-group-item"><strong>New Hire End:</strong> {{ end_date_obj }}</li>
+                <li class="list-group-item"><strong>Extension Duration:</strong> {{ extension_duration|duration_format }}</li>
+                <li class="list-group-item"><strong>Total fee for extending hire:</strong> {{ additional_cost }}</li>
+            </ul>
+        </div>
+        
+        <!-- Payment Form -->
+        <div class="card">
+            <div class="card-header">
+                Select Payment Type
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('payment_form', instance_id=instance_id, end_date_obj=end_date_obj, hire_id=hire_id, extension_duration=extension_duration, additional_cost=additional_cost) }}" method="post">
+
+                    <div class="mb-3">
+                        <label for="payment_type" class="form-label">Payment Type:</label>
+                        <select name="payment_type" id="payment_type" class="form-control">
+                            <option value="1">Paypal</option>
+                            <option value="2">Master Card</option>
+                            <option value="3">Credit</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Pay Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
