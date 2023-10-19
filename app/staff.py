@@ -213,24 +213,44 @@ def add_equipment():
         description = request.form.get('description')
         detail = request.form.get('detail')
         capitalize_name = equipment.title()
-        if main_image.filename:
-            priority = 1
-            image_url = upload_image(main_image)
-            sql_function.add_equipment(image_url,priority,capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
-        elif image.filename:
-            priority = 0
-            image_url = upload_image(image)
-            sql_function.add_equipment(image_url,priority,capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
+        images = []
+        if driver_license == 'yes':
+            driver_license = 1
+        elif driver_license == 'no':
+            driver_license = 0
         else: 
-            if driver_license == 'yes':
-                driver_license = 1
-            elif driver_license == 'no':
-                driver_license = 0
-        sql_function.add_equipment(image_url,priority, capitalize_name, price, stock, driver_license,threshold, length, width, height, description, detail)
+            raise ValueError("Invalid value for driver's license")
+        if main_image.filename:
+            main_image_url = upload_image(main_image)
+            images.append((main_image_url, 1))    
+            if image.filename:
+                image_url = upload_image(image)
+                images.append((image_url,0))
+                for image_url, priority in images:
+                    sql_function.add_equipment(capitalize_name, price, stock, length, width, height, driver_license,threshold,description, detail, image_url,priority)
+        else: 
+            last_error_msg = 'There was a problem adding equipment'
         session['msg'] = 'Equipment has been added!'
         return redirect(url_for('add_equipment', equipment=equipment))
     return render_template('staff/add_equipment.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
-
+    
+@app.route('/staff/delete_equipment/<equipment_id>', methods=['GET','POST'])
+def delete_equipment(equipment_id):
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Delete Equipment", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 2:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    equipment = sql_function.get_equipment_by_id(equipment_id)
+    sql_function.deleting_equipment(equipment_id)
+    session['msg'] = "Deleted successfully"
+    return redirect(url_for('equipment_list',equipment=equipment,breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
+    
 @app.route('/staff/search_result', methods=['GET', 'POST'])
 def search_result():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Result", "url": "#"}]

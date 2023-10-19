@@ -592,18 +592,26 @@ def updating_equipment(name, price, count, requires_drive_license, length, width
                 height = %s, description = %s, detail = %s
                 WHERE equipment_id= %s"""
     operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
-  
-# def add_equipment_image(equipment_id, image_url, priority):
-#     sql_img = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s)"""
-#     operate_sql(sql_img, (equipment_id, image_url, priority))
 
-def add_equipment(image_url, name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, detail):
+def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, image_url, priority):
+    sql_data = get_cursor()
     sql = """INSERT INTO hire.equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
-    detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s)"""
-    operate_sql(sql, (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail), close= 0)
-    operate_sql("""SET @equipment_id=LAST_INSERT_ID();""", fetch=0, close=0)
-    sql_img = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (@equipment_id, %s, %s);"""
-    operate_sql(sql_img, (image_url, priority))
+            detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s);"""
+    value = (name, price, count ,length, width, height, requires_drive_license, min_stock_threshold, description, detail)
+    sql_data.execute(sql, value)
+    sql_data.execute("""SET @equipment_id = LAST_INSERT_ID();""")
+    sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (LAST_INSERT_ID(), %s, %s);"""
+    value = (image_url, priority)
+    sql_data.execute(sql, value)
+    # sql = """INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (LAST_INSERT_ID(), 1)"""
+    # sql_data.execute(sql)
+
+
+def deleting_equipment(equipment_id):
+    sql_img = "DELETE FROM hire.equipment_img WHERE equipment_id = %s;"
+    operate_sql(sql_img, (equipment_id,))
+    sql_equipment = "DELETE FROM hire.equipment WHERE equipment_id = %s;"
+    operate_sql(sql_equipment, (equipment_id,))
 
 def add_staff(first_name, last_name, title, phone_number, email, password):
     today = datetime.today().date()
