@@ -987,3 +987,10 @@ def get_annual_bookings(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+def equipment_instance():
+    sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status, s.name AS instance_name
+            FROM equipment e
+            LEFT JOIN equipment_instance i ON e.equipment_id = i.equipment_id
+            LEFT JOIN instance_status s ON i.instance_status = s.instance_id;"""
+    sql_list = operate_sql(sql)
+    return sql_list
