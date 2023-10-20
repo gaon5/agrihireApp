@@ -21,7 +21,7 @@
                     <th>Amount</th>
                     <th>Hire Start</th>
                     <th>Hire End</th>
-                    <th>Modify Return Date</th>
+                    <th>Extend Return Date</th>
                     <th>Delete Booking</th>
 
                 </tr>
@@ -36,11 +36,17 @@
                         <td>{{ booking.expected_return_datetime }}</td>
                         <td>
                             <form action="{{ url_for('update_booking') }}" method="post">
-                                <!-- Replace update_booking with your actual route for updating booking -->
                                 <input type="date" name="new_end_date" required>
-                                <input type="hidden" id="instance_id" name="instance_id" value="{{ booking.instance_id }}">
-                                <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                                <input type="time" name="new_end_time" required>
+                                <input type="hidden" id="update_instance_id" name="instance_id" value="{{ booking.instance_id }}">
+                                <input type="hidden" id="start_date" name="start_date" value="{{ booking.rental_start_datetime }}">
+                                <input type="hidden" id="price_per_day" name="price" value="{{ booking.price }}">
+                                <input type="hidden" id="update_hire_id" name="hire_id" value="{{ booking.hire_id }}">
+                                
+                                <button type="submit" class="btn btn-primary btn-sm">Extend</button>
                             </form>
+                            
+                            
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
@@ -71,8 +77,8 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <form action="{{ url_for('delete_booking') }}" method="post">
-                        <input type="hidden" id="instance_id" name="instance_id">
-                        <input type="hidden" id="hire_id" name="hire_id">
+                        <input type="hidden" id="delete_instance_id" name="instance_id">
+                        <input type="hidden" id="delete_hire_id" name="hire_id">
                         <button type="submit" class="btn btn-danger my-1">Yes</button>
                     </form>
                 </div>
@@ -84,8 +90,8 @@
 {% block myjs %}
     <script>
         function confirmDelete(instance_id, hire_id) {
-            document.getElementById("instance_id").value = instance_id;
-            document.getElementById("hire_id").value = hire_id;
+            document.getElementById("delete_instance_id").value = instance_id;
+            document.getElementById("delete_hire_id").value = hire_id;
         }
     </script>
 {% endblock %}

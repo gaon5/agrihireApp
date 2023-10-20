@@ -201,18 +201,81 @@ def delete_booking():
         return redirect(url_for('index'))
 
 
+
+
 @app.route('/update_booking', methods=['POST'])
 def update_booking():
     session['msg'] = session['error_msg'] = ''
-    end_date = request.form.get('end_date')
+    start_date = request.form.get('start_date')
+    cost_per_day = float(request.form.get('price'))
     instance_id = request.form.get('instance_id')
+    hire_id = request.form.get('hire_id')
+    new_end_date = request.form.get('new_end_date')
+    new_end_time = request.form.get('new_end_time')
+
+    # Combine the date and time to form a datetime string
+    combined_datetime_str = f"{new_end_date} {new_end_time}"
+
     if 'loggedIn' in session:
-        sql_function.update_booking_end_date(instance_id, end_date)
-        session['msg'] = "Booking updated successfully"
+        # Convert the string end_date and rental_start to datetime objects for comparison
+        end_date_obj = datetime.strptime(combined_datetime_str, '%Y-%m-%d %H:%M')
+        rental_start_obj = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+        
+        # Check if the difference between end_date and rental_start exceeds one week
+        if end_date_obj > rental_start_obj + timedelta(weeks=1):
+            session['error_msg'] = 'You can only extend the hire period up to a week from the start date.'
+            return redirect(url_for('bookings'))
+        
+        # Calculate the additional cost for the extension
+        extension_duration = end_date_obj - rental_start_obj
+        extension_duration_seconds = (end_date_obj - rental_start_obj).total_seconds()
+
+        extension_days = extension_duration.days
+        additional_cost = extension_days * cost_per_day
+        
+        # Check if extension duration exceeds 12 hours beyond the complete days
+        if extension_duration.seconds > 12 * 3600:
+            additional_cost += 0.75 * cost_per_day
+
+    return redirect(url_for('payment_form', end_date_obj=end_date_obj, instance_id=instance_id, hire_id=hire_id, extension_duration=extension_duration_seconds, additional_cost=additional_cost))
+
+@app.template_filter('duration_format')
+def seconds_to_days_hours_seconds(seconds):
+    # Convert seconds to days, hours, and seconds
+    days, remainder = divmod(seconds, 86400)  # 86400 seconds in a day
+    hours, seconds = divmod(remainder, 3600)  # 3600 seconds in an hour
+
+    return f"{days} Days {hours} Hours {seconds} Seconds"
+
+@app.route('/payment_form/<instance_id>/<hire_id>/<end_date_obj>/<int:extension_duration>/<float:additional_cost>', methods=['GET', 'POST'])
+def payment_form(instance_id, hire_id, end_date_obj, extension_duration, additional_cost):
+    session['msg'] = session['error_msg'] = ''
+    today_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Assuming you have a function to fetch booking details based on instance_id or hire_id
+    booking = sql_function.get_booking(hire_id,instance_id) 
+    
+
+    if request.method == 'POST':
+        payment_type = request.form.get('payment_type')
+        payment_type_id = int(payment_type)
+        status_id = 1  # Assume successful for now.
+        payment_successful = sql_function.update_payment(hire_id, status_id, payment_type_id, today_date)
+        if payment_successful:
+            sql_function.update_booking_end_date(end_date_obj, instance_id)
+            session['msg'] = "Booking updated successfully"
+        else:
+            session['error_msg'] = 'Payment failed. Please try again.'
         return redirect(url_for('bookings'))
-    else:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('index'))
+    return render_template('customer/payment_form.html', 
+                       booking=booking, 
+                       extension_duration=extension_duration, 
+                       end_date_obj=end_date_obj, 
+                       additional_cost=additional_cost, 
+                       today=today_date,
+                       instance_id=instance_id, 
+                       hire_id=hire_id)
+
 
 
 @app.route('/faq')
@@ -226,17 +289,8 @@ def contact():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    if request.method == 'POST':
-        # Get form data (to be stored or processed)
-        first_name = request.form.get('first_name')
-        last_name = request.form.get('last_name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        location = request.form.get('location')
-        enquiry_type = request.form.get('enquiry_type')
-        enquiry_details = request.form.get('enquiry_details')
-# send to database
-        last_msg = "'Your enquiry has been submitted successfully!'"
+   
+    last_msg = "'Your enquiry has been submitted successfully!'"
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 

@@ -496,6 +496,21 @@ def get_bookings(user_id):
     bookings = operate_sql(sql, (customer_id,))
     return bookings
 
+def get_booking(hire_id, instance_id):
+    sql = '''SELECT DISTINCT e.name, hl.datetime, ers.rental_start_datetime, ers.expected_return_datetime, hl.price
+        FROM hire_list AS hl
+        INNER JOIN equipment_rental_status AS ers ON hl.customer_id = ers.customer_id
+        INNER JOIN equipment_instance AS ei ON ers.instance_id = ei.instance_id
+        INNER JOIN equipment AS e ON ei.equipment_id = e.equipment_id
+        WHERE hl.hire_id = %s and ers.instance_id = %s '''  # your SQL query remains unchanged
+    result = operate_sql(sql, (hire_id, instance_id))
+    if result:
+        booking = result[0]
+        return booking
+    else:
+        return None
+   
+          
 
 def sql_delete_booking(instance_id=None, hire_id=None):
     if instance_id:
@@ -510,9 +525,22 @@ def sql_delete_booking(instance_id=None, hire_id=None):
         operate_sql(sql, (hire_id,))
 
 
-def update_booking_end_date(instance_id, new_end_date):
-    sql = """UPDATE equipment_rental_status SET expected_return_date=%s WHERE instance_id=%s;"""
-    operate_sql(sql, (new_end_date, instance_id))
+
+
+def update_booking_end_date(end_date_obj, instance_id):
+    # Now that we know the date is valid, we can proceed with the update
+    sql = """UPDATE equipment_rental_status SET expected_return_datetime=%s WHERE instance_id=%s;"""
+    operate_sql(sql, (end_date_obj, instance_id))
+
+def update_payment(hire_id, status_id, payment_type_id, today_date):
+    sql = """INSERT INTO payment (hire_id, status_id, payment_type_id, datetime)
+                    VALUES (%s, %s, %s, %s);"""
+    try:
+        operate_sql(sql, (hire_id, status_id, payment_type_id, today_date))
+        return True
+    except Exception as e:
+        print(f"Error updating payment: {e}")
+        return False
 
 
 def get_pickup_equipment(the_date):
