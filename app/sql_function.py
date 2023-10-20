@@ -812,4 +812,48 @@ def payment_update(hire_id,payment_method):
     sql = """INSERT INTO payment (hire_id,status_id,payment_type_id,datetime)
             VALUES (%s,1,%s,%s)"""
     operate_sql(sql, (hire_id, payment_type_id_value, now,))
-    
+
+def update_equipment_instance(booking_equipment_id,equipment_quantity):
+    sql = """SELECT instance_id FROM equipment_instance
+                WHERE equipment_id = %s AND instance_status = 1
+                order by instance_id
+                limit %s;"""
+    instance_id_list = operate_sql(sql, (booking_equipment_id, equipment_quantity,))
+    instance_ids = [item['instance_id'] for item in instance_id_list]
+    for instance_id in instance_ids:
+        sql = """UPDATE equipment_instance 
+                    SET instance_status = 2
+                    WHERE instance_id = %s;"""
+        operate_sql(sql, (instance_id,))
+    return instance_ids
+
+def update_equipment_rental_status(instance_id,cart_item_id,user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT start_time, end_time FROM hire.shopping_cart_item
+                WHERE cart_item_id = %s;"""
+    time_list = operate_sql(sql, (cart_item_id,))
+    start_time = time_list[0]['start_time']
+    end_time = time_list[0]['end_time']
+    sql = """INSERT INTO equipment_rental_status (instance_id,customer_id,rental_start_datetime,expected_return_datetime,rental_status_id)
+            VALUES (%s,%s,%s,%s,2);"""
+    operate_sql(sql, (instance_id,customer_id,start_time,end_time,))
+    time_diff = end_time - start_time
+    return time_diff
+
+def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
+    sql = """SELECT price
+                FROM equipment
+                WHERE equipment_id = %s;"""
+    unit_price = operate_sql(sql, (booking_equipment_id,))
+    price = float(unit_price[0]['price'])
+    total_price = price * days
+    sql = """INSERT INTO hire_item (hire_id,instance_id,count,price)
+            VALUES (%s,%s,%s,%s,2);"""
+    operate_sql(sql, (hire_id,instance_id,count,total_price,))
+
+

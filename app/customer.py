@@ -264,7 +264,7 @@ def customer_cart():
         # 计算具体的天数、小时数、分钟数
         days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
         hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-        minutes, _ = divmod(remainder, 60)
+        
         if 0 < hours <= 4:
             days = days + 0.75
         elif hours == 0:
@@ -277,8 +277,8 @@ def customer_cart():
         total_amount = total_amount + total_item_price
         # print(type(equipment['price']))
         # print(f"{days} days, {hours} hours, {minutes} minutes")
-        print(equipment['quantity'])
-        print(equipment['max_count'])
+        # print(equipment['quantity'])
+        # print(equipment['max_count'])
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
 
@@ -291,6 +291,8 @@ def add_to_cart():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     equipment_id = request.form.get('equipment_id')
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     previous_url = str(request.referrer)
     if not (start_time and end_time and equipment_id):
@@ -320,6 +322,8 @@ def delete_item():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     cart_item_id = request.form.get('cart_item_id')
     # print(cart_item_id)
@@ -329,6 +333,9 @@ def delete_item():
 
 @app.route('/edit_details', methods=['POST', 'GET'])
 def edit_details():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
@@ -337,10 +344,10 @@ def edit_details():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     cart_item_id = request.form.get('cart_item_id')
-    print(start_time)
-    print(end_time)
-    print(quantity)
-    print(cart_item_id)
+    # print(start_time)
+    # print(end_time)
+    # print(quantity)
+    # print(cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
         return redirect(url_for('customer_cart'))
@@ -387,7 +394,7 @@ def payment():
                        error_msg=last_error_msg, 
                        price=total_amount_final, 
                        selectedItemList=selected_ids_list, 
-                       selected_quantities_list=selected_quantities, 
+                       selected_quantities_list=selected_quantities_list, 
                        methods=methods)
 
         for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
@@ -400,11 +407,14 @@ def payment():
                 return redirect(url_for('customer_cart'))
         
         return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
-                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities, methods = methods)
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods)
 
 
 @app.route('/complete_payment', methods=['POST'])
 def complete_payment():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     # 检查请求是否包含POST数据
     if request.method == 'POST':
         # 获取表单数据
@@ -425,6 +435,29 @@ def complete_payment():
         hire_id = sql_function.hire_list_update(price,user_id)
         print(hire_id)
         sql_function.payment_update(hire_id,payment_method)
+        for i in range(0,len(selected_items)):
+            booking_equipment_id = sql_function.booking_equipment(selected_items[i])
+            equipment_quantity = selected_quantities[i]
+            instance_ids = sql_function.update_equipment_instance(booking_equipment_id,equipment_quantity)
+            for instance_id in instance_ids:
+                time_diff = sql_function.update_equipment_rental_status(instance_id,selected_items[i],user_id)
+
+                total_seconds = time_diff.total_seconds()
+
+                # 计算具体的天数、小时数、分钟数
+                days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+                hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+                
+                if 0 < hours <= 4:
+                    days = days + 0.75
+                elif hours == 0:
+                    days = days
+                else:
+                    days = days + 1
+                sql_function.update_hire_item(hire_id,instance_id,equipment_quantity,booking_equipment_id,days)
+            sql_function.sql_delete_item(selected_items[i])
+
+        session['msg'] = "Order complete. Please check in your bookings. "
 
         return redirect(url_for('customer_cart'))
 
@@ -454,4 +487,4 @@ def driver_lisence():
     print(total_amount_final)
 
     return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
-                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities, methods = methods_list)
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods_list)
