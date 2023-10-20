@@ -325,17 +325,44 @@ def get_equipment_by_sub(sub_id, sql_page):
     count = math.ceil(count['count'] / 12)
     return equipment, count
 
-
-def get_equipment_by_id(equipment_id):
-    sql = """SELECT * FROM equipment WHERE equipment_id=%s;"""
+def get_more_detail(equipment_id):
+    sql = """SELECT e.equipment_id, e.name, e.price, e.count, e.requires_drive_license, e.length, e.width, e.height, e.description, e.detail,
+            GROUP_CONCAT(ei.image_url) AS image_urls
+            FROM equipment e
+            LEFT JOIN equipment_img ei ON e.equipment_id = ei.equipment_id
+            LEFT JOIN classify c ON e.equipment_id = c.equipment_id
+            WHERE e.equipment_id=%s
+            GROUP BY e.equipment_id;"""
     equipment = operate_sql(sql, (equipment_id,))
+    for item in equipment:
+        if item['image_urls']:
+            item['image_urls'] = item['image_urls'].split(',')
     return equipment
 
+def get_equipment_by_id(equipment_id):
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description, 
+                e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+                LEFT JOIN classify c on e.equipment_id = c.equipment_id
+                LEFT JOIN sub_category s on s.sub_id = c.sub_id
+                LEFT JOIN category ca on ca.category_id = s.category_id
+                WHERE e.equipment_id=%s;"""
+    equipment = operate_sql(sql, (equipment_id,))
+    for item in equipment:
+        if item['image_urls']:
+            item['image_urls'] = item['image_urls'].split(',')
+    return equipment
+
+def image_priority(equipment_id):
+    sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_url, ei.priority FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;;"""
+    image_priority = operate_sql(sql, (equipment_id,))
+    return image_priority
+    
 def get_image_by_id(equipment_id):
     sql_img = """SELECT * FROM equipment_img WHERE equipment_id = %s;"""
     image = operate_sql(sql_img, (equipment_id,))
     return image
-
 
 def get_equipment_by_wishlist(user_id, sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM customer
@@ -551,7 +578,6 @@ def get_return_equipment(the_date):
     return_list = operate_sql(sql, (the_date,))
     return return_list
 
-
 def return_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
     # get expected return datetime
     sql = """SELECT expected_return_datetime AS expected_return_datetime FROM equipment_rental_status WHERE equipment_rental_status_id = %s"""
@@ -581,24 +607,50 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
 
-
-def updating_equipment_image(image_url, equipment_id):
-    sql_img = """UPDATE hire.equipment_img SET image_url =%s WHERE equipment_id = %s"""
-    operate_sql(sql_img, (equipment_id, image_url))
-
-
-def updating_equipment(name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id):
-    sql = """UPDATE hire.equipment SET name = %s, price = %s, count = %s, requires_drive_license = %s, length = %s, width = %s, 
-                height = %s, description = %s, detail = %s
-                WHERE equipment_id= %s"""
-    operate_sql(sql, (name, price, count, requires_drive_license, length, width, height, description, detail, equipment_id))
-
-def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, images):
+def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images, sub_id):
+    sql_data = get_cursor()
+    sql = """UPDATE hire.equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
+                detail=%s WHERE equipment_id= %s;"""
+    value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail, equipment_id)
+    sql_data.execute(sql, value)
+    for i in images:
+        sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s);"""
+        value = (equipment_id, i[0], i[1])
+        print(sql % value)
+        sql_data.execute(sql, value)
+    sql = """DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"""
+    value = (equipment_id,)
+    sql_data.execute(sql,value)
+    for i in range(int(count)):
+        sql = """INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (%s, 1);"""
+        value = (equipment_id,)
+        sql_data.execute(sql,value)
+    sql = """DELETE FROM hire.classify WHERE equipment_id = %s;"""
+    value = (equipment_id,)
+    sql_data.execute(sql,value)
+    sql = """INSERT INTO hire.classify(sub_id, equipment_id) VALUES (%s, %s);"""
+    value = (sub_id,equipment_id)
+    sql_data.execute(sql, value)
+    
+def check_existing_main_image(equipment_id):
+    sql_data = get_cursor()
+    sql = """SELECT COUNT(*) FROM equipment_img WHERE equipment_id = %s AND priority = 1;"""
+    value =(equipment_id,)
+    sql_data.execute(sql, value)
+    main_image_exist = sql_data.fetchone()
+    print(main_image_exist)
+    return main_image_exist
+    
+def get_sub_category():
+    sql = """SELECT * FROM hire.sub_category;"""
+    sub_category = operate_sql(sql)
+    return sub_category
+    
+def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, images, sub_id):
     sql_data = get_cursor()
     sql = """INSERT INTO hire.equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
                 detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s);"""
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail)
-    print(sql % value)
     sql_data.execute(sql, value)
     sql_data.execute("""SET @equipment_id = LAST_INSERT_ID();""")
     for i in images:
@@ -608,17 +660,23 @@ def add_equipment(name, price, count,length, width, height, requires_drive_licen
         sql_data.execute(sql, value)
     for i in range(int(count)):
         sql_data.execute("""INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (@equipment_id, 1)""")
-    # sql = """INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (LAST_INSERT_ID(), 1)"""
-    # sql_data.execute(sql)
-
+    sql = """INSERT INTO hire.classify(sub_id, equipment_id) VALUES (%s, @equipment_id);"""
+    value = (sub_id,)
+    sql_data.execute(sql, value)
 
 def deleting_equipment(equipment_id):
     sql_img = "DELETE FROM hire.equipment_img WHERE equipment_id = %s;"
     operate_sql(sql_img, (equipment_id,))
-    sql_img = "DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"
-    operate_sql(sql_img, (equipment_id,))
+    sql_category = "DELETE FROM hire.classify WHERE equipment_id = %s;"
+    operate_sql(sql_category,(equipment_id,))
+    sql_instance = "DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"
+    operate_sql(sql_instance, (equipment_id,))
     sql_equipment = "DELETE FROM hire.equipment WHERE equipment_id = %s;"
     operate_sql(sql_equipment, (equipment_id,))
+
+def deleting_image(equipment_id, image_id):
+    sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
+    operate_sql(sql, (equipment_id, image_id))
 
 def add_staff(first_name, last_name, title, phone_number, email, password):
     today = datetime.today().date()

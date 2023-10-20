@@ -36,6 +36,24 @@
                         <label for="image" class="asterisk mt-2"></label>
                         <input type="file" class="form-control asterisk-inside" name="image" id="image" accept="image/*" multiple="true">
                     </div>
+                    <!-- Category -->
+                    <div class="relative mb-3">
+                        <label for="category" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <select class="form-control asterisk-inside" name="category" id="category">
+                            {% for type in main %}
+                                <option value="{{ type.category_id }}">{{ type.name }} </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!-- Sub-Category -->
+                    <div class="relative mb-3">
+                        <label for="sub_category" class="asterisk mt-2"><span style="color:red">*</span></label>
+                        <select class="form-control asterisk-inside" name="sub_category" id="sub_category">
+                            {% for type in sub %}
+                                <option value="{{ type.sub_id }}">{{ type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>                    
                     <!-- Equipment Name -->
                     <div class="relative mb-3">
                         <label for="ename" class="asterisk mt-2"><span style="color:red">*</span></label>
