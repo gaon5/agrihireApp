@@ -74,7 +74,7 @@ title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
 city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
 question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
 category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
-sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""")
+sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
 
 category = {cat['category_id']: {'name': cat['name'], 'subcategories': []} for cat in category_list}
 for sub in sub_category_list:
@@ -603,7 +603,8 @@ def get_maintenance_equipment(today_date):
     sql = """SELECT instance_id, maintenance_start_date AS start_date, maintenance_end_date AS end_date, maintenance_type.name AS type, maintenance_status.name AS status, notes FROM equipment_maintenance
                 INNER JOIN maintenance_type ON maintenance_type.maintenance_type_id = equipment_maintenance.maintenance_type_id
                 INNER JOIN maintenance_status ON maintenance_status.maintenance_status_id = equipment_maintenance.maintenance_status_id
-                ORDER BY maintenance_start_date"""
+                WHERE NOT equipment_maintenance.maintenance_status_id = 3
+                ORDER BY maintenance_start_date;"""
     details = operate_sql(sql)
     return details
 
@@ -618,11 +619,14 @@ def complete_maintenance(id):
             WHERE instance_id=%s"""
     operate_sql(sql, (id,))
 
+# call a function to get category list so that the website always display LATEST information (don't delete this )
+def get_category_list():
+    category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
+    return category_list
 
 def insert_category(value):
     sql = """INSERT INTO category (category_id, name) VALUES (NULL, %s)"""
     operate_sql(sql, (value,))
-
 
 def check_category(id):
     sql="""SELECT * FROM category
@@ -631,13 +635,19 @@ def check_category(id):
     details = operate_sql(sql, (id,))
     return details
 
+def validate_category(input):
+    category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
+    result = False
+    for category in category_list:
+        if input.lower() == category['name'].lower():
+            result = True
+    return result
 
 def edit_category(id, name):
     sql = """UPDATE category 
                 SET name = %s
                 WHERE category_id = %s"""
     operate_sql(sql, (name,id))
-
 
 def delete_category(id):
     sql = """DELETE FROM category WHERE category_id=%s"""
@@ -651,7 +661,6 @@ def get_main_and_sub_categories():
     details = operate_sql(sql)
     return details
 
-
 def insert_subcategory(id, name):
     sql="""INSERT INTO sub_category (sub_id, category_id, name) VALUES (NULL, %s, %s)"""
     operate_sql(sql, (id, name))
@@ -664,6 +673,13 @@ def check_subcategory(id):
     details = operate_sql(sql, (id,))
     return details
 
+def validate_subcategory(input, category_id):
+    sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
+    result = False
+    for sub in sub_category_list:
+        if sub['category_id'] == int(category_id) and sub['name'].lower() == input.lower():
+            result = True
+    return result
 
 def change_category(sub_id, main_id):
     sql = """UPDATE sub_category 
@@ -745,6 +761,7 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
                     SET count = %s, start_time = %s, end_time = %s
                     WHERE (customer_id = %s) and (cart_item_id = %s)"""
     operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))
+
 
 def check_cart(user_id):
     sql = """SELECT ua.user_id, c.customer_id
@@ -856,4 +873,89 @@ def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
             VALUES (%s,%s,%s,%s,2);"""
     operate_sql(sql, (hire_id,instance_id,count,total_price,))
 
+
+
+def get_monthly_details(start_date):
+    sql = """SELECT payment_id, payment_type.name AS payment_type, hire_list.price AS price, category.name AS category_name FROM payment
+                INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
+                INNER JOIN hire_list ON hire_list.hire_id = payment.hire_id
+                INNER JOIN hire_item ON hire_item.hire_id = hire_list.hire_id
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = hire_item.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (payment.status_id = 1) AND (payment.datetime >= %s AND payment.datetime < DATE_ADD(%s, INTERVAL 1 MONTH))
+                ORDER BY payment.datetime;"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_monthly_payment(start_date):
+    sql = """SELECT payment_id, payment_type.name AS payment_type, hire_list.price AS price FROM payment
+                INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
+                INNER JOIN hire_list ON hire_list.hire_id = payment.hire_id
+                WHERE (payment.status_id = 1) AND (payment.datetime >= %s AND payment.datetime < DATE_ADD(%s, INTERVAL 1 MONTH))"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_annual_details(end_date):
+    sql = """SELECT payment_id, payment.datetime AS payment_datetime, payment_type.name AS payment_type, hire_list.price AS price, category.name AS category_name FROM payment
+                INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
+                INNER JOIN hire_list ON hire_list.hire_id = payment.hire_id
+                INNER JOIN hire_item ON hire_item.hire_id = hire_list.hire_id
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = hire_item.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (payment.status_id = 1) AND (payment.datetime > DATE_SUB(%s, INTERVAL 1 YEAR) AND payment.datetime <= %s)
+                ORDER BY payment.datetime;"""
+    sql_list = operate_sql(sql, (end_date, end_date))
+    return sql_list
+
+def get_annual_payment(end_date):
+    sql = """SELECT payment_id, payment.datetime AS payment_datetime, payment_type.name AS payment_type, hire_list.price AS price FROM payment
+                INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
+                INNER JOIN hire_list ON hire_list.hire_id = payment.hire_id
+                WHERE (payment.status_id = 1) AND (payment.datetime > DATE_SUB(%s, INTERVAL 1 YEAR) AND payment.datetime <= %s)"""
+    sql_list = operate_sql(sql, (end_date, end_date))
+    return sql_list
+
+def get_monthly_maintenances(start_date):
+    sql = """SELECT maintenance_id, maintenance_cost, category.name AS category_name FROM equipment_maintenance
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (maintenance_start_date >= %s AND maintenance_start_date < DATE_ADD(%s, INTERVAL 1 MONTH))"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_annual_maintenances(start_date):
+    sql = """SELECT maintenance_id, maintenance_cost, maintenance_start_date, category.name AS category_name FROM equipment_maintenance
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (maintenance_start_date >= %s AND maintenance_start_date < DATE_ADD(%s, INTERVAL 1 YEAR));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_monthly_bookings(start_date):
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (rental_start_datetime >= %s AND rental_start_datetime < DATE_ADD(%s, INTERVAL 1 MONTH));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
+
+def get_annual_bookings(start_date):
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+                INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
+                INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
+                INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
+                INNER JOIN category ON category.category_id = sub_category.category_id
+                WHERE (rental_start_datetime >= %s AND rental_start_datetime < DATE_ADD(%s, INTERVAL 1 YEAR));"""
+    sql_list = operate_sql(sql, (start_date, start_date))
+    return sql_list
 

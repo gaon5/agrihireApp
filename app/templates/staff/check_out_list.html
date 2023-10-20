@@ -32,27 +32,27 @@
         }
 
         .header-cell:nth-child(1) {
-            flex: 3; /* 对应My Equipment */
+            flex: 3; 
 
         }
 
         .header-cell:nth-child(2) {
-            flex: 2; /* 对应My Equipment */
+            flex: 2; 
 
         }
 
         .header-cell:nth-child(3) {
-            flex: 2; /* 对应My Equipment */
+            flex: 2; 
 
         }
 
         .header-cell:nth-child(4) {
-            flex: 2; /* 对应My Equipment */
+            flex: 1; 
 
         }
 
         .header-cell:nth-child(5) {
-            flex: 1; /* 对应My Equipment */
+            flex: 2;
 
         }
     </style>
@@ -69,7 +69,6 @@
             </div>
         </div>
     </div>
-
     <div class="row justify-content-center">
         <div class="col-md-6">
             <form action="{{ url_for('check_out_list') }}" method="post">
@@ -77,21 +76,23 @@
                     <button type="submit" class="btn btn-dark mx-5 px-4" id="previous_day" name="previous_day" value="previous_day">&larr;</button>
                     <p id="date" class="px-3">{{ the_date }}</p>
                     <button type="submit" class="btn btn-dark mx-5 px-4" id="next_day" name="next_day" value="next_day">&rarr;</button>
+                    <input type="hidden" name="the_date" id="the_date" value="{{ the_date }}">
                 </div>
-                <br>
-                {% if pickup_list %}
-                    <div class="table-header">
-                        <div class="header-cell">Equipment Name</div>
-                        <div class="header-cell">Customer ID</div>
-                        <div class="header-cell">Pickup Time</div>
-                        <div class="header-cell">Notes</div>
-                        <div class="header-cell">Check Out</div>
-                    </div>
-
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            {% for pickup in pickup_list %}
-                                <div class="row">
+            </form>
+            <br>
+            {% if pickup_list %}
+                <div class="table-header">
+                    <div class="header-cell">Equipment Name</div>
+                    <div class="header-cell">Customer ID</div>
+                    <div class="header-cell">Pickup Time</div>
+                    <div class="header-cell">Notes</div>
+                    <div class="header-cell"></div>
+                </div>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        {% for pickup in pickup_list %}
+                            <form action="{{ url_for('check_out_list') }}" method="post">
+                                <div class="row" style="margin: 5px;">
                                     <div class="col-md-4 d-flex align-items-center justify-content-center">
                                         {{ pickup.name }}
                                     </div>
@@ -101,25 +102,25 @@
                                     <div class="col-md-2 d-flex align-items-center justify-content-center">
                                         {{ pickup.rental_start_datetime }}
                                     </div>
-                                    <div class="col-md-3 d-flex align-items-center justify-content-center">
+                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
                                         {{ pickup.notes }}
                                     </div>
                                     <div class="col-md-1 d-flex align-items-center justify-content-center">
                                         <input type="hidden" name="instance_id" id="instance_id" value="{{ pickup.instance_id }}">
                                         <input type="hidden" name="equipment_rental_status_id" id="equipment_rental_status_id" value="{{ pickup.equipment_rental_status_id }}">
+                                        <input type="hidden" name="the_date" id="the_date" value="{{ the_date }}">
                                         <button type="submit" class="btn btn-primary">
                                             Check Out
                                         </button>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        </div>
+                            </form>
+                        {% endfor %}
                     </div>
-                {% else %}
-                    <p>There is no equipment for pickup</p>
-                {% endif %}
-                <input type="hidden" name="the_date" id="the_date" value="{{ the_date }}">
-            </form>
+                </div>
+            {% else %}
+                <p>There is no equipment for pickup</p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

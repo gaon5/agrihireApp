@@ -32,7 +32,7 @@
         }
 
         .header-cell:nth-child(1) {
-            width: 650px
+            width: 950px
         }
 
         .header-cell:nth-child(2) {
@@ -97,7 +97,7 @@
             <div class="col-md-5">
                 <div class="card">
                     <div class="card-body">
-                        <h5>Change Main Category</h5><br>
+                        <h5>Update Main Category</h5><br>
                         <form action="{{ url_for('manage_subcategory') }}" method="post">
                             <div class="input-group mb-3">
                                 <select class="form-control" name="sub_category_id" id="sub_category_id" required>
@@ -117,7 +117,7 @@
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary" id="change" name="change" value="change">
-                                    Change
+                                    Update
                                 </button>
                             </div>
                         </form>
@@ -128,7 +128,7 @@
     </div>
     <br>
     <div class="row justify-content-center">
-        <div class="col-md-4">
+        <div class="col-md-8">
             <br>
             {% if subcategory_list %}
                 <div class="table-header">
@@ -141,8 +141,8 @@
                     <div class="card-body">
                         {% for subcategory in subcategory_list %}
                             <form action="{{ url_for('manage_subcategory') }}" method="post">
-                                <div class="row">
-                                    <div class="col-md-4 d-flex align-items-center justify-content-center">
+                                <div class="row" style="margin: 5px;">
+                                    <div class="col-md-5 d-flex align-items-center justify-content-center">
                                         <input type="text" class="form-control" name="subcategory_name" id="subcategory_name" value="{{ subcategory.sub }}"
                                                required>
                                     </div>
@@ -151,11 +151,12 @@
                                     </div>
                                     <div class="col-md-2 d-flex align-items-center justify-content-center">
                                         <button type="submit" class="btn btn-primary" id="edit" name="edit" value="edit">
-                                            Edit
+                                            Change
                                         </button>
                                     </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
+                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
                                         <input type="hidden" name="subcategory_id" id="subcategory_id" value="{{ subcategory.sub_id }}">
+                                        <input type="hidden" name="category_id" id="category_id" value="{{ subcategory.category_id }}">
                                         <button type="submit" onclick="return confirmDelete()" class="btn btn-danger">
                                             Delete
                                         </button>

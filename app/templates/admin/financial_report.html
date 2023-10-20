@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+    Financial Report
+{% endblock %}
+
+
+{% block mycss %}
+{% endblock %}
+
+
+{% block body %}
+<div style="min-height: 800px">
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <h1 style="text-align: center">Financial Report</h1>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <form action="{{ url_for('financial_report') }}" method="post">
+                    <select class="form-control" name="report_type" id="report_type" onchange="this.form.submit();" required>
+                        <option value="" selected="selected" disabled>---Choose a report type---</option>
+                        <option value="month">Monthly Report</option>
+                        <option value="year">Annual Report</option>
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% if month_flag %}
+        <div class="container mt-3">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <form action="{{ url_for('financial_report') }}" method="post">
+                        <label for="month">Select a year and month for the monthly report:</label>
+                        <select class="form-control" name="month_year" id="month_year" required>
+                            <option value="" selected="selected" disabled>---Choose a year---</option>
+                            {% for year in year_list %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        <select class="form-control" name="month" id="month" required>
+                            <option value="" selected="selected" disabled>---Choose a month---</option>
+                            {% for month in month_list %}
+                                <option value="{{ month }}">{{ month }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if year_flag %}
+        <div class="container mt-3">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <form action="{{ url_for('financial_report') }}" method="post">
+                        <label for="month">Select a year for the annual report:</label>
+                        <select class="form-control" name="year" id="year" onchange="this.form.submit();" required>
+                            <option value="" selected="selected" disabled>---Choose a financial year---</option>
+                            {% for year in year_list %}
+                                <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <br>
+    {% if title %}
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-5" style="text-align: center">
+                <h4>{{ title }}</h4>
+            </div>
+            <br></br>
+            {% if total_revenue %}
+                <div class="container mt-3">
+                    <div class="row justify-content-center">
+                        <div class="col-md-5">
+                            <h5 style="text-align: center">Revenue per Category</h5>
+                            <canvas style="text-align: center;" id="myChart1"></canvas>
+                            <br>
+                            <h5 style="text-align: center">Revenue per Payment Method</h5>
+                            <canvas style="text-align: center;" id="myChart2"></canvas>
+                            {% if income_list %}
+                                <br>
+                                <h5 style="text-align: center">Monthly Income</h5>
+                                <canvas style="text-align: center" id="myChart3"></canvas>
+                            {% endif %}
+                            <br></br>
+                            <h3 style="text-align: center">Total revenue: ${{ total_revenue }}</h3>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            {% else %}
+                <p style="text-align: center;">Nothing to show here</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+
+{% block myjs %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx1 = document.getElementById('myChart1');
+        const category_list = JSON.parse('{{ category_list|tojson }}');
+        const category_total = JSON.parse('{{ category_total|tojson }}');
+
+        new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: category_list,
+                datasets: [{
+                    label: 'NZ dollars',
+                    data: category_total,
+                    borderWidth: 0
+                }]
+            }
+        });
+
+        const ctx2 = document.getElementById('myChart2');
+        const method_list = JSON.parse('{{ method_list|tojson }}');
+        const method_total = JSON.parse('{{ method_total|tojson }}');
+
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: method_list,
+                datasets: [{
+                    label: 'NZ dollars',
+                    data: method_total,
+                    borderWidth: 0
+                }]
+            }
+        });
+
+        const ctx3 = document.getElementById('myChart3');
+        const income_list = JSON.parse('{{ income_list|tojson }}');
+        const financial_months = JSON.parse('{{ financial_months|tojson }}');
+
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: financial_months,
+                datasets: [{
+                    label: 'NZ dollars',
+                    data: income_list,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}
