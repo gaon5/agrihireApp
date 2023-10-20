@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+
+{% block mytitle %}
+    Upload lisence
+{% endblock %}
+
+
+{% block mycss %}
+<style>
+    .title {
+        color: #1D1912; /* 字体颜色 */
+        font-family: 'Poppins', sans-serif; /* 字体 */
+        font-size: 24px; /* 字体大小 */
+        margin-left: 15%; /* 左侧距离 */
+        margin-right: 15%; /* 右侧距离 */
+        border-bottom: 3px solid #1D1912; /* 3px深色横线 */
+        padding-bottom: 10px; /* 为了使横线与文字之间有些间距 */
+    }
+
+    .form-container {
+        border: 1px solid #000; /* 添加边框 */
+        padding: 20px; /* 添加内部间距 */
+        box-sizing: border-box; /* 确保宽度包括内边距和边框 */
+    }
+</style>
+    
+{% endblock %}
+
+
+{% block body %}
+    <p class="title">
+        My Driver Lisence
+    </p>
+
+    <div class="container-fluid" style="margin-left: 15%; margin-right: 15%;"> <!-- 如果你希望容器是全宽的，可以使用 container-fluid -->
+        <div class="row"> <!-- 这是主要的行 -->
+            <!-- 表单部分 -->
+            <div class="col-md-3">
+                <div class="form-container">
+                    <!-- 表单内容 -->
+                    <div class="mb-3 mt-3">
+                        <label for="plate" class="form-label">Car Plate:</label>
+                        <input type="text" class="form-control" id="plate" placeholder="Enter Plate number" name="plate_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lisence" class="form-label">Driver Lisence:</label>
+                        <input type="file" id="myFile" name="filename">
+                        <button type="button"> Submit </button>
+                    </div>
+                </div>
+                <br>
+                <form id="lisence" method="POST" action="/driver_lisence">
+                    <input type="hidden" id="driver_lisence" name="driver_lisence">
+                    <input type="hidden" name="total_amount_final" value="{{ price }}">
+                    <input type="hidden" name="selected_ids" value="{{ selectedItemList|join(',') }}">
+                    <input type="hidden" name="selected_quantities" value="{{ selected_quantities_list|join(',') }}">
+                    <input type="hidden" name="methods" value="{{ methods|join(',') }}">
+                    <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
+                </form>
+            </div>
+    
+            <!-- 图片部分 -->
+            <div class="col-md-9">
+                <div class="row gx-0">
+                    <div class="col-md-12 mb-3">
+                        <img src="{{ url_for('static', filename='image/D/Front.jpg') }}" class="img-fluid" alt="Front page">
+                    </div>
+                    <div class="col-md-12">
+                        <img src="{{ url_for('static', filename='image/D/Back.jpg') }}" class="img-fluid" alt="Back page">
+                    </div>
+                </div>
+            </div>
+        </div> <!-- 结束主要的行 -->
+    </div> <!-- 结束容器 -->
+
+{% endblock %}
+
+
+{% block myjs %}
+
+{% endblock %}

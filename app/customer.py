@@ -1,7 +1,8 @@
-from flask import Flask, url_for, request, redirect, render_template, session
+from flask import Flask, url_for, request, redirect, render_template, session, jsonify
 from datetime import date, datetime, timedelta
 import math
 import re
+import json
 from app import app, check_permissions, sql_function
 
 
@@ -263,7 +264,7 @@ def customer_cart():
         # 计算具体的天数、小时数、分钟数
         days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
         hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-        minutes, _ = divmod(remainder, 60)
+        
         if 0 < hours <= 4:
             days = days + 0.75
         elif hours == 0:
@@ -274,10 +275,12 @@ def customer_cart():
         total_item_price = unit_price * days
         equipment['price'] = total_item_price
         total_amount = total_amount + total_item_price
-        print(type(equipment['price']))
-        print(f"{days} days, {hours} hours, {minutes} minutes")
-        max_amount = sql_function.max_count(equipment['equipment_id'])
-        equipment['count'] = max_amount
+        # print(type(equipment['price']))
+        # print(f"{days} days, {hours} hours, {minutes} minutes")
+        # print(equipment['quantity'])
+        # print(equipment['max_count'])
+        equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
+        equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
 
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
@@ -288,6 +291,8 @@ def add_to_cart():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     equipment_id = request.form.get('equipment_id')
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     previous_url = str(request.referrer)
     if not (start_time and end_time and equipment_id):
@@ -317,32 +322,169 @@ def delete_item():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     cart_item_id = request.form.get('cart_item_id')
+    # print(cart_item_id)
     sql_function.sql_delete_item(cart_item_id)
     session['msg'] = "Delete successfully"
-    previous_url = str(request.referrer)
-    return redirect(previous_url)
+    return redirect(url_for('customer_cart'))
 
-
-@app.route('/edit_details', methods=['post'])
+@app.route('/edit_details', methods=['POST', 'GET'])
 def edit_details():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     user_id = session['user_id']
-    data = request.get_json()
-    # 从数据中提取特定的值
-    cart_item_id = data.get('cart_item_id')
-    quantity = data.get('quantity')
-    start_time = data.get('start_time')
-    end_time = data.get('end_time')
+    quantity = request.form.get('quantity')
+    start_time = request.form.get('start_time')
+    end_time = request.form.get('end_time')
+    cart_item_id = request.form.get('cart_item_id')
+    # print(start_time)
+    # print(end_time)
+    # print(quantity)
+    # print(cart_item_id)
+    if not (start_time and end_time and cart_item_id and quantity):
+        session['error_msg'] = 'Please select the required date and time and quantity.'
+        return redirect(url_for('customer_cart'))
+    else:
+        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+        sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
+        session['msg'] = "Update successfully"
+        return redirect(url_for('customer_cart'))
 
-    sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
-    session['msg'] = "Update successfully"
-    return redirect(url_for('customer_cart'))
 
-
-@app.route('/payment', methods=['POST'])
+@app.route('/payment', methods=['POST','GET'])
 def payment():
-    pass
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    user_id = session['user_id']
+    selected_ids = request.form.get('selectedCartItemIds')
+    selected_quantities = request.form.get('selectedQuantities')
+    total_amount_final = request.form.get('totalAmountFinal')
+
+    # 将字符串形式的ids和quantities转换为列表
+    selected_ids_list = [int(id) for id in selected_ids.split(',') if id]
+    selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
+    # print(selected_ids_list)
+    # print(selected_quantities_list)
+    # print(total_amount_final)
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    methods = sql_function.payment_method()
+    if selected_ids_list == ['']:
+        session['error_msg'] = 'Please choose the equipment in your cart to place order.'
+        return redirect(url_for('customer_cart'))
+    else:
+        equipment_list = sql_function.check_cart(user_id)
+        for each in selected_ids_list:
+            booking_equipment_id = sql_function.booking_equipment(each)
+            # print(booking_equipment_id)
+            # print(equipment_list)
+            if booking_equipment_id in equipment_list :
+                session['msg'] = "Please provide your driver lisence"
+                return render_template('customer/driver_lisence.html', msg=last_msg, 
+                       error_msg=last_error_msg, 
+                       price=total_amount_final, 
+                       selectedItemList=selected_ids_list, 
+                       selected_quantities_list=selected_quantities_list, 
+                       methods=methods)
+
+        for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
+            booking_equipment_id = sql_function.booking_equipment(selected_id)
+            max_count = sql_function.max_count(booking_equipment_id)
+            # print(max_count)
+
+            if selected_quantity > max_count:
+                session['error_msg'] = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
+                return redirect(url_for('customer_cart'))
+        
+        return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods)
+
+
+@app.route('/complete_payment', methods=['POST'])
+def complete_payment():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    # 检查请求是否包含POST数据
+    if request.method == 'POST':
+        # 获取表单数据
+        selected_items_json = request.form.get('selectedItemList')  # 这是一个JSON字符串
+        selected_items = json.loads(selected_items_json)  # 将JSON字符串转换回Python列表
+        
+        price = request.form['price']  # 获取价格
+        payment_method = request.form['paymentMethod']  # 获取用户选择的支付方式
+        print(selected_items)
+        print(price)
+        print(payment_method)
+        selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
+        selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
+
+        # 打印调试信息，或进行其他处理
+        print(selected_quantities)
+        user_id = session['user_id']
+        hire_id = sql_function.hire_list_update(price,user_id)
+        print(hire_id)
+        sql_function.payment_update(hire_id,payment_method)
+        for i in range(0,len(selected_items)):
+            booking_equipment_id = sql_function.booking_equipment(selected_items[i])
+            equipment_quantity = selected_quantities[i]
+            instance_ids = sql_function.update_equipment_instance(booking_equipment_id,equipment_quantity)
+            for instance_id in instance_ids:
+                time_diff = sql_function.update_equipment_rental_status(instance_id,selected_items[i],user_id)
+
+                total_seconds = time_diff.total_seconds()
+
+                # 计算具体的天数、小时数、分钟数
+                days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+                hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+                
+                if 0 < hours <= 4:
+                    days = days + 0.75
+                elif hours == 0:
+                    days = days
+                else:
+                    days = days + 1
+                sql_function.update_hire_item(hire_id,instance_id,equipment_quantity,booking_equipment_id,days)
+            sql_function.sql_delete_item(selected_items[i])
+
+        session['msg'] = "Order complete. Please check in your bookings. "
+
+        return redirect(url_for('customer_cart'))
+
+    else:
+        # 例如，重定向到首页或错误页面
+        return redirect(url_for('customer_cart'))
+    
+@app.route('/driver_lisence', methods=['POST'])
+def driver_lisence():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    session['msg'] = "Received your driver lisence"
+    selected_ids = request.form.get('selected_ids')
+    selected_ids_list = [int(id) for id in selected_ids.split(',')]
+
+    selected_quantities = request.form.get('selected_quantities')
+    selected_quantities_list = [int(qty) for qty in selected_quantities.split(',')]
+
+    total_amount_final = request.form.get('total_amount_final')
+    methods_str = request.form.get('methods')
+    # 将字符串转换回列表
+    methods_list = methods_str.split(',')
+    print(selected_ids_list)
+    print(selected_quantities_list)
+    print(methods_list)
+    print(total_amount_final)
+
+    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
+                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods_list)

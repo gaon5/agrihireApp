@@ -32,17 +32,17 @@
         }
 
         .header-cell:nth-child(1) {
-            flex: 3;
-
-        }
-
-        .header-cell:nth-child(2) {
             flex: 1;
 
         }
 
+        .header-cell:nth-child(2) {
+            flex: 3;
+
+        }
+
         .header-cell:nth-child(3) {
-            flex: 2;
+            flex: 1;
 
         }
 
@@ -62,6 +62,10 @@
         }
 
         .header-cell:nth-child(7) {
+            flex: 1;
+
+        }
+        .header-cell:nth-child(8) {
             flex: 1;
 
         }
@@ -111,6 +115,7 @@
         <div style="margin-left: 15%; margin-right: 15%;">
 
             <div class="table-header">
+                <div class="header-cell"></div>
                 <div class="header-cell">My Equipment</div>
                 <div class="header-cell">Quantity</div>
                 <div class="header-cell">Rental Date</div>
@@ -122,8 +127,12 @@
 
             <div class="card mb-3">
                 <div class="card-body">
-                    <div class="row">
-                        {% for equipment in equipment_list %}
+                    {% for equipment in equipment_list %}
+                        <div class="row" data-cart-item-id="{{ equipment.cart_item_id }}">
+                            <div class="col-md-1 d-flex align-items-center">
+                                <input type="checkbox" class="equipment-checkbox" data-cart-item-id="{{ equipment.cart_item_id }}" data-price="{{ equipment.price }}" onchange="updateTotalAmount();">
+                            </div>
+
                             <div class="col-md-3 d-flex align-items-center">
                                 <img src="{{ url_for('static', filename=equipment.image_url) }}" alt="Equipment Image" class="img-fluid"
                                      style="max-width: 80px;">
@@ -131,24 +140,25 @@
                                 <input type="hidden" id="cart_item_id" name="cart_item_id" value="{{ equipment.cart_item_id }}">
                             </div>
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                <button class="quantity-btn" onclick="decrementQuantity({{ loop.index }})">-</button>
-                                <input type="number" id="quantityInput_{{ loop.index }}" data-max-count="{{ equipment.count }}" value="1" min="1"
-                                       max="{{ equipment.count }}" style="width: 50px; text-align: center; margin: 0 5px;">
-                                <button class="quantity-btn" onclick="incrementQuantity({{ loop.index }})">+</button>
+                                <button class="quantity-btn" onclick="decrementQuantity({{ equipment.cart_item_id }})">-</button>
+                                <input type="number" id="quantityInput_{{ equipment.cart_item_id }}" data-max-count="{{ equipment.max_count }}" value="{{ equipment.quantity }}" min="1"
+                                    max="{{ equipment.max_count }}" style="width: 50px; text-align: center; margin: 0 5px;">
+                                <button class="quantity-btn" onclick="incrementQuantity({{ equipment.cart_item_id }})">+</button>
                             </div>
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                <span id="startTime_{{ loop.index }}" data-start-time="{{ equipment.start_time }}">{{ equipment.start_time }}</span>
+                                <span id="startTime_{{ equipment.cart_item_id }}" data-start-time="{{ equipment.start_time }}">{{ equipment.start_time }}</span>
                             </div>
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                <span id="endTime_{{ loop.index }}" data-end-time="{{ equipment.end_time }}">{{ equipment.end_time }}</span>
+                                <span id="endTime_{{ equipment.cart_item_id }}" data-end-time="{{ equipment.end_time }}">{{ equipment.end_time }}</span>
                             </div>
-                            <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                <span id="itemPrice_{{ loop.index }}" data-original-price="{{ equipment.price }}">{{ equipment.price }}</span>
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <span id="itemPrice_{{ equipment.cart_item_id }}" data-original-price="{{ equipment.price }}">{{ equipment.price }}</span>
                             </div>
 
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                <a href="#" class="btn btn-primary" style="font-size: 14px" data-bs-toggle="modal" data-bs-target="#editModal"
-                                   onclick="openEditModal({{ loop.index }})">Edit</a>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size: 14px" data-bs-toggle="modal" data-bs-target="#editModal"
+                                    onclick="openEditModal(this, {{ equipment.cart_item_id }})">Edit
+                                </button>
                             </div>
 
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
@@ -156,16 +166,19 @@
                                         onclick="confirmDelete({{ equipment.cart_item_id }})">Delete
                                 </button>
                             </div>
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="total-bar">
                 <span class="total-price">Total Price: </span>
                 <span class="total-amount">{{ total_amount }} </span>
-                <form action="{{ url_for('payment') }}" method="get">
-                    <button type="submit" class="btn btn-primary">Next Step</button>
+                <form id="cartItemsForm" method="POST" action="/payment">
+                    <input type="hidden" id="selectedCartItemIds" name="selectedCartItemIds">
+                    <input type="hidden" id="totalAmountFinal" name="totalAmountFinal">
+                    <input type="hidden" id="finalQuantity" name="finalQuantity">
+                    <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
                 </form>
             </div>
         </div>
@@ -174,38 +187,43 @@
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Rental Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Quantity Input -->
-                    <div class="mb-3">
-                        <label for="Quantity" class="form-label">Quantity</label>
-                        <div style="display: flex; align-items: center;">
-                            <button class="quantity-btn" onclick="decrementModalQuantity()">-</button>
-                            <input type="text" class="form-control" id="Quantity" value="1" readonly
-                                   style="width: 60px; text-align: center; margin: 0 5px;">
-                            <button class="quantity-btn" onclick="incrementModalQuantity()">+</button>
+                <form method="POST" action="/edit_details">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Rental Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Quantity Input -->
+                        <div class="mb-3">
+                            <label for="Quantity" class="form-label">Quantity</label>
+                            <div style="display: flex; align-items: center;">
+                                <button type="button" class="quantity-btn" onclick="decrementModalQuantity()">-</button>
+                                <input type="text" class="form-control" id="Quantity" name="quantity" value="1" readonly
+                                    data-max-count="10" style="width: 60px; text-align: center; margin: 0 5px;">
+                                <button type="button" class="quantity-btn" onclick="incrementModalQuantity()">+</button>
+                            </div>
                         </div>
+                        <!-- Date Input -->
+                        <div class="mb-3">
+                            <label for="RentalDate" class="form-label">Rental Date</label>
+                            <input type="text" id="start_time_updated" name="start_time" placeholder="Rental Date & Time">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ReturnDate" class="form-label">Return Date</label>
+                            <input type="text" id="end_time_updated" name="end_time" placeholder="Return Date & Time">
+                        </div>
+                        <!-- Optional: Include a hidden input if you need to pass any specific ID or token -->
+                        <input type="hidden" name="cart_item_id" id="cart_item_id_modal1" />
                     </div>
-                    <!-- Date Input -->
-                    <div class="mb-3">
-                        <label for="Rental Date" class="form-label">Rental Date</label>
-                        <input type="text" id="start_time_updated" name="start_time" placeholder="Rental Date & Time">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary" value="Save changes" />
                     </div>
-                    <div class="mb-3">
-                        <label for="Return Date" class="form-label">Return Date</label>
-                        <input type="text" id="end_time_updated" name="end_time" placeholder="Return Date & Time">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
          aria-hidden="true">
         <div class="modal-dialog">
@@ -220,7 +238,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <form action="{{ url_for('delete_item') }}" method="post">
-                        <input type="hidden" id="cart_item_id" name="cart_item_id">
+                        <input type="hidden" id="cart_item_id_modal" name="cart_item_id">
                         <button type="submit" class="btn btn-danger my-1">Yes</button>
                     </form>
                 </div>
@@ -233,31 +251,50 @@
 
 {% block myjs %}
     <script>
-        let currentIndex;
+        function adjustQuantity(cartItemId, increment = true, isModal = false) {
+            let inputId = isModal ? 'Quantity' : 'quantityInput_' + cartItemId;
+            let input = document.getElementById(inputId);
+            
+            if(!input) return; // 如果找不到input，直接返回
 
-        function decrementQuantity(index) {
-            let input = document.getElementById('quantityInput_' + index);
-            let currentValue = parseInt(input.value, 10);
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-                updateItemPrice(index);
-            }
-        }
-
-        function incrementQuantity(index) {
-            let input = document.getElementById('quantityInput_' + index);
             let currentValue = parseInt(input.value, 10);
             let maxCount = parseInt(input.getAttribute('data-max-count'), 10);
-
-            if (currentValue < maxCount) {
+            
+            if (increment && currentValue < maxCount) {
                 input.value = currentValue + 1;
-                updateItemPrice(index);
+            } else if (!increment && currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+            
+            if (!isModal) {
+                updateItemPrice(cartItemId);
             }
         }
 
-        function updateItemPrice(index) {
-            let quantityInput = document.getElementById('quantityInput_' + index);
-            let priceElement = document.getElementById('itemPrice_' + index);
+        function decrementQuantity(cartItemId) {
+            adjustQuantity(cartItemId, false);
+        }
+
+        function incrementQuantity(cartItemId) {
+            adjustQuantity(cartItemId, true);
+        }
+
+        function decrementModalQuantity() {
+            console.log("Decrementing modal quantity...");
+            adjustQuantity(null, false, true);
+        }
+
+        function incrementModalQuantity() {
+            console.log("Incrementing modal quantity...");
+            adjustQuantity(null, true, true);
+        }
+        
+        function updateItemPrice(cartItemId) {
+            let quantityInput = document.getElementById('quantityInput_' + cartItemId);
+            let priceElement = document.getElementById('itemPrice_' + cartItemId);
+
+            // console.log("Quantity Input Value:", quantityInput.value);  // 调试输出
+            // console.log("Original Price:", priceElement.getAttribute('data-original-price'));  // 调试输出
 
             let originalPrice = parseFloat(priceElement.getAttribute('data-original-price'));
             let quantity = parseInt(quantityInput.value, 10);
@@ -266,18 +303,6 @@
             priceElement.textContent = totalPriceForItem.toFixed(2);  // 显示两位小数的价格
 
             updateTotalAmount();
-        }
-
-        function updateTotalAmount() {
-            let total = 0;
-            let items = document.querySelectorAll('[id^="itemPrice_"]');  // 选择所有以 "itemPrice_" 开头的ID的元素
-
-            items.forEach(item => {
-                total += parseFloat(item.textContent);
-            });
-
-            // 将总计更新到.total-amount元素
-            document.querySelector('.total-amount').textContent = total.toFixed(2);
         }
 
         flatpickr("#start_time_updated", {
@@ -300,73 +325,132 @@
             maxDate: new Date().fp_incr(91),
         });
 
-        function decrementModalQuantity() {
-            let input = document.getElementById('Quantity');
-            let currentValue = parseInt(input.value, 10);
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-            }
-        }
+        function openEditModal(buttonElement, cart_item_id) {
+            // Find the closest .row element relative to the clicked button
+            let rowDiv = buttonElement.closest('.row');
 
-        function incrementModalQuantity() {
-            let input = document.getElementById('Quantity');
-            let maxCount = parseInt(document.querySelector("#quantityInput_" + currentIndex).getAttribute('data-max-count'), 10);
-            let currentValue = parseInt(input.value, 10);
-            if (currentValue < maxCount) {
-                input.value = currentValue + 1;
-            }
-        }
+            // From the row, find the quantity input element and the start and end time elements
+            let quantityInput = rowDiv.querySelector('input[type="number"]');
+            let startTimeElement = rowDiv.querySelector('span[id^="startTime_"]');
+            let endTimeElement = rowDiv.querySelector('span[id^="endTime_"]');
 
-        function openEditModal(index) {
-            currentIndex = index;
-            let quantityInput = document.getElementById('quantityInput_' + index);
-            let start_time = document.getElementById('startTime_' + index);
-            let end_time = document.getElementById('endTime_' + index);
-
-            // 设置模态框中的输入值
+            // Set the modal's input values based on the found elements' values
             document.getElementById('Quantity').value = quantityInput.value;
-            document.getElementById('start_time_updated').value = start_time.textContent;
-            document.getElementById('end_time_updated').value = end_time.textContent;
+            document.getElementById('start_time_updated').value = startTimeElement.textContent.trim();
+            document.getElementById('end_time_updated').value = endTimeElement.textContent.trim();
 
-            // 步骤二的代码
-            let modalQuantityInput = document.getElementById('Quantity');
-            let maxCount = parseInt(quantityInput.getAttribute('data-max-count'), 10);
-            modalQuantityInput.setAttribute('min', '1');
-            modalQuantityInput.setAttribute('max', maxCount.toString());
+            // Set the cart item id in the modal's hidden input
+            document.getElementById('cart_item_id_modal1').value = cart_item_id;
         }
 
-        function saveChanges() {
-            let cart_item_id = document.getElementById('cart_item_id').value;
-            let quantity = document.getElementById('Quantity').value;
-            let start_time = document.getElementById('start_time_updated').value
-            let end_time = document.getElementById('end_time_updated').value;
-
-            // 使用fetch或XMLHttpRequest向服务器发送数据
-            fetch('/edit_details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    cart_item_id: cart_item_id,
-                    quantity: quantity,
-                    start_time: start_time,
-                    end_time: end_time
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    // 处理服务器的响应，例如更新页面
-                });
-        }
-
-        // 监听模态框上的保存按钮点击事件
-        document.querySelector('#editModal .btn-primary').addEventListener('click', saveChanges);
-
+        document.querySelectorAll('.btn-primary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let cartItemId = this.getAttribute('data-cart-item-id');
+                openEditModal(cartItemId);
+            });
+        });
 
         function confirmDelete(cart_item_id) {
-            document.getElementById("cart_item_id").value = cart_item_id;
+            document.getElementById("cart_item_id_modal").value = cart_item_id;
         }
+
+                // 此函数将遍历所有的复选框并收集已选中的ID
+        function getSelectedCartItems() {
+            // 创建一个数组来存储选中的ID
+            let selectedItems = [];
+
+            // 获取所有的复选框元素
+            var checkboxes = document.querySelectorAll('.equipment-checkbox');
+
+            // 遍历复选框
+            checkboxes.forEach(function(checkbox) {
+                // 如果复选框被选中
+                if (checkbox.checked) {
+                    // 获取此复选框的data-cart-item-id属性值
+                    var cartItemId = checkbox.getAttribute('data-cart-item-id');
+                    let rowDiv = checkbox.closest('.row');
+
+                    // 在这个row中查找数量输入元素
+                    let quantityInput = rowDiv.querySelector('input[type="number"]');
+
+                    // 获取输入的数量
+                    let quantity = parseInt(quantityInput.value, 10);
+
+                    // 将ID和数量添加到数组中
+                    selectedItems.push({
+                        id: cartItemId,
+                        quantity: quantity
+                    });
+                }
+            });
+
+            // 最后，返回包含所有已选中ID的数组
+            return selectedItems;
+        }
+
+        function updateTotalAmount() {
+            let total = 0.00;
+
+            // 获取所有选中的复选框
+            let checkboxes = document.querySelectorAll('.equipment-checkbox:checked');
+            
+            // 遍历每个选中的复选框
+            checkboxes.forEach(checkbox => {
+                // 获取复选框的价格数据
+                let price = parseFloat(checkbox.getAttribute('data-price'));
+
+                // 找到复选框所在的容器（.col-md-1），然后获取其父元素（.row）
+                let rowDiv = checkbox.closest('.row');
+
+                // 在这个row中查找数量输入元素
+                let quantityInput = rowDiv.querySelector('input[type="number"]');
+
+                if (quantityInput) {  // 如果找到数量输入元素
+                    // 获取输入的数量
+                    let quantity = parseInt(quantityInput.value, 10);
+
+                    // 计算这个项目的总价格，并累加到总金额中
+                    total += price * quantity;
+                }
+            });
+
+            // 更新总金额的显示
+            document.querySelector('.total-amount').textContent = total.toFixed(2);
+        }
+
+
+        window.onload = function() {
+            // 设置初始总金额为 0
+            document.querySelector('.total-amount').textContent = '0.00';
+
+            // 为每个复选框添加状态变更的监听器
+            let checkboxes = document.querySelectorAll('.equipment-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateTotalAmount);
+            });
+        }
+
+        document.getElementById('cartItemsForm').onsubmit = function() {
+            let selectedItems = getSelectedCartItems();
+            let price = document.querySelector(".total-amount").textContent;
+
+            // 获取所有选中的ID和数量
+            let selectedIds = selectedItems.map(item => item.id).join(',');
+            let selectedQuantities = selectedItems.map(item => item.quantity).join(',');
+
+            // 更新隐藏字段的值
+            document.getElementById('selectedCartItemIds').value = selectedIds;
+            // 新增一个隐藏字段来存储数量
+            let quantityInput = document.createElement('input');
+            quantityInput.type = 'hidden';
+            quantityInput.name = 'selectedQuantities';
+            quantityInput.value = selectedQuantities;
+            document.getElementById('cartItemsForm').appendChild(quantityInput);
+
+            document.getElementById("totalAmountFinal").value = price;
+
+            return true; // 允许表单提交
+        };
 
     </script>
 

@@ -739,7 +739,9 @@ def my_cart(user_id):
                 WHERE ua.user_id = %s;"""
     customer = operate_sql(sql, (user_id,), fetch=0, close=0)
     customer_id = customer['customer_id']
-    sql = """SELECT * FROM hire.shopping_cart_item as sci
+    sql = """SELECT sci.cart_item_id, sci.customer_id, sci.equipment_id,sci.count as quantity, sci.start_time,sci.end_time, e.name,  
+                e.price, e.count as max_count, ei.image_url
+                FROM hire.shopping_cart_item as sci
                 inner join equipment as e on sci.equipment_id = e.equipment_id
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
@@ -747,15 +749,6 @@ def my_cart(user_id):
     # print(sql % (customer_id,equipment_id,count,start_time,duration))
     equipment_in_cart = operate_sql(sql, (customer_id,))
     return equipment_in_cart
-
-
-def max_count(equipment_id):
-    sql = """SELECT count(*) FROM hire.equipment_instance
-                where equipment_id = %s and instance_status = 1;"""
-    max_count = operate_sql(sql, (equipment_id,))
-    max_amount = list(max_count[0].values())[0]
-    return max_amount
-
 
 def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time):
     sql = """SELECT ua.user_id, c.customer_id
@@ -767,8 +760,120 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
     sql = """UPDATE shopping_cart_item 
                     SET count = %s, start_time = %s, end_time = %s
                     WHERE (customer_id = %s) and (cart_item_id = %s)"""
-    # print(sql % (customer_id,equipment_id,count,start_time,duration))
     operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))
+
+
+def check_cart(user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT sci.equipment_id FROM hire.shopping_cart_item as sci
+                inner join equipment as e on sci.equipment_id = e.equipment_id
+                LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
+                LEFT JOIN classify as c on e.equipment_id = c.equipment_id
+                WHERE sci.customer_id = %s and e.requires_drive_license = 1;"""
+    # print(sql % (customer_id,equipment_id,count,start_time,duration))
+    equipment_require_licence = operate_sql(sql, (customer_id,))
+    equipment_id_list = [item['equipment_id'] for item in equipment_require_licence]
+    return equipment_id_list
+
+def booking_equipment(cart_item_id):
+    sql = """SELECT equipment_id
+                FROM hire.shopping_cart_item
+                WHERE cart_item_id = %s"""
+    booking_equipment = operate_sql(sql, (cart_item_id,))
+    booking_equipment_id = booking_equipment[0]['equipment_id']
+    return booking_equipment_id
+
+def max_count(booking_equipment_id):
+    sql = """SELECT count(*) FROM hire.equipment_instance
+                WHERE equipment_id = %s AND instance_status = 1;"""
+    max_count = operate_sql(sql, (booking_equipment_id,))
+    max = max_count[0]['count(*)']
+    return max
+    
+def payment_method():
+    sql = """SELECT * FROM hire.payment_type;"""
+    payment_method = operate_sql(sql)
+    methods = [method['name'] for method in payment_method]
+    # print(methods)
+    return methods
+
+def hire_list_update(price,user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    sql = """INSERT INTO hire_list (customer_id,status_id,datetime,price)
+            VALUES (%s,3,%s,%s)"""
+    operate_sql(sql, (customer_id, now, price,))
+    sql = """SELECT hire_id 
+                FROM hire_list
+                WHERE (customer_id = %s) and (datetime = %s) and (price = %s);"""
+    hire_id = operate_sql(sql, (customer_id, now, price,))
+    return hire_id[0]['hire_id']
+
+def payment_update(hire_id,payment_method):
+    sql = """SELECT payment_type_id
+                FROM payment_type
+                WHERE name = %s;"""
+    payment_type_id = operate_sql(sql, (payment_method,), fetch=0, close=0)
+    payment_type_id_value = payment_type_id['payment_type_id']
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    sql = """INSERT INTO payment (hire_id,status_id,payment_type_id,datetime)
+            VALUES (%s,1,%s,%s)"""
+    operate_sql(sql, (hire_id, payment_type_id_value, now,))
+
+def update_equipment_instance(booking_equipment_id,equipment_quantity):
+    sql = """SELECT instance_id FROM equipment_instance
+                WHERE equipment_id = %s AND instance_status = 1
+                order by instance_id
+                limit %s;"""
+    instance_id_list = operate_sql(sql, (booking_equipment_id, equipment_quantity,))
+    instance_ids = [item['instance_id'] for item in instance_id_list]
+    for instance_id in instance_ids:
+        sql = """UPDATE equipment_instance 
+                    SET instance_status = 2
+                    WHERE instance_id = %s;"""
+        operate_sql(sql, (instance_id,))
+    return instance_ids
+
+def update_equipment_rental_status(instance_id,cart_item_id,user_id):
+    sql = """SELECT ua.user_id, c.customer_id
+                FROM user_account ua
+                INNER JOIN customer c on c.user_id = ua.user_id
+                WHERE ua.user_id = %s;"""
+    customer = operate_sql(sql, (user_id,), fetch=0, close=0)
+    customer_id = customer['customer_id']
+    sql = """SELECT start_time, end_time FROM hire.shopping_cart_item
+                WHERE cart_item_id = %s;"""
+    time_list = operate_sql(sql, (cart_item_id,))
+    start_time = time_list[0]['start_time']
+    end_time = time_list[0]['end_time']
+    sql = """INSERT INTO equipment_rental_status (instance_id,customer_id,rental_start_datetime,expected_return_datetime,rental_status_id)
+            VALUES (%s,%s,%s,%s,2);"""
+    operate_sql(sql, (instance_id,customer_id,start_time,end_time,))
+    time_diff = end_time - start_time
+    return time_diff
+
+def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
+    sql = """SELECT price
+                FROM equipment
+                WHERE equipment_id = %s;"""
+    unit_price = operate_sql(sql, (booking_equipment_id,))
+    price = float(unit_price[0]['price'])
+    total_price = price * days
+    sql = """INSERT INTO hire_item (hire_id,instance_id,count,price)
+            VALUES (%s,%s,%s,%s,2);"""
+    operate_sql(sql, (hire_id,instance_id,count,total_price,))
+
+
 
 def get_monthly_details(start_date):
     sql = """SELECT payment_id, payment_type.name AS payment_type, hire_list.price AS price, category.name AS category_name FROM payment
@@ -853,3 +958,4 @@ def get_annual_bookings(start_date):
                 WHERE (rental_start_datetime >= %s AND rental_start_datetime < DATE_ADD(%s, INTERVAL 1 YEAR));"""
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
+
