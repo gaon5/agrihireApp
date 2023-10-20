@@ -57,12 +57,25 @@
         font-size: 24px; /* 字体大小 */
         font-weight: bold; /* 粗体字 */
         font-family: 'Poppins', sans-serif;
+        white-space: nowrap;
     }
 
     .total-amount {
         font-size: 24px; /* 字体大小 */
         font-weight: bold; /* 粗体字 */
         font-family: 'Poppins', sans-serif;
+    }
+
+    .total-bar {
+        display: flex; /* 使这个元素成为一个flex容器 */
+        justify-content: space-between; /* 在子项之间提供空间，推动它们到两端 */
+        align-items: center; /* 垂直居中对齐内容 */
+        width: 100%; /* 可选：如果需要，可以设置为特定宽度 */
+    }
+
+    .total-section {                   /* 新增的包裹价格信息的容器 */
+        display: flex;
+        align-items: center;
     }
 </style>
 {% endblock %}
@@ -105,13 +118,16 @@
         
             <div class="custom-horizontal-line"></div>
             <div class="total-bar">
-                <span class="total-price">Total Price: </span>
-                <span class="total-amount">{{ price }} </span>
+                <div class="total-section">  <!-- 新增的容器，包含总价信息 -->
+                    <span class="total-price">Total Price: </span>
+                    <span class="total-amount">{{ price }} </span>
+                </div>
+                <button type="submit" class="btn btn-primary">Pay Now</button>  <!-- 现在这个按钮将位于右侧 -->
             </div>
     
-            <button type="submit" class="btn btn-primary">Pay Now</button>
+            
         </form>  <!-- 注意表单的结束标签也已经提前 -->
-        
+        <br>
         <a href="{{ url_for('customer_cart') }}" class="btn btn-primary">Back to My Cart</a>
         
     </div>
