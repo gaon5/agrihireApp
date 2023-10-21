@@ -87,17 +87,19 @@
                         <div class="col-md-5">
                             <h5 style="text-align: center">Revenue per Category</h5>
                             <canvas style="text-align: center;" id="myChart1"></canvas>
-                            <br>
+                        </div>
+                        <div class="col-md-5">
                             <h5 style="text-align: center">Revenue per Payment Method</h5>
                             <canvas style="text-align: center;" id="myChart2"></canvas>
-                            {% if income_list %}
-                                <br>
+                        </div>
+                        {% if income_list %}
+                            <br>
+                            <div class="col-md-8">
                                 <h5 style="text-align: center">Monthly Income</h5>
                                 <canvas style="text-align: center" id="myChart3"></canvas>
-                            {% endif %}
-                            <br></br>
-                            <h3 style="text-align: center">Total revenue: ${{ total_revenue }}</h3>
-                        </div>
+                            </div>
+                        {% endif %}
+                        <h3 style="text-align: center">Total revenue: ${{ total_revenue }}</h3>
                     </div>
                 </div>
                 <br>
