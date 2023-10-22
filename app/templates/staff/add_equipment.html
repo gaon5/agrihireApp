@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'staff/manage_base.html' %}
 
 <!--Add Equipment-->
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         .relative {
             position: relative;
@@ -23,10 +23,10 @@
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container">
+{% block inside_body %}
+    <div class="">
         <div class="row justify-content-center my-5">
-            <div class="col-lg-4">
+            <div class="col-lg-12">
                 <form action="{{ url_for('add_equipment') }}" method="POST" enctype="multipart/form-data">
                     <!-- Main Image -->
                     <div class="relative mb-3">
@@ -117,4 +117,7 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block inside_js %}
 {% endblock %}

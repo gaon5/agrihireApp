@@ -1,12 +1,12 @@
-{% extends "base.html" %}
+{% extends 'staff/manage_base.html' %}
 
 
-{% block mytitle %}
+{% block inside_title %}
 
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         #navigation-container {
             display: flex;
@@ -64,8 +64,8 @@
 {% endblock %}
 
 
-{% block body %}
-    <div class="container mt-3">
+{% block inside_body %}
+    <div class="mt-3">
         <div class="row justify-content-center">
             <div class="col-md-8" style="text-align: center">
                 <br>
@@ -75,8 +75,8 @@
         </div>
     </div>
     <br>
-    <div class="row justify-content-center">
-        <div class="col-md-7">
+    <div class="row">
+        <div class="col-md-12">
             <br>
             {% if maintenance_list %}
                 <div class="table-header">
@@ -130,5 +130,6 @@
 {% endblock %}
 
 
-{% block myjs %}
+{% block inside_js %}
+
 {% endblock %}
