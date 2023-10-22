@@ -1,12 +1,12 @@
-{% extends "base.html" %}
+{% extends 'admin/manage_base.html' %}
 
 
-{% block mytitle %}
+{% block inside_title %}
 
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         #navigation-container {
             display: flex;
@@ -50,9 +50,9 @@
 {% endblock %}
 
 
-{% block body %}
+{% block inside_body %}
 
-    <div class="container mt-3">
+    <div class="mt-3">
         <div class="row justify-content-center">
             <div class="col-md-8" style="text-align: center">
                 <br>
@@ -61,9 +61,9 @@
         </div>
     </div>
     <br>
-    <div class="container mt-3">
+    <div class="mt-3">
         <div class="row justify-content-center">
-            <div class="col-md-5">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
                         <h5>Add Sub Catergory</h5><br>
@@ -75,7 +75,7 @@
                             <div class="input-group mb-3">
                                 <select class="form-control" name="main_category_id" id="main_category_id" required>
                                     <option value="" selected="selected" disabled>Choose a main category</option>
-                                    {% for category in category_list %}
+                                    {% for category in get_classify()[0] %}
                                         <option value="{{ category.category_id }}">{{ category.name }}</option>
                                     {% endfor %}
                                 </select>
@@ -92,9 +92,9 @@
         </div>
     </div>
     <br>
-    <div class="container mt-3">
+    <div class="mt-3">
         <div class="row justify-content-center">
-            <div class="col-md-5">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
                         <h5>Update Main Category</h5><br>
@@ -102,7 +102,7 @@
                             <div class="input-group mb-3">
                                 <select class="form-control" name="sub_category_id" id="sub_category_id" required>
                                     <option value="" selected="selected" disabled>Choose a sub category</option>
-                                    {% for subcategory in subcategory_list %}
+                                    {% for subcategory in get_classify()[3] %}
                                         <option value="{{ subcategory.sub_id }}">{{ subcategory.sub }} ({{ subcategory.main }})</option>
                                     {% endfor %}
                                 </select>
@@ -110,7 +110,7 @@
                             <div class="input-group mb-3">
                                 <select class="form-control" name="main_category_id_2" id="main_category_id_2" required>
                                     <option value="" selected="selected" disabled>Choose a main category</option>
-                                    {% for category in category_list %}
+                                    {% for category in get_classify()[0] %}
                                         <option value="{{ category.category_id }}">{{ category.name }}</option>
                                     {% endfor %}
                                 </select>
@@ -130,7 +130,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <br>
-            {% if subcategory_list %}
+            {% if get_classify()[3] %}
                 <div class="table-header">
                     <div class="header-cell">Sub Category</div>
                     <div class="header-cell">Main Category</div>
@@ -139,7 +139,7 @@
                 </div>
                 <div class="card mb-4">
                     <div class="card-body">
-                        {% for subcategory in subcategory_list %}
+                        {% for subcategory in get_classify()[3] %}
                             <form action="{{ url_for('manage_subcategory') }}" method="post">
                                 <div class="row" style="margin: 5px;">
                                     <div class="col-md-5 d-flex align-items-center justify-content-center">
@@ -174,7 +174,7 @@
 {% endblock %}
 
 
-{% block myjs %}
+{% block inside_js %}
     <script>
         function confirmDelete() {
             // Display a confirmation dialog

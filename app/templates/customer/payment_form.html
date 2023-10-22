@@ -30,7 +30,7 @@
                 Select Payment Type
             </div>
             <div class="card-body">
-                <form action="{{ url_for('payment_form', instance_id=instance_id, end_date_obj=end_date_obj, hire_id=hire_id, extension_duration=extension_duration, additional_cost=additional_cost) }}" method="post">
+                <form action="{{ url_for('payment_form') }}" method="post">
 
                     <div class="mb-3">
                         <label for="payment_type" class="form-label">Payment Type:</label>

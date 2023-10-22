@@ -65,6 +65,7 @@
         .image2-switcher:hover {
             background-image: url('{{ url_for('static', filename='image/heart21.png') }}');
         }
+
     </style>
 {% endblock %}
 
@@ -75,7 +76,7 @@
             <div class="col-md-3 col-sm-12">
                 <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Category</h5>
                 <ul style="padding: 0; list-style: none;">
-                    {% for category in category_list %}
+                    {% for category in get_classify()[0] %}
                         <li style="margin: 20px 0;">
                             <div>
                                 <input type="radio" id="{{ category.category_id }}" style="display: none">
@@ -136,10 +137,12 @@
                                 </thead>
                             </table>
                         </div>
+                        <p class="text-center">Remaining Quantity: {{ equipment[0]['count'] }}</p>
                         <div class="d-flex justify-content-center pt-3">
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
-                                <input type="text" id="start_time" name="start_time" placeholder="Rental Date & Time">
-                                <input type="text" id="end_time" name="end_time" placeholder="Return Date & Time">
+                                <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px">
+                                <input type="hidden" id="start_time">
+                                <input type="hidden" id="end_time">
                                 <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
                                 <br>
                                 <button type="button" class="btn btn-primary hire-button mt-3" style="font-size: 14px">Hire Now</button>
@@ -164,25 +167,29 @@
 
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script>
-        flatpickr("#start_time", {
-            disable: ["2023-10-30", "2023-10-10"], //可以添加为设备租借完了的日子
-            enableTime: true, // 启用时间选择
-            noCalendar: false, // 显示日期选择器
-            time_24hr: true, // 使用24小时制时间格式
-            minDate: new Date().fp_incr(1),
-            maxDate: new Date().fp_incr(91),
-            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
-        });
+        $(function () {
+            $('input[name="datetimes"]').daterangepicker({
+                autoUpdateInput: false,
+                timePicker: true,
+                timePicker24Hour: true,
+                minDate: new Date().fp_incr(1),
+                maxDate: new Date().fp_incr(91),
+                maxSpan: {"days": 7},
+                locale: {
+                    format: 'DD/M/Y HH:mm'
+                }
+            });
+            $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/M/Y HH:mm') + ' - ' + picker.endDate.format('DD/M/Y HH:mm'));
+            });
 
-        flatpickr("#end_time", {
-            disable: ["2023-10-30", "2023-10-10"],
-            enableTime: true, // 启用时间选择
-            noCalendar: false, // 显示日期选择器
-            time_24hr: true, // 使用24小时制时间格式
-            minDate: new Date().fp_incr(1),
-            maxDate: new Date().fp_incr(91),
-            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
+            $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
         });
 
         const elementsArray = [];
@@ -225,14 +232,6 @@
     <script>
         $('.hire-button, .add-to-cart-button').on('click', function (event) {
             event.preventDefault();
-
-            // 获取用户在select_date和days输入框中的输入
-            const startTimeValue = $('#start_time').val();
-            const endTimeValue = $('#end_time').val();
-
-            // 将获取到的值赋予隐藏输入框
-            $('input[name="start_time"]').val(startTimeValue);
-            $('input[name="end_time"]').val(endTimeValue);
 
             const form = $(this).closest('form');
 

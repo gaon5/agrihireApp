@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'staff/manage_base.html' %}
 
 <!--Manage Equipment List-->
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         table, th.header {
             vertical-align: middle;
@@ -12,7 +12,9 @@
             vertical-align: middle;
             width: -75px;
         }
-
+        table, th, td {
+            background-color: transparent !important;
+        }
         .input-group {
             float: none;
             width: 40%;
@@ -22,28 +24,28 @@
     </style>
 {% endblock %}
 
-{% block body %}
-<a role="button" id="add" class="btn btn-primary" href="{{ url_for('add_equipment') }}">Add</a>
-
+{% block inside_body %}
     <form class="form-inline my-2 my-lg-0" action="{{ url_for('search_result') }}" method="POST">
         <div class="input-group">
             <input type="search" id="s1" class="form-control rounded" placeholder="Search by Equipment Name, Category, Sub Category..."
-                   name="equipmentsearch" aria-label="Search" aria-describedby="search-addon" autocomplete="off"/>
+                   name="equipment_search" aria-label="Search" aria-describedby="search-addon" autocomplete="off"/>
             <button type="submit" id="s2" value="Search" class="btn btn-warning">Search</button>
+            <a role="button" id="add" class="btn btn-secondary" href="{{ url_for('equipment_list') }}">Reset</a>
         </div>
+        <a role="button" id="add" class="btn btn-primary" href="{{ url_for('add_equipment') }}">Add Equipment</a>
     </form>
 
-    <div class="container mt-3">
-        <div class="row justify-content-center">
-            <div class="col-md-10" style="text-align: center">
-                <table class="table align-middle mb-0 bg-white">
+    <div class="mt-3">
+        <div class="row">
+            <div class="col-md-12" style="text-align: center">
+                <table class="table table-hover align-middle mb-0" id="myTable">
                     <thead>
                     <tr>
                         <th class="header">Category
                             <p class="text-muted mb-0">Sub Category</p>
                         </th>
                         <th class="header">Image</th>
-                        <th class="header">Equipment Name</th>
+                        <th class="header" style="max-width: 350px;">Equipment Name</th>
                         <th class="header">Price($)</th>
                         <th class="header">Stock</th>
                         <th class="'header">Delete</th>
@@ -51,7 +53,7 @@
                     </thead>
                     <tbody>
                     {% for item in equipment %}
-                        <tr>
+                        <tr id="{{ item.equipment_id }}" style="cursor: pointer;">
                             <td>
                                 <p class="fw-normal mb-1">{{ item.ca_name }}</p>
                                 <p class="text-muted mb-0">{{ item.sub_name }}</p>
@@ -59,8 +61,8 @@
                             <td>
                                 <img src="{{ url_for('static', filename=item.image_url) }}" alt="" class="img-thumbnail" width="100" height="100">
                             </td>
-                            <td>
-                                <a href="{{ url_for('more_detail', detail_id=item.equipment_id) }}">{{ item.e_name }}</a>
+                            <td style="max-width: 350px;">
+                                <p>{{ item.e_name }}</p>
                             </td>
                             <td>
                                 <p class="fw-normal mb-1">{{ item.price }}</p>
@@ -69,7 +71,9 @@
                                 <p class="fw-normal mb-1">{{ item.count }}</p>
                             </td>
                             <td>
-                                <a role="button" id="delete" class="btn btn-danger" href="{{url_for('delete_equipment', equipment_id = item.equipment_id)}}" onclick="return confirm('Are you sure you want to delete this equipment?')">Delete</a></td>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        onclick="confirmDelete({{ item.equipment_id }})">Delete
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -78,5 +82,44 @@
             </div>
         </div>
     </div>
+    {% block mymodal %}
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <form action="{{ url_for('delete_equipment') }}" method="post">
+                            <input type="hidden" id="equipment_id" name="equipment_id">
+                            <button type="submit" class="btn btn-danger my-1">Yes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}
 
+{% block inside_js %}
+    <script>
+    $(document).ready(function() {
+        $("tr").click(function() {
+            const rowId = $(this).attr('id');
+            if(rowId) {
+                window.location.href = "{{ url_for('more_detail') }}?detail_id=" + rowId;
+            }
+        });
+    });
+    function confirmDelete(equipment_id){
+        event.stopPropagation();
+        document.getElementById("equipment_id").value = equipment_id;
+    }
+</script>
 {% endblock %}

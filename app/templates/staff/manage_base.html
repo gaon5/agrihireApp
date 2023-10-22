@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block mytitle %}
+    {% block inside_title %}{% endblock %}
+{% endblock %}
+
+{% block mycss %}
+    <style>
+    .label_style {
+            font-size: 20px;
+            line-height: 25px;
+            cursor: pointer;
+        }
+
+        .label_style:hover {
+            font-weight: 700;
+        }
+    </style>
+    {% block inside_css %}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-12">
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Staff Manage Lists</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('customer_list') }}'">Customer List</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('maintenance_list') }}'">Maintenance List</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('return_list') }}'">Return List</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('equipment_list') }}'">Equipment List</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('check_out_list') }}'">Checkout List</label>
+                        </div>
+                    </li>
+                </ul>
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Placeholder</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Equipment Status</label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-9 col-sm-12">
+                {% block inside_body %}{% endblock %}
+            </div>
+        </div>
+</div>
+
+    {% block mymodal %} {% endblock %}
+
+{% endblock %}
+
+{% block myjs %}
+    {% block inside_js %}{% endblock %}
+{% endblock %}

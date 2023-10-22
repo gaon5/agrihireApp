@@ -1,13 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'staff/manage_base.html' %}
 
 <!--Update Equipment-->
 
-{% block mytitle %}
+{% block inside_title %}
 
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         .relative {
             position: relative;
@@ -28,10 +28,10 @@
     </style>
 {% endblock %}
 
-{% block body %}
-<div class="container">
+{% block inside_body %}
+<div class="">
     <div class="row justify-content-center my-5">
-        <div class="col-lg-4">
+        <div class="col-lg-8">
             {% for item in equipment %}
                 <form action="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}" method="POST" enctype="multipart/form-data" id="myForm1">
                     <!-- Hidden Field -->
@@ -160,7 +160,7 @@
     </div>
 {% endblock %}
 
-{% block myjs %}
+{% block inside_js %}
     <script>
         $("#myForm1").validate({
             rules: {

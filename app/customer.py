@@ -23,12 +23,12 @@ def equipments(category, sub):
         page = int(page)
         sql_page = (page - 1) * 12
     if category:
-        if any(categories['name'] == category for categories in sql_function.category.values()):
+        if any(categories['name'] == category for categories in sql_function.get_classify()[2].values()):
             breadcrumbs.append({"text": str(category).replace("-", " "), "url": "/equipments/" + str(category)})
-            category_id = next((key for key, value in sql_function.category.items() if value['name'] == category), None)
+            category_id = next((key for key, value in sql_function.get_classify()[2].items() if value['name'] == category), None)
             if sub:
-                if sub in sql_function.category[category_id]['subcategories']:
-                    sub_id = next((item['sub_id'] for item in sql_function.sub_category_list if item['name'] == sub), None)
+                if sub in sql_function.get_classify()[2][category_id]['subcategories']:
+                    sub_id = next((item['sub_id'] for item in sql_function.get_classify()[1] if item['name'] == sub), None)
                     breadcrumbs.append({"text": str(sub).replace("-", " "), "url": "/equipments/" + str(category) + "/" + str(sub)})
                 else:
                     session['error_msg'] = "Sorry, we can't find the page you're looking for!."
@@ -41,14 +41,14 @@ def equipments(category, sub):
             sql_equipments, count = sql_function.get_equipment_by_sub(sub_id, sql_page)
         else:
             sql_equipments, count = sql_function.get_equipment_by_category(category_id, sql_page)
-        sub_list = sql_function.category[category_id]
+        sub_list = sql_function.get_classify()[2][category_id]
     else:
         sql_equipments, count = sql_function.get_all_equipment(sql_page)
     if 'loggedIn' in session:
         if check_permissions() == 1:
             wishlist = sql_function.get_wishlist(session['user_id'])
-    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                           count=count, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
+    return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, count=count, wishlist=wishlist,
+                           sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/equipments/search_equipment', methods=['GET', 'POST'])
@@ -70,8 +70,8 @@ def search_equipment():
         if 'loggedIn' in session:
             if check_permissions() == 1:
                 wishlist = sql_function.get_wishlist(session['user_id'])
-        return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                               count=count, wishlist=wishlist, equipment_search=equipment, msg=last_msg, error_msg=last_error_msg)
+        return render_template('customer/equipments.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, count=count, wishlist=wishlist,
+                               equipment_search=equipment, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -86,13 +86,13 @@ def equipment_detail(category, sub, detail_id):
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     if category:
-        if any(categories['name'] == category for categories in sql_function.category.values()):
+        if any(categories['name'] == category for categories in sql_function.get_classify()[2].values()):
             breadcrumbs.append({"text": str(category).replace("-", " "), "url": "/equipments/" + str(category)})
-            category_id = next((key for key, value in sql_function.category.items() if value['name'] == category), None)
-            sub_list = sql_function.category[category_id]
+            category_id = next((key for key, value in sql_function.get_classify()[2].items() if value['name'] == category), None)
+            sub_list = sql_function.get_classify()[2][category_id]
             if sub:
-                if sub in sql_function.category[category_id]['subcategories']:
-                    sub_id = next((item['sub_id'] for item in sql_function.sub_category_list if item['name'] == sub), None)
+                if sub in sql_function.get_classify()[2][category_id]['subcategories']:
+                    sub_id = next((item['sub_id'] for item in sql_function.get_classify()[1] if item['name'] == sub), None)
                     breadcrumbs.append({"text": str(sub).replace("-", " "), "url": "/equipments/" + str(category) + "/" + str(sub)})
                 else:
                     session['error_msg'] = "Sorry, we can't find the page you're looking for!."
@@ -109,27 +109,17 @@ def equipment_detail(category, sub, detail_id):
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
     if request.method == 'POST':
-        select_date = request.form.get('select_date')
-        days = request.form.get('days')
-        if select_date:
-            select_date = datetime.strptime(select_date, "%d %b %Y")
-            print(select_date.date())
-        if days:
-            start_date_str, end_date_str = map(str.strip, days.split("to"))
-            start_date = datetime.strptime(start_date_str, "%d %b %Y")
-            end_date = datetime.strptime(end_date_str, "%d %b %Y")
-            days = (start_date - end_date).days
-            print(days)
+        select_date = request.form.get('datetimes')
     if 'loggedIn' in session:
         if check_permissions() == 1:
             wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
-    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,
-                           category_list=sql_function.category_list, wishlist=wishlist, sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
+    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,  wishlist=wishlist,
+                           sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
 def user_wishlist():
-    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Wishlist", "url": "/user_wishlist"}]
+    breadcrumbs = [{"text": "Wishlist", "url": "/user_wishlist"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -139,14 +129,13 @@ def user_wishlist():
     else:
         page = int(page)
         sql_page = (page - 1) * 12
-    if 'loggedIn' in session:
-        if check_permissions() == 1:
-            sql_equipments, count = sql_function.get_equipment_by_wishlist(session['user_id'], sql_page)
-            return render_template('customer/wishlist.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, category_list=sql_function.category_list,
-                                   count=count, msg=last_msg, error_msg=last_error_msg)
-    else:
+    if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('equipments'))
+    if check_permissions() == 1:
+        sql_equipments, count = sql_function.get_equipment_by_wishlist(session['user_id'], sql_page)
+        return render_template('customer/wishlist.html', breadcrumbs=breadcrumbs, equipments=sql_equipments, count=count, msg=last_msg,
+                               error_msg=last_error_msg)
 
 
 @app.route('/add_favorite/<int:equipment_id>', methods=['GET', 'POST'])
@@ -175,7 +164,7 @@ def remove_favorite(equipment_id):
 
 @app.route('/bookings')
 def bookings():
-    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Bookings", "url": "#"}]
+    breadcrumbs = [{"text": "Bookings", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -187,95 +176,76 @@ def bookings():
         return redirect(url_for('index'))
 
 
-@app.route('/delete_booking', methods=['POST'])
-def delete_booking():
-    session['msg'] = session['error_msg'] = ''
-    instance_id = request.form.get('instance_id')
-    hire_id = request.form.get('hire_id')
-    if 'loggedIn' in session:
-        sql_function.sql_delete_booking(instance_id, hire_id)
-        session['msg'] = "Booking deleted successfully"
-        return redirect(url_for('bookings'))
-    else:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('index'))
-
-
-
-
 @app.route('/update_booking', methods=['POST'])
 def update_booking():
-    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
     start_date = request.form.get('start_date')
     cost_per_day = float(request.form.get('price'))
     instance_id = request.form.get('instance_id')
     hire_id = request.form.get('hire_id')
     new_end_date = request.form.get('new_end_date')
     new_end_time = request.form.get('new_end_time')
-
     # Combine the date and time to form a datetime string
     combined_datetime_str = f"{new_end_date} {new_end_time}"
+    # Convert the string end_date and rental_start to datetime objects for comparison
+    end_date_obj = datetime.strptime(combined_datetime_str, '%Y-%m-%d %H:%M')
+    rental_start_obj = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+    # Check if the difference between end_date and rental_start exceeds one week
+    if end_date_obj > rental_start_obj + timedelta(weeks=1):
+        session['error_msg'] = 'You can only extend the hire period up to a week from the start date.'
+        return redirect(url_for('bookings'))
+    # Calculate the additional cost for the extension
+    extension_duration = end_date_obj - rental_start_obj
+    extension_duration_seconds = (end_date_obj - rental_start_obj).total_seconds()
+    extension_days = extension_duration.days
+    additional_cost = extension_days * cost_per_day
+    # Check if extension duration exceeds 12 hours beyond the complete days
+    if extension_duration.seconds > 12 * 3600:
+        additional_cost += 0.75 * cost_per_day
+    session['end_date_obj'] = end_date_obj
+    session['instance_id'] = instance_id
+    session['hire_id'] = hire_id
+    session['extension_duration_seconds'] = extension_duration_seconds
+    session['additional_cost'] = additional_cost
+    return redirect(url_for('payment_form'))
 
-    if 'loggedIn' in session:
-        # Convert the string end_date and rental_start to datetime objects for comparison
-        end_date_obj = datetime.strptime(combined_datetime_str, '%Y-%m-%d %H:%M')
-        rental_start_obj = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
-        
-        # Check if the difference between end_date and rental_start exceeds one week
-        if end_date_obj > rental_start_obj + timedelta(weeks=1):
-            session['error_msg'] = 'You can only extend the hire period up to a week from the start date.'
-            return redirect(url_for('bookings'))
-        
-        # Calculate the additional cost for the extension
-        extension_duration = end_date_obj - rental_start_obj
-        extension_duration_seconds = (end_date_obj - rental_start_obj).total_seconds()
-
-        extension_days = extension_duration.days
-        additional_cost = extension_days * cost_per_day
-        
-        # Check if extension duration exceeds 12 hours beyond the complete days
-        if extension_duration.seconds > 12 * 3600:
-            additional_cost += 0.75 * cost_per_day
-
-    return redirect(url_for('payment_form', end_date_obj=end_date_obj, instance_id=instance_id, hire_id=hire_id, extension_duration=extension_duration_seconds, additional_cost=additional_cost))
 
 @app.template_filter('duration_format')
 def seconds_to_days_hours_seconds(seconds):
     # Convert seconds to days, hours, and seconds
     days, remainder = divmod(seconds, 86400)  # 86400 seconds in a day
     hours, seconds = divmod(remainder, 3600)  # 3600 seconds in an hour
-
     return f"{days} Days {hours} Hours {seconds} Seconds"
 
-@app.route('/payment_form/<instance_id>/<hire_id>/<end_date_obj>/<int:extension_duration>/<float:additional_cost>', methods=['GET', 'POST'])
-def payment_form(instance_id, hire_id, end_date_obj, extension_duration, additional_cost):
+
+@app.route('/payment_form', methods=['GET', 'POST'])
+def payment_form():
+    end_date_obj = session['end_date_obj']
+    instance_id = session['instance_id']
+    hire_id = session['hire_id']
+    extension_duration = session['extension_duration_seconds']
+    additional_cost = session['additional_cost']
+    breadcrumbs = [{"text": "Bookings", "url": "/bookings"}, {"text": "Payment", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    today_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
     # Assuming you have a function to fetch booking details based on instance_id or hire_id
-    booking = sql_function.get_booking(hire_id,instance_id) 
-    
-
+    booking = sql_function.get_booking(hire_id, instance_id)
     if request.method == 'POST':
         payment_type = request.form.get('payment_type')
         payment_type_id = int(payment_type)
-        status_id = 1  # Assume successful for now.
-        payment_successful = sql_function.update_payment(hire_id, status_id, payment_type_id, today_date)
+        payment_successful = sql_function.update_payment(hire_id, 1, payment_type_id)
         if payment_successful:
             sql_function.update_booking_end_date(end_date_obj, instance_id)
             session['msg'] = "Booking updated successfully"
         else:
             session['error_msg'] = 'Payment failed. Please try again.'
+        session['end_date_obj'] = session['instance_id'] = session['hire_id'] = session['extension_duration_seconds'] = session['additional_cost'] = ''
         return redirect(url_for('bookings'))
-    return render_template('customer/payment_form.html', 
-                       booking=booking, 
-                       extension_duration=extension_duration, 
-                       end_date_obj=end_date_obj, 
-                       additional_cost=additional_cost, 
-                       today=today_date,
-                       instance_id=instance_id, 
-                       hire_id=hire_id)
-
+    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, end_date_obj=end_date_obj,
+                           additional_cost=additional_cost, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/faq')
@@ -289,14 +259,23 @@ def contact():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-   
-    last_msg = "'Your enquiry has been submitted successfully!'"
+    if request.method == 'POST':
+        # Get form data (to be stored or processed)
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        location = request.form.get('location')
+        enquiry_type = request.form.get('enquiry_type')
+        enquiry_details = request.form.get('enquiry_details')
+# send to database
+        last_msg = "'Your enquiry has been submitted successfully!'"
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/customer_cart')
 def customer_cart():
-    breadcrumbs = [{"text": "Personal Center", "url": "#"}, {"text": "Cart", "url": "#"}]
+    breadcrumbs = [{"text": "Cart", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -311,14 +290,11 @@ def customer_cart():
         end_time = equipment['end_time']
         # 计算时间差
         time_diff = end_time - start_time
-
         # 获取时间差的总秒数
         total_seconds = time_diff.total_seconds()
-
         # 计算具体的天数、小时数、分钟数
         days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
         hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-        
         if 0 < hours <= 4:
             days = days + 0.75
         elif hours == 0:
@@ -335,15 +311,16 @@ def customer_cart():
         # print(equipment['max_count'])
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
-
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
 
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
 def add_to_cart():
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
+    datetimes = request.form.get('datetimes')
+    start_str, end_str = datetimes.split(' - ')
+    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     equipment_id = request.form.get('equipment_id')
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
@@ -356,8 +333,6 @@ def add_to_cart():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     try:
-        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         # print(start_time, end_time)
         if start_time >= end_time:
             session['error_msg'] = 'Start time must be before end time.'
@@ -385,6 +360,7 @@ def delete_item():
     session['msg'] = "Delete successfully"
     return redirect(url_for('customer_cart'))
 
+
 @app.route('/edit_details', methods=['POST', 'GET'])
 def edit_details():
     last_msg = session.get('msg', '')
@@ -398,10 +374,7 @@ def edit_details():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     cart_item_id = request.form.get('cart_item_id')
-    # print(start_time)
-    # print(end_time)
-    # print(quantity)
-    # print(cart_item_id)
+    # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
         return redirect(url_for('customer_cart'))
@@ -413,7 +386,7 @@ def edit_details():
         return redirect(url_for('customer_cart'))
 
 
-@app.route('/payment', methods=['POST','GET'])
+@app.route('/payment', methods=['POST', 'GET'])
 def payment():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
@@ -442,15 +415,10 @@ def payment():
             booking_equipment_id = sql_function.booking_equipment(each)
             # print(booking_equipment_id)
             # print(equipment_list)
-            if booking_equipment_id in equipment_list :
-                session['msg'] = "Please provide your driver lisence"
-                return render_template('customer/driver_lisence.html', msg=last_msg, 
-                       error_msg=last_error_msg, 
-                       price=total_amount_final, 
-                       selectedItemList=selected_ids_list, 
-                       selected_quantities_list=selected_quantities_list, 
-                       methods=methods)
-
+            if booking_equipment_id in equipment_list:
+                session['msg'] = "Please provide your driver license"
+                return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
+                                       selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
         for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
             booking_equipment_id = sql_function.booking_equipment(selected_id)
             max_count = sql_function.max_count(booking_equipment_id)
@@ -459,13 +427,15 @@ def payment():
             if selected_quantity > max_count:
                 session['error_msg'] = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
                 return redirect(url_for('customer_cart'))
-        
-        return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
-                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods)
+        return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
+                               selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
 
 
 @app.route('/complete_payment', methods=['POST'])
 def complete_payment():
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
@@ -474,7 +444,7 @@ def complete_payment():
         # 获取表单数据
         selected_items_json = request.form.get('selectedItemList')  # 这是一个JSON字符串
         selected_items = json.loads(selected_items_json)  # 将JSON字符串转换回Python列表
-        
+
         price = request.form['price']  # 获取价格
         payment_method = request.form['paymentMethod']  # 获取用户选择的支付方式
         print(selected_items)
@@ -486,47 +456,45 @@ def complete_payment():
         # 打印调试信息，或进行其他处理
         print(selected_quantities)
         user_id = session['user_id']
-        hire_id = sql_function.hire_list_update(price,user_id)
+        hire_id = sql_function.hire_list_update(price, user_id)
         print(hire_id)
-        sql_function.payment_update(hire_id,payment_method)
-        for i in range(0,len(selected_items)):
+        sql_function.payment_update(hire_id, payment_method)
+        for i in range(0, len(selected_items)):
             booking_equipment_id = sql_function.booking_equipment(selected_items[i])
             equipment_quantity = selected_quantities[i]
-            instance_ids = sql_function.update_equipment_instance(booking_equipment_id,equipment_quantity)
+            instance_ids = sql_function.update_equipment_instance(booking_equipment_id, equipment_quantity)
             for instance_id in instance_ids:
-                time_diff = sql_function.update_equipment_rental_status(instance_id,selected_items[i],user_id)
-
+                time_diff = sql_function.update_equipment_rental_status(instance_id, selected_items[i], user_id)
                 total_seconds = time_diff.total_seconds()
-
                 # 计算具体的天数、小时数、分钟数
                 days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
                 hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-                
                 if 0 < hours <= 4:
                     days = days + 0.75
                 elif hours == 0:
                     days = days
                 else:
                     days = days + 1
-                sql_function.update_hire_item(hire_id,instance_id,equipment_quantity,booking_equipment_id,days)
+                sql_function.update_hire_item(hire_id, instance_id, equipment_quantity, booking_equipment_id, days)
             sql_function.sql_delete_item(selected_items[i])
-
         session['msg'] = "Order complete. Please check in your bookings. "
-
         return redirect(url_for('customer_cart'))
-
     else:
         # 例如，重定向到首页或错误页面
         return redirect(url_for('customer_cart'))
-    
-@app.route('/driver_lisence', methods=['POST'])
-def driver_lisence():
+
+
+@app.route('/driver_license', methods=['POST'])
+def driver_license():
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    session['msg'] = "Received your driver lisence"
+    session['msg'] = "Received your driver license"
     selected_ids = request.form.get('selected_ids')
-    selected_ids_list = [int(id) for id in selected_ids.split(',')]
+    selected_ids_list = [int(id_) for id_ in selected_ids.split(',')]
 
     selected_quantities = request.form.get('selected_quantities')
     selected_quantities_list = [int(qty) for qty in selected_quantities.split(',')]
@@ -540,5 +508,5 @@ def driver_lisence():
     print(methods_list)
     print(total_amount_final)
 
-    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, 
-                               price = total_amount_final, selectedItemList = selected_ids_list, selected_quantities_list = selected_quantities_list, methods = methods_list)
+    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final, selectedItemList=selected_ids_list,
+                           selected_quantities_list=selected_quantities_list, methods=methods_list)

@@ -110,16 +110,15 @@
                     <li><a href="{{ url_for('manage_category') }}"><button type="button" class="btn btn-outline-warning ">Category</button></a></li>
                     <li><a href="{{ url_for('manage_subcategory') }}"><button type="button" class="btn btn-outline-warning ">Sub Category</button></a></li>
                     <li><a href="#"><button type="button" class="btn btn-outline-warning ">Equipment</button></a></li>
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Bookings</button></a></li>
                 </ul>
             </div>
 
             <div class="column rounded">
                 <h2>Reports</h2>
                 <ul id="remove">
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Financial</button></a></li>
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Equipment Utilization</button></a></li>
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Maintenance</button></a></li>
+                    <li><a href="{{ url_for('financial_report') }}"><button type="button" class="btn btn-outline-warning ">Financial</button></a></li>
+                    <li><a href="{{ url_for('equipment_report') }}"><button type="button" class="btn btn-outline-warning ">Equipment Utilization</button></a></li>
+                    <li><a href="{{ url_for('maintenance_report') }}"><button type="button" class="btn btn-outline-warning ">Maintenance</button></a></li>
                 </ul>
             </div>
         </div>

@@ -49,12 +49,12 @@ def login():
                     return redirect(url_for('index'))
                 else:
                     # password error
-                    last_error_msg = 'username or password error.'
+                    last_error_msg = 'Email or password error.'
             else:
                 last_error_msg = 'The account has been Inactivated, please get in touch with the staff.'
         else:
-            # username error
-            last_error_msg = 'username or password error.'
+            # Email error
+            last_error_msg = 'Email or password error.'
     return render_template('guest/login.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
@@ -138,7 +138,6 @@ def reset_password():
             if not question['answer'] or (answer and question['answer'] and answer.lower() != question['answer'].lower()):
                 last_error_msg = "The answer is incorrect!"
                 return render_template('guest/answer.html', question=question, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
-            session['error_msg'] = "The answer is incorrect!"
             return redirect(url_for('change_password'))
     return render_template('guest/reset_password.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
@@ -231,7 +230,8 @@ def edit_detail():
         if 'birth_date' in details_list:
             details_list['birth_date'] = details_list['birth_date'].strftime('%d %b %Y')
         return render_template(details_function_map[permission_level]["template"], details_list=details_list, title_list=sql_function.title_list,
-                               breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+                               breadcrumbs=breadcrumbs, city_list=sql_function.city_list, region_list=sql_function.region_list,
+                               msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = 'Incorrect permissions'
         return redirect(url_for('index'))
@@ -257,7 +257,7 @@ def user_change_password():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    original_password = sql_function.get_account_by_id(user_id)['password'].encode('utf-8')
+    original_password = sql_function.get_account(user_id)['password'].encode('utf-8')
     if request.method == 'POST':
         old_password = request.form.get('old_pw').encode('utf-8')
         new_password = request.form.get('new_pw').encode('utf-8')

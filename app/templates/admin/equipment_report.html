@@ -1,16 +1,16 @@
-{% extends "base.html" %}
+{% extends 'admin/manage_base.html' %}
 
 
-{% block mytitle %}
+{% block inside_title %}
     Equipment Report
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
 {% endblock %}
 
 
-{% block body %}
+{% block inside_body %}
 <div style="min-height: 800px">
     <div class="container mt-3">
         <div class="row justify-content-center">
@@ -117,7 +117,7 @@
 {% endblock %}
 
 
-{% block myjs %}
+{% block inside_js %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>

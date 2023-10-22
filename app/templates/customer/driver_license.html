@@ -2,7 +2,7 @@
 
 
 {% block mytitle %}
-    Upload lisence
+    Upload License
 {% endblock %}
 
 
@@ -30,7 +30,7 @@
 
 {% block body %}
     <p class="title">
-        My Driver Lisence
+        My Driver License
     </p>
 
     <div class="container-fluid" style="margin-left: 15%; margin-right: 15%;"> <!-- 如果你希望容器是全宽的，可以使用 container-fluid -->
@@ -44,14 +44,14 @@
                         <input type="text" class="form-control" id="plate" placeholder="Enter Plate number" name="plate_number" required>
                     </div>
                     <div class="mb-3">
-                        <label for="lisence" class="form-label">Driver Lisence:</label>
+                        <label for="license" class="form-label">Driver License:</label>
                         <input type="file" id="myFile" name="filename">
                         <button type="button"> Submit </button>
                     </div>
                 </div>
                 <br>
-                <form id="lisence" method="POST" action="/driver_lisence">
-                    <input type="hidden" id="driver_lisence" name="driver_lisence">
+                <form id="license" method="POST" action="/driver_license">
+                    <input type="hidden" id="driver_license" name="driver_license">
                     <input type="hidden" name="total_amount_final" value="{{ price }}">
                     <input type="hidden" name="selected_ids" value="{{ selectedItemList|join(',') }}">
                     <input type="hidden" name="selected_quantities" value="{{ selected_quantities_list|join(',') }}">

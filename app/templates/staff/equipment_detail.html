@@ -1,10 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'staff/manage_base.html' %}
 
 <!--Selected Equipment Details-->
 
-{% block body %}
+{% block inside_body %}
     {% for item in equipment %}
-        <div class="container" style="min-height: 800px">
+        <div class="" style="min-height: 800px">
             <h1 class="my-4">{{ item.name }}</h1>
             {% if item.image_urls %}
                 {% for image_url in item.image_urls %}

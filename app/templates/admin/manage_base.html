@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block mytitle %}
+    {% block inside_title %}{% endblock %}
+{% endblock %}
+
+{% block mycss %}
+    <style>
+        .label_style {
+            font-size: 20px;
+            line-height: 25px;
+            cursor: pointer;
+        }
+
+        .label_style:hover {
+            font-weight: 700;
+        }
+    </style>
+    {% block inside_css %}{% endblock %}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-12">
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Admin Manage</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_customer') }}'">Manage Customer</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_staff') }}'">Manage Staff</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_category') }}'">Manage Category</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('manage_subcategory') }}'">Manage Sub
+                                Category</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '#'">Manage Equipment</label>
+                        </div>
+                    </li>
+                </ul>
+                <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Report</h5>
+                <ul style="padding: 0; list-style: none;">
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('financial_report') }}'">Financial Report</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('equipment_report') }}'">Equipment Utilization Report</label>
+                        </div>
+                    </li>
+                    <li style="margin: 20px 0;">
+                        <div>
+                            <input type="radio" style="display: none">
+                            <label class="label_style" for="" onclick="window.location.href = '{{ url_for('maintenance_report') }}'">Maintenance Report</label>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-9 col-sm-12">
+                {% block inside_body %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    {% block mymodal %} {% endblock %}
+
+{% endblock %}
+
+{% block myjs %}
+    {% block inside_js %}{% endblock %}
+{% endblock %}
