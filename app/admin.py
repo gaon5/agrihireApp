@@ -275,9 +275,17 @@ def financial_report():
     month_list = []
     for month in range(1, 13):
         month_list.append(calendar.month_name[month])
-    details_list = revenue_list = category_list = category_total = method_list = method_total = financial_months = income_list = []
+    details_list = []
+    revenue_list = []
+    category_list = []
+    category_total = []
+    method_list = []
+    method_total = []
+    financial_months = []
+    income_list = []
     total_revenue = 0
-    month_flag = year_flag = False
+    month_flag = False
+    year_flag = False
     # if the user choose a report type
     if request.form.get('report_type'):
         report_type = request.form.get('report_type')

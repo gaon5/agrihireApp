@@ -110,17 +110,6 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     if request.method == 'POST':
         select_date = request.form.get('datetimes')
-        print(select_date)
-        # days = request.form.get('days')
-        # if select_date:
-        #     select_date = datetime.strptime(select_date, "%d %b %Y")
-        #     print(select_date.date())
-        # if days:
-        #     start_date_str, end_date_str = map(str.strip, days.split("to"))
-        #     start_date = datetime.strptime(start_date_str, "%d %b %Y")
-        #     end_date = datetime.strptime(end_date_str, "%d %b %Y")
-        #     days = (start_date - end_date).days
-        #     print(days)
     if 'loggedIn' in session:
         if check_permissions() == 1:
             wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
