@@ -511,5 +511,13 @@ def driver_license():
     print(methods_list)
     print(total_amount_final)
 
-    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final, selectedItemList=selected_ids_list,
+    driver_license = request.form.get('driver_license')
+    print(driver_license)
+
+    if not driver_license:
+        previous_url = str(request.referrer)
+        session['error_msg'] = 'Please input driver lisence number'
+        return redirect(previous_url)
+    else:
+        return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final, selectedItemList=selected_ids_list,
                            selected_quantities_list=selected_quantities_list, methods=methods_list)
