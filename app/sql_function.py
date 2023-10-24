@@ -532,30 +532,39 @@ def get_equipment_count(detail_id):
 def get_equipment_disable_list(detail_id):
     sql = """SELECT ei.instance_id,ei.instance_status,ers.rental_start_datetime,ers.expected_return_datetime,ers.actual_return_datetime FROM equipment_instance ei
                 LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
-                WHERE ei.equipment_id=%s;"""
+                LEFT JOIN rental_status rs on ers.rental_status_id = rs.rental_status_id
+                WHERE ei.equipment_id=%s AND ers.rental_status_id!=4;"""
     instances = operate_sql(sql, (detail_id,))
-    timeline = defaultdict(int)
+    date_dict = {}
     for instance in instances:
-        if instance['instance_status'] == 2:
-            start_date = instance['rental_start_datetime'].date()
-            end_date = instance['expected_return_datetime'].date()
-            timeline[start_date] -= 1
-            timeline[end_date + timedelta(days=1)] += 1
-        elif instance['instance_status'] in [3, 4]:  # 保养或禁用
-            start_date = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
-            end_date = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
-            if start_date and end_date:
-                timeline[start_date] -= 1
-                timeline[end_date + timedelta(days=1)] += 1
-    sorted_dates = sorted(timeline.keys())
-    total = len(instances)
-    zero_dates = []
-    for date in sorted_dates:
-        total += timeline[date]
-        if total == 0:
-            zero_dates.append(date)
-    print(zero_dates)
-    return instance
+        start_date = instance['rental_start_datetime'].date()
+        if instance['actual_return_datetime']:
+            end_date = instance['actual_return_datetime'].date() + timedelta(days=1)
+        else:
+            end_date = instance['expected_return_datetime'].date() + timedelta(days=1)
+        date_list = [start_date + timedelta(days=x) for x in range(0, (end_date-start_date).days + 1)]
+        for date in date_list:
+            date_dict[date] = date_dict.get(date, 0) + 1
+    sql = """SELECT count(*) AS count FROM equipment_instance ei
+                    LEFT JOIN instance_status i on ei.instance_status = i.instance_id
+                    WHERE equipment_id=%s"""
+    equipment_count = operate_sql(sql, (detail_id,), fetch=0)
+    dates = [date for date, count in date_dict.items() if count == int(equipment_count['count'])]
+    formatted_dates = [date.strftime('%d/%m/%Y') for date in dates]
+
+    today = datetime.now().date()
+    available_count = 0
+    for instance in instances:
+        status = instance['instance_status']
+        rental_start = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
+        expected_return = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
+        if status == 1:
+            available_count += 1
+        elif status == 2 and (today < rental_start or today > expected_return):
+            available_count += 1
+        elif status in [3, 4] and (not rental_start or not expected_return or (today < rental_start or today > expected_return)):
+            available_count += 1
+    return formatted_dates, available_count
 
 
 def get_pickup_equipment(the_date):

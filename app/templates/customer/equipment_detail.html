@@ -177,6 +177,13 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script>
         $(function () {
+            const disabledDates = JSON.parse('{{ disable_list|tojson }}');
+
+            function isDateDisabled(date) {
+                const formatted = date.format('DD/M/Y');
+                return disabledDates.indexOf(formatted) != -1;
+            }
+
             $('input[name="datetimes"]').daterangepicker({
                 autoUpdateInput: false,
                 timePicker: true,
@@ -184,11 +191,27 @@
                 minDate: new Date().fp_incr(1),
                 maxDate: new Date().fp_incr(91),
                 maxSpan: {"days": 7},
+                isInvalidDate: isDateDisabled,
                 locale: {
                     format: 'DD/M/Y HH:mm'
                 }
             });
+
             $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+                const startDate = picker.startDate;
+                const endDate = picker.endDate;
+
+                const currentDate = startDate.clone();
+                while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+                    if (isDateDisabled(currentDate)) {
+                        alert("The selected range contains invalid dates. Please select again.");
+                        picker.startDate = picker.oldStartDate;
+                        picker.endDate = picker.oldEndDate;
+                        picker.updateView();
+                        return;
+                    }
+                    currentDate.add(1, 'days');
+                }
                 $(this).val(picker.startDate.format('DD/M/Y HH:mm') + ' - ' + picker.endDate.format('DD/M/Y HH:mm'));
             });
 
