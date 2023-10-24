@@ -105,9 +105,7 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
-    count = sql_function.get_equipment_count(detail_id)
-    disable_list = sql_function.get_equipment_disable_list(detail_id)
-
+    disable_list, count = sql_function.get_equipment_disable_list(detail_id)
     if equipment[0]['sub_id'] != sub_id:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -117,7 +115,7 @@ def equipment_detail(category, sub, detail_id):
         if check_permissions() == 1:
             wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
     return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, wishlist=wishlist,
-                           sub_list=sub_list, count=count, msg=last_msg, error_msg=last_error_msg)
+                           sub_list=sub_list, count=count, disable_list=disable_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
