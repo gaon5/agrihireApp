@@ -137,7 +137,7 @@
                                 </thead>
                             </table>
                         </div>
-                        <p class="text-center">Remaining Quantity: {{ equipment[0]['count'] }}</p>
+                        <p class="text-center">Current Quantity: {{ count }}</p>
                         <div class="d-flex justify-content-center pt-3">
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
                                 <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px">
@@ -145,8 +145,13 @@
                                 <input type="hidden" id="end_time">
                                 <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
                                 <br>
-                                <button type="button" class="btn btn-primary hire-button mt-3" style="font-size: 14px">Hire Now</button>
-                                <button type="button" class="btn btn-danger add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
+                                {% if count == 0 %}
+                                    <button type="button" class="btn btn-primary hire-button mt-3" style="font-size: 14px" disabled>Insufficient Quantity</button>
+                                    <button type="button" class="btn btn-danger add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-primary hire-button mt-3" style="font-size: 14px">Hire Now</button>
+                                    <button type="button" class="btn btn-danger add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
+                                {% endif %}
                             </form>
                         </div>
                         <a href="{{ url_for('add_favorite', equipment_id=equipment[0]['equipment_id'] ) }}" id="favorite"

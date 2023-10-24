@@ -105,6 +105,9 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
+    count = sql_function.get_equipment_count(detail_id)
+    disable_list = sql_function.get_equipment_disable_list(detail_id)
+
     if equipment[0]['sub_id'] != sub_id:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -113,8 +116,8 @@ def equipment_detail(category, sub, detail_id):
     if 'loggedIn' in session:
         if check_permissions() == 1:
             wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
-    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment,  wishlist=wishlist,
-                           sub_list=sub_list, msg=last_msg, error_msg=last_error_msg)
+    return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, wishlist=wishlist,
+                           sub_list=sub_list, count=count, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
@@ -397,7 +400,7 @@ def payment():
     total_amount_final = request.form.get('totalAmountFinal')
 
     # 将字符串形式的ids和quantities转换为列表
-    selected_ids_list = [int(id) for id in selected_ids.split(',') if id]
+    selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_]
     selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
     # print(selected_ids_list)
     # print(selected_quantities_list)
@@ -416,7 +419,7 @@ def payment():
             # print(booking_equipment_id)
             # print(equipment_list)
             if booking_equipment_id in equipment_list:
-                session['msg'] = "Please provide your driver license"
+                # session['msg'] = "Please provide your driver license"
                 return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
                                        selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
         for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
@@ -492,7 +495,7 @@ def driver_license():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    session['msg'] = "Received your driver license"
+    last_msg = "Received your driver license"
     selected_ids = request.form.get('selected_ids')
     selected_ids_list = [int(id_) for id_ in selected_ids.split(',')]
 
