@@ -2,6 +2,7 @@ import mysql.connector
 from app import app, config, bcrypt
 from datetime import date, datetime, timedelta
 import math
+from collections import defaultdict
 
 db_conn = None
 connection = None
@@ -53,8 +54,10 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     try:
         cursor = get_cursor()
         if values:
+            # print(sql % values)
             cursor.execute(sql, values)
         else:
+            # print(sql)
             cursor.execute(sql)
         if sql.startswith("SELECT"):
             if fetch:
@@ -393,7 +396,7 @@ def get_all_equipment(sql_page):
     count = math.ceil(count['count'] / 12)
     return equipment, count
 
-# 重构
+#################################
 def equipment_details():
     sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
                 e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
@@ -441,7 +444,7 @@ def get_equipment_by_search(search, sql_page):
     return equipment, count
 
 
-# 重构
+##########################################
 def search_equipment_list(search):
     sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
                 e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
@@ -516,6 +519,43 @@ def get_equipment_by_id_(equipment_id):
         if item['image_urls']:
             item['image_urls'] = item['image_urls'].split(',')
     return equipment
+
+
+def get_equipment_count(detail_id):
+    sql = """SELECT count(*) AS count FROM equipment_instance ei
+                LEFT JOIN instance_status i on ei.instance_status = i.instance_id
+                WHERE equipment_id=%s AND ei.instance_status=1"""
+    count = operate_sql(sql, (detail_id,), fetch=0)
+    return int(count['count'])
+
+
+def get_equipment_disable_list(detail_id):
+    sql = """SELECT ei.instance_id,ei.instance_status,ers.rental_start_datetime,ers.expected_return_datetime,ers.actual_return_datetime FROM equipment_instance ei
+                LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
+                WHERE ei.equipment_id=%s;"""
+    instances = operate_sql(sql, (detail_id,))
+    timeline = defaultdict(int)
+    for instance in instances:
+        if instance['instance_status'] == 2:
+            start_date = instance['rental_start_datetime'].date()
+            end_date = instance['expected_return_datetime'].date()
+            timeline[start_date] -= 1
+            timeline[end_date + timedelta(days=1)] += 1
+        elif instance['instance_status'] in [3, 4]:  # 保养或禁用
+            start_date = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
+            end_date = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
+            if start_date and end_date:
+                timeline[start_date] -= 1
+                timeline[end_date + timedelta(days=1)] += 1
+    sorted_dates = sorted(timeline.keys())
+    total = len(instances)
+    zero_dates = []
+    for date in sorted_dates:
+        total += timeline[date]
+        if total == 0:
+            zero_dates.append(date)
+    print(zero_dates)
+    return instance
 
 
 def get_pickup_equipment(the_date):
@@ -744,7 +784,7 @@ def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
     price = float(unit_price[0]['price'])
     total_price = price * days
     sql = """INSERT INTO hire_item (hire_id,instance_id,count,price)
-            VALUES (%s,%s,%s,%s,2);"""
+            VALUES (%s,%s,%s,%s);"""
     operate_sql(sql, (hire_id,instance_id,count,total_price,))
 
 

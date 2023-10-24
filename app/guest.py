@@ -175,8 +175,9 @@ def dashboard():
         elif session['is_staff'] == 1:
             return render_template('staff/dashboard.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
         elif session['is_customer'] == 1:
-            breadcrumbs = [{"text": "Personal Center", "url": "#"}]
-            return render_template('customer/dashboard.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+            return redirect(url_for('index'))
+            # breadcrumbs = [{"text": "Personal Center", "url": "#"}]
+            # return render_template('customer/dashboard.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
         else:
             session['error_msg'] = 'Incorrect permissions'
             return redirect(url_for('index'))
