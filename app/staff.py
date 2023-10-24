@@ -249,3 +249,40 @@ def equipment_list():
         return redirect(url_for('index'))
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+
+@app.route('/staff/set_instance', methods = ["POST", "GET"])
+def set_instance():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipments List", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 2:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    equipment = sql_function.equipment_instance()
+    for i in equipment:
+        item=i
+    all = sql_function.all_equipment()
+    i_status = sql_function.instance_status()
+    if request.method == 'POST':
+        equipment_id = request.form.get('equipment_id')
+        chosen_status = request.form.get('instance')
+        current_status = request.form.get('instance_status')
+        if current_status and current_status != 'None':
+            instance_id = int(current_status.split()[0])
+            current_id = int(current_status.split()[1])   
+        else:
+            # Handle the case where current_status is 'None' or None
+            # You can set appropriate default values or handle it as needed.
+            instance_id = None  # Set to a suitable default value or handle the case.
+            current_id = None
+        print('current:')
+        print(current_status)
+        print(current_id)
+        sql_function.change_status(chosen_status, instance_id, equipment_id)
+        session['msg'] = 'Status has changed successfully!'
+        return redirect(url_for('set_instance'))    
+    return render_template('staff/equipment_instance.html',breadcrumbs=breadcrumbs,item=item, i_status=i_status, all=all, equipment=equipment, msg=last_msg, error_msg=last_error_msg)

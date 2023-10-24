@@ -510,8 +510,6 @@ def get_booking(hire_id, instance_id):
     else:
         return None
    
-          
-
 def sql_delete_booking(instance_id=None, hire_id=None):
     if instance_id:
         sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
@@ -523,9 +521,6 @@ def sql_delete_booking(instance_id=None, hire_id=None):
     if hire_id:
         sql = """DELETE FROM hire_list WHERE hire_id=%s"""
         operate_sql(sql, (hire_id,))
-
-
-
 
 def update_booking_end_date(end_date_obj, instance_id):
     # Now that we know the date is valid, we can proceed with the update
@@ -988,9 +983,30 @@ def get_annual_bookings(start_date):
     return sql_list
 
 def equipment_instance():
-    sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status, s.name AS instance_name
+    sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status,i.instance_id, s.name AS instance_name
             FROM equipment e
             LEFT JOIN equipment_instance i ON e.equipment_id = i.equipment_id
             LEFT JOIN instance_status s ON i.instance_status = s.instance_id;"""
     sql_list = operate_sql(sql)
     return sql_list
+
+def instance_status():
+    sql = """SELECT * FROM hire.instance_status;"""
+    sql = operate_sql (sql)
+    return sql
+
+def all_equipment():
+    sql = """SELECT * FROM hire.equipment;"""
+    sql = operate_sql(sql)
+    return sql
+
+def change_status(instance_status, instance_id, equipment_id):
+    sql_data = get_cursor()
+    sql = """UPDATE hire.equipment_instance SET instance_status = %s WHERE instance_id=%s"""
+    value = (instance_status, instance_id)
+    sql_data.execute(sql,value)
+    if instance_status == None:
+        instance_status = 1 
+        sql = """INSERT INTO hire.equipment_instance (equipment_id, instance_status) VALUES (%s, %s);""" 
+        value = (equipment_id, instance_status)
+        sql_data.execute(sql, value)
