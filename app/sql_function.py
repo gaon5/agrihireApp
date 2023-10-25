@@ -1132,3 +1132,14 @@ def check_existing_main_image(equipment_id):
 def deleting_image(equipment_id, image_id):
     sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
     operate_sql(sql, (equipment_id, image_id))
+
+def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
+    sql = ("INSERT INTO contact (first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
+           "VALUES (%s, %s, %s, %s, %s, %s, %s)")
+    value = (first_name, last_name, email, phone, location, enquiry_type, enquiry_details)
+    return operate_sql(sql, value)
+
+def get_all_enquiries():
+    sql = """SELECT * FROM contact"""
+    enquiries = operate_sql(sql)
+    return enquiries

@@ -353,3 +353,21 @@ def equipment_list():
         return redirect(url_for('index'))
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+
+@app.route('/staff/get_enquiries')
+def get_enquiries():
+    # Check if user is logged in
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))  # Assume there is a login route defined
+    
+    # Check if user has required permissions
+    if check_permissions() != 2: # Implement check_permissions
+        session['error_msg'] = 'You are not authorized to access this page.'
+        return redirect(url_for('dashboard'))  # Redirect to a safe page
+
+    # Fetch enquiries from database
+    enquiries = sql_function.get_all_enquiries()
+    
+    # Display enquiries
+    return render_template('staff/enquiries.html', enquiries=enquiries)

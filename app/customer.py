@@ -257,11 +257,11 @@ def faq():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     breadcrumbs = [{"text": "Contact Us", "url": "#"}]
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')  # Retrieve and clear the message in one step
+    last_error_msg = session.get('error_msg', '')  # Retrieve and clear the error message in one step
     session['msg'] = session['error_msg'] = ''
     if request.method == 'POST':
-        # Get form data (to be stored or processed)
+        # Get form data
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         email = request.form.get('email')
@@ -269,9 +269,15 @@ def contact():
         location = request.form.get('location')
         enquiry_type = request.form.get('enquiry_type')
         enquiry_details = request.form.get('enquiry_details')
-# send to database
-        last_msg = "'Your enquiry has been submitted successfully!'"
+
+        # Insert into database
+        if sql_function.insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
+            last_error_msg = "Your enquiry has been submitted successfully!"
+        else:
+            session['error_msg'] = "There was an error submitting your enquiry. Please try again."
+
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+
 
 
 @app.route('/customer_cart')
