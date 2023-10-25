@@ -1082,27 +1082,16 @@ def get_equipment_id(instance_id):
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
 
+# get latest customer_list
+def get_customer_list():
+    sql = """SELECT * from customer
+                INNER JOIN title ON title.title_id = customer.title_id
+                INNER JOIN city on city.city_id = customer.city_id
+                INNER JOIN region on region.region_id = customer.region_id"""
+    customers = operate_sql(sql)
+    return customers 
 
 
-
-
-
-
-
-
-# 有疑问
-def customer_list():
-    sql = """SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, c.phone_number, e.name AS Equipment, rs.name AS Status, 
-                DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, 
-                TIME(ers.expected_return_datetime) AS rTime, DATE(actual_return_datetime) AS aDate, TIME(actual_return_datetime) AS aTime
-                FROM hire.equipment_rental_status ers
-                INNER JOIN customer c ON c.customer_id = ers.customer_id
-                INNER JOIN rental_status rs ON ers.rental_status_id = rs.rental_status_id
-                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
-                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
-                ORDER BY ers.expected_return_datetime ASC;"""
-    equipment = operate_sql(sql)
-    return equipment
 
 
 # 有疑问
