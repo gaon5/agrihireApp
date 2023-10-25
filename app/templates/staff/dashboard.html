@@ -12,6 +12,7 @@
 
         .btn {
             width: 50%;
+            color: black;
         }
 
         .column {
@@ -22,6 +23,7 @@
             padding: 10px;
             margin: 5% auto;
             box-sizing: border-box;
+            background-color: #ffffff;
         }
     </style>
 {% endblock %}
@@ -33,18 +35,17 @@
             <div class="column rounded">
                 <h2>Manage Lists</h2>
                 <ul style="list-style-type: none">
-                    <li><a href="{{ url_for('customer_list') }}"><button type="button" class="btn btn-outline-warning ">Customer List</button></a></li>
-                    <li><a href="{{ url_for('maintenance_list') }}"><button type="button" class="btn btn-outline-warning ">Maintenance List</button></a></li>
-                    <li><a href="{{ url_for('return_list') }}"><button type="button" class="btn btn-outline-warning ">Return List</button></a></li>
-                    <li><a href="{{ url_for('equipment_list') }}"><button type="button" class="btn btn-outline-warning ">Equipment List</button></a></li>
-                    <li><a href="{{ url_for('check_out_list') }}"><button type="button" class="btn btn-outline-warning ">Checkout List</button></a></li>
+                    <li><a href="{{ url_for('customer_list') }}"><button type="button" class="btn btn-warning ">Customer List</button></a></li>
+                    <li><a href="{{ url_for('maintenance_list') }}"><button type="button" class="btn btn-warning ">Maintenance List</button></a></li>
+                    <li><a href="{{ url_for('return_list') }}"><button type="button" class="btn btn-warning ">Return List</button></a></li>
+                    <li><a href="{{ url_for('equipment_list') }}"><button type="button" class="btn btn-warning ">Equipment List</button></a></li>
+                    <li><a href="{{ url_for('check_out_list') }}"><button type="button" class="btn btn-warning ">Checkout List</button></a></li>
                 </ul>
             </div>
-
             <div class="column rounded">
-                <h2>Placeholder</h2>
+                <h2>Others</h2>
                 <ul style="list-style-type: none">
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Equipment Status</button></a></li>
+                    <li><a href="#"><button type="button" class="btn btn-warning ">Equipment Status</button></a></li>
                 </ul>
             </div>
         </div>
