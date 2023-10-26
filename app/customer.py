@@ -376,6 +376,8 @@ def edit_details():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     cart_item_id = request.form.get('cart_item_id')
+    start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+    end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
@@ -384,8 +386,6 @@ def edit_details():
         session['error_msg'] = 'Return time must be after rental time.'
         return redirect(url_for('customer_cart'))
     else:
-        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
         session['msg'] = "Update successfully"
         return redirect(url_for('customer_cart'))
