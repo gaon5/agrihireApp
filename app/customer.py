@@ -228,7 +228,7 @@ def update_booking():
     # Check if extension duration exceeds 12 hours beyond the complete days
     if extension_duration.seconds > 12 * 3600:
         additional_cost += 0.75 * cost_per_day
-    session['end_date_obj'] = end_date_obj
+    session['end_date_obj'] = end_date_obj.strftime('%Y-%m-%d %H:%M:%S')
     session['instance_id'] = instance_id
     session['hire_id'] = hire_id
     session['extension_duration_seconds'] = extension_duration_seconds
@@ -249,12 +249,14 @@ def seconds_to_days_hours_seconds(seconds):
 
 @app.route('/payment_form', methods=['GET', 'POST'])
 def payment_form():
-    end_date_obj = session.get('end_date_obj')
-    if end_date_obj:
-        formatted_end_date = end_date_obj.strftime('%Y-%m-%d %H:%M:%S')
-
+    end_date_str = session.get('end_date_obj')
+    if end_date_str:
+        # Convert the end_date_str back to a datetime object
+        end_date_obj = datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S')
+        formatted_end_date = end_date_obj.strftime('%d-%m-%Y %H:%M')
     else:
         formatted_end_date = None
+    
     instance_id = session['instance_id']
     hire_id = session['hire_id']
     extension_duration = session['extension_duration_seconds']
@@ -276,7 +278,7 @@ def payment_form():
             session['error_msg'] = 'Payment failed. Please try again.'
         session['end_date_obj'] = session['instance_id'] = session['hire_id'] = session['extension_duration_seconds'] = session['additional_cost'] = ''
         return redirect(url_for('bookings'))
-    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, end_date_obj=formatted_end_date,
+    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, formatted_end_date=formatted_end_date,
                            additional_cost=additional_cost, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
