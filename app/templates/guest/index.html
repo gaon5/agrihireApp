@@ -87,6 +87,23 @@
             justify-content: center;
             height: 100%; /* 或者您想要的任何高度 */
         }
+        .nav-link {
+            border: 2px solid #eeeec3; /* 为每个链接添加边框 */
+            border-radius: 5px; /* 可选：为边框添加圆角 */
+            margin-bottom: 5px; /* 添加下外边距，使链接之间有间隔 */
+            padding-left: 50px;
+            padding-right: 50px;
+            text-align: center; /* 文本居中 */
+        }
+
+        .nav-link:hover {
+            background-color: #eacd76; /* 鼠标悬停时的背景颜色 */
+        }
+
+        .nav-link.active {
+            background-color: #b29b5b; /* 激活链接的背景颜色 */
+            font-weight: bold; /* 激活链接的字体加粗 */
+        }
 
     </style>
 {% endblock %}

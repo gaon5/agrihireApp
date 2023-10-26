@@ -204,7 +204,7 @@ def register_account(email, password, title, given_name, surname, question, answ
     account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
     sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state,phone_number,region_id,city_id,street_name,birth_date) 
                 VALUES (%s,%s,%s,%s,%s,%s,1,%s,%s,%s,%s,%s);"""
-    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%Y-%m-%d').date()))
+    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%d %b %Y').date()))
 
 
 def get_id(user_id):
@@ -507,13 +507,22 @@ def get_equipment_by_id(equipment_id):
 
 
 def get_equipment_by_id_(equipment_id):
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description, 
-                e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+    # sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description,
+    #             e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e
+    #             LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+    #             LEFT JOIN classify c on e.equipment_id = c.equipment_id
+    #             LEFT JOIN sub_category s on s.sub_id = c.sub_id
+    #             LEFT JOIN category ca on ca.category_id = s.category_id
+    #             WHERE e.equipment_id=%s;"""
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description,e.detail,
+                MAX(ei.image_id) as image_id, GROUP_CONCAT(ei.image_url) AS image_urls, MAX(ei.priority) as priority, s.name AS sub_name, ca.name AS ca_name
+                FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 LEFT JOIN sub_category s on s.sub_id = c.sub_id
                 LEFT JOIN category ca on ca.category_id = s.category_id
-                WHERE e.equipment_id=%s;"""
+                WHERE e.equipment_id = %s
+                GROUP BY e.equipment_id, e.name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description, e.detail, s.name, ca.name;"""
     equipment = operate_sql(sql, (equipment_id,))
     for item in equipment:
         if item['image_urls']:
@@ -533,18 +542,19 @@ def get_equipment_disable_list(detail_id):
     sql = """SELECT ei.instance_id,ei.instance_status,ers.rental_start_datetime,ers.expected_return_datetime,ers.actual_return_datetime FROM equipment_instance ei
                 LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
                 LEFT JOIN rental_status rs on ers.rental_status_id = rs.rental_status_id
-                WHERE ei.equipment_id=%s AND ers.rental_status_id!=4;"""
+                WHERE ei.equipment_id=%s AND (ers.rental_status_id IS NULL OR ers.rental_status_id!=4);"""
     instances = operate_sql(sql, (detail_id,))
     date_dict = {}
     for instance in instances:
-        start_date = instance['rental_start_datetime'].date()
-        if instance['actual_return_datetime']:
-            end_date = instance['actual_return_datetime'].date() + timedelta(days=1)
-        else:
-            end_date = instance['expected_return_datetime'].date() + timedelta(days=1)
-        date_list = [start_date + timedelta(days=x) for x in range(0, (end_date-start_date).days + 1)]
-        for date in date_list:
-            date_dict[date] = date_dict.get(date, 0) + 1
+        if instance['rental_start_datetime']:
+            start_date = instance['rental_start_datetime'].date()
+            if instance['actual_return_datetime']:
+                end_date = instance['actual_return_datetime'].date() + timedelta(days=1)
+            else:
+                end_date = instance['expected_return_datetime'].date() + timedelta(days=1)
+            date_list = [start_date + timedelta(days=x) for x in range(0, (end_date-start_date).days + 1)]
+            for date in date_list:
+                date_dict[date] = date_dict.get(date, 0) + 1
     sql = """SELECT count(*) AS count FROM equipment_instance ei
                     LEFT JOIN instance_status i on ei.instance_status = i.instance_id
                     WHERE equipment_id=%s"""
@@ -555,14 +565,17 @@ def get_equipment_disable_list(detail_id):
     today = datetime.now().date()
     available_count = 0
     for instance in instances:
-        status = instance['instance_status']
-        rental_start = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
-        expected_return = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
-        if status == 1:
-            available_count += 1
-        elif status == 2 and (today < rental_start or today > expected_return):
-            available_count += 1
-        elif status in [3, 4] and (not rental_start or not expected_return or (today < rental_start or today > expected_return)):
+        if instance['rental_start_datetime']:
+            status = instance['instance_status']
+            rental_start = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
+            expected_return = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
+            if status == 1:
+                available_count += 1
+            elif status == 2 and (today < rental_start or today > expected_return):
+                available_count += 1
+            elif status in [3, 4] and (not rental_start or not expected_return or (today < rental_start or today > expected_return)):
+                available_count += 1
+        else:
             available_count += 1
     return formatted_dates, available_count
 
@@ -1084,27 +1097,16 @@ def get_equipment_id(instance_id):
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
 
+# get latest customer_list
+def get_customer_list():
+    sql = """SELECT * from customer
+                INNER JOIN title ON title.title_id = customer.title_id
+                INNER JOIN city on city.city_id = customer.city_id
+                INNER JOIN region on region.region_id = customer.region_id"""
+    customers = operate_sql(sql)
+    return customers 
 
 
-
-
-
-
-
-
-# 有疑问
-def customer_list():
-    sql = """SELECT CONCAT(c.first_name," ",c.last_name) AS Customer, c.phone_number, e.name AS Equipment, rs.name AS Status, 
-                DATE(ers.rental_start_datetime) AS sDate, TIME(ers.rental_start_datetime) AS sTime, DATE(ers.expected_return_datetime) AS rDate, 
-                TIME(ers.expected_return_datetime) AS rTime, DATE(actual_return_datetime) AS aDate, TIME(actual_return_datetime) AS aTime
-                FROM hire.equipment_rental_status ers
-                INNER JOIN customer c ON c.customer_id = ers.customer_id
-                INNER JOIN rental_status rs ON ers.rental_status_id = rs.rental_status_id
-                INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
-                INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
-                ORDER BY ers.expected_return_datetime ASC;"""
-    equipment = operate_sql(sql)
-    return equipment
 
 
 # 有疑问
@@ -1145,3 +1147,36 @@ def get_all_enquiries():
     sql = """SELECT * FROM contact"""
     enquiries = operate_sql(sql)
     return enquiries
+
+
+def equipment_instance():
+    sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status,i.instance_id, s.name AS instance_name
+            FROM equipment e
+            LEFT JOIN equipment_instance i ON e.equipment_id = i.equipment_id
+            LEFT JOIN instance_status s ON i.instance_status = s.instance_id;"""
+    sql_list = operate_sql(sql)
+    return sql_list
+
+
+def instance_status():
+    sql = """SELECT * FROM hire.instance_status;"""
+    sql = operate_sql (sql)
+    return sql
+
+
+def all_equipment():
+    sql = """SELECT * FROM hire.equipment;"""
+    sql = operate_sql(sql)
+    return sql
+
+
+def change_status(instance_status, instance_id, equipment_id):
+    sql_data = get_cursor()
+    sql = """UPDATE hire.equipment_instance SET instance_status = %s WHERE instance_id=%s"""
+    value = (instance_status, instance_id)
+    sql_data.execute(sql,value)
+    if instance_status == None:
+        instance_status = 1 
+        sql = """INSERT INTO hire.equipment_instance (equipment_id, instance_status) VALUES (%s, %s);""" 
+        value = (equipment_id, instance_status)
+        sql_data.execute(sql, value)
