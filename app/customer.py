@@ -380,6 +380,9 @@ def edit_details():
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
         return redirect(url_for('customer_cart'))
+    elif end_time <= start_time:
+        session['error_msg'] = 'Return time must be after rental time.'
+        return redirect(url_for('customer_cart'))
     else:
         start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
