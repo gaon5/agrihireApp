@@ -320,32 +320,34 @@ def customer_cart():
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
 def add_to_cart():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     datetimes = request.form.get('datetimes')
+    previous_url = str(request.referrer)
+    if not datetimes:
+        last_error_msg = 'Please select the required date and time.'
+        return redirect(previous_url)
     start_str, end_str = datetimes.split(' - ')
     start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     equipment_id = request.form.get('equipment_id')
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
-    session['msg'] = session['error_msg'] = ''
-    previous_url = str(request.referrer)
-    if not (start_time and end_time and equipment_id):
-        session['error_msg'] = 'Please select the required date and time.'
-        return redirect(previous_url)
+    
+    
     if 'loggedIn' not in session:
-        session['error_msg'] = 'You are not logged in, please login first.'
+        last_error_msg = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     try:
         # print(start_time, end_time)
         if start_time >= end_time:
-            session['error_msg'] = 'Start time must be before end time.'
+            last_error_msg = 'Start time must be before end time.'
             return redirect(previous_url)
         else:
             sql_function.add_equipment_into_cart(session['user_id'], equipment_id, 1, start_time, end_time)
-            session['msg'] = "Add to cart successfully"
+            last_msg = "Add to cart successfully"
             return redirect(previous_url)
     except ValueError:
-        session['error_msg'] = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
+        last_error_msg = 'Invalid date or time format. Please use DD-MM-YYYY HH:MM.'
         return redirect(previous_url)
 
 
@@ -360,7 +362,7 @@ def delete_item():
     cart_item_id = request.form.get('cart_item_id')
     # print(cart_item_id)
     sql_function.sql_delete_item(cart_item_id)
-    session['msg'] = "Delete successfully"
+    last_msg = "Delete successfully"
     return redirect(url_for('customer_cart'))
 
 
@@ -379,13 +381,13 @@ def edit_details():
     cart_item_id = request.form.get('cart_item_id')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
-        session['error_msg'] = 'Please select the required date and time and quantity.'
+        last_error_msg = 'Please select the required date and time and quantity.'
         return redirect(url_for('customer_cart'))
     else:
         start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
-        session['msg'] = "Update successfully"
+        last_msg = "Update successfully"
         return redirect(url_for('customer_cart'))
 
 
@@ -400,17 +402,25 @@ def payment():
     total_amount_final = request.form.get('totalAmountFinal')
 
     # 将字符串形式的ids和quantities转换为列表
-    selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_]
-    selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
     # print(selected_ids_list)
     # print(selected_quantities_list)
     # print(total_amount_final)
+    if selected_ids:
+        selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_.strip()]
+    else:
+        selected_ids_list = []
+    
+    if selected_quantities:
+        selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
+    else:
+        selected_quantities_list = []
+    
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
     methods = sql_function.payment_method()
-    if selected_ids_list == ['']:
-        session['error_msg'] = 'Please choose the equipment in your cart to place order.'
+    if selected_ids_list == []:
+        last_error_msg = 'Please choose the equipment in your cart to place order.'
         return redirect(url_for('customer_cart'))
     else:
         equipment_list = sql_function.check_cart(user_id)
@@ -428,13 +438,13 @@ def payment():
             # print(max_count)
 
             if selected_quantity > max_count:
-                session['error_msg'] = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
+                last_error_msg = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
                 return redirect(url_for('customer_cart'))
         return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
                                selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
 
 
-@app.route('/complete_payment', methods=['POST'])
+@app.route('/complete_payment', methods=['POST','get'])
 def complete_payment():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
@@ -449,37 +459,41 @@ def complete_payment():
         selected_items = json.loads(selected_items_json)  # 将JSON字符串转换回Python列表
 
         price = request.form['price']  # 获取价格
-        payment_method = request.form['paymentMethod']  # 获取用户选择的支付方式
+        payment_method = request.form.get('paymentMethod')  # 获取用户选择的支付方式
         print(selected_items)
         print(price)
         print(payment_method)
-        selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
-        selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
+        if not payment_method:
+            last_error_msg = "Please choose the payment method and place order again"
+            return redirect(url_for('payment'))
+        else:
+            selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
+            selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
 
-        # 打印调试信息，或进行其他处理
-        print(selected_quantities)
-        user_id = session['user_id']
-        hire_id = sql_function.hire_list_update(price, user_id)
-        print(hire_id)
-        sql_function.payment_update(hire_id, payment_method)
-        for i in range(0, len(selected_items)):
-            booking_equipment_id = sql_function.booking_equipment(selected_items[i])
-            equipment_quantity = selected_quantities[i]
-            instance_ids = sql_function.update_equipment_instance(booking_equipment_id, equipment_quantity)
-            for instance_id in instance_ids:
-                time_diff = sql_function.update_equipment_rental_status(instance_id, selected_items[i], user_id)
-                total_seconds = time_diff.total_seconds()
-                # 计算具体的天数、小时数、分钟数
-                days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
-                hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
-                if 0 < hours <= 4:
-                    days = days + 0.75
-                elif hours == 0:
-                    days = days
-                else:
-                    days = days + 1
-                sql_function.update_hire_item(hire_id, instance_id, equipment_quantity, booking_equipment_id, days)
-            sql_function.sql_delete_item(selected_items[i])
+            # 打印调试信息，或进行其他处理
+            print(selected_quantities)
+            user_id = session['user_id']
+            hire_id = sql_function.hire_list_update(price, user_id)
+            print(hire_id)
+            sql_function.payment_update(hire_id, payment_method)
+            for i in range(0, len(selected_items)):
+                booking_equipment_id = sql_function.booking_equipment(selected_items[i])
+                equipment_quantity = selected_quantities[i]
+                instance_ids = sql_function.update_equipment_instance(booking_equipment_id, equipment_quantity)
+                for instance_id in instance_ids:
+                    time_diff = sql_function.update_equipment_rental_status(instance_id, selected_items[i], user_id)
+                    total_seconds = time_diff.total_seconds()
+                    # 计算具体的天数、小时数、分钟数
+                    days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+                    hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+                    if 0 < hours <= 4:
+                        days = days + 0.75
+                    elif hours == 0:
+                        days = days
+                    else:
+                        days = days + 1
+                    sql_function.update_hire_item(hire_id, instance_id, equipment_quantity, booking_equipment_id, days)
+                sql_function.sql_delete_item(selected_items[i])
         session['msg'] = "Order complete. Please check in your bookings. "
         return redirect(url_for('customer_cart'))
     else:
@@ -495,7 +509,6 @@ def driver_license():
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    last_msg = "Received your driver license"
     selected_ids = request.form.get('selected_ids')
     selected_ids_list = [int(id_) for id_ in selected_ids.split(',')]
 
@@ -515,9 +528,10 @@ def driver_license():
     print(driver_license)
 
     if not driver_license:
-        previous_url = str(request.referrer)
-        session['error_msg'] = 'Please input driver lisence number'
-        return redirect(previous_url)
+        last_error_msg = 'Please input driver lisence number'
+        return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
+                                       selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods_list)
+        
     else:
         return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final, selectedItemList=selected_ids_list,
                            selected_quantities_list=selected_quantities_list, methods=methods_list)
