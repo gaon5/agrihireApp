@@ -46,7 +46,8 @@
             <div class="info-item"><strong>Original Booking Date:</strong> {{ booking['datetime'].strftime('%d-%m-%Y %H:%M') }}</div>
             <div class="info-item"><strong>Price Per Day:</strong> {{ booking['price'] }}</div>
             <div class="info-item"><strong>Hire Start:</strong> {{ booking['rental_start_datetime'].strftime('%d-%m-%Y %H:%M') }}</div>
-            <div class="info-item"><strong>New Hire End:</strong> {{ end_date_obj.strftime('%d-%m-%Y %H:%M') }}</div>
+            <div class="info-item"><strong>New Hire End:</strong> {{ formatted_end_date }}</div>
+
             <div class="info-item"><strong>Extension Duration:</strong> {{ extension_duration|duration_format }}</div>
             <div class="info-item"><strong>Total Fee:</strong> {{ additional_cost }}</div>
         </div>
