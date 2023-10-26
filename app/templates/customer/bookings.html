@@ -5,42 +5,65 @@
 {% endblock %}
 
 {% block mycss %}
-
+    <style>
+        .table img {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 5px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .extend-form input[type="date"],
+        .extend-form input[type="time"],
+        .extend-form button {
+            display: inline-block;
+        }
+    </style>
 {% endblock %}
-
 
 {% block body %}
     <div class="container mt-5">
-        <h1 class="mb-4">User Bookings</h1>
+        <h1 class="mb-4">Your Bookings</h1>
         {% if bookings %}
             <table class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Equipment Name</th>
+                    <th>Equipment</th>
                     <th>Booking Date</th>
                     <th>Amount</th>
                     <th>Hire Start</th>
                     <th>Hire End</th>
                     <th>Extend Return Date</th>
-
                 </tr>
                 </thead>
                 <tbody>
                 {% for booking in bookings %}
                     <tr>
-                        <td>{{ booking.name }}</td>
-                        <td>{{ booking.datetime }}</td>
-                        <td>{{ booking.price }}</td>
+                        <td>
+                            {% if booking.image_url %}
+                                <img src="{{ url_for('static', filename=booking.image_url) }}" alt="{{ booking.name }}" class="img-fluid" style="max-width: 80px;">
+                                {{ booking.name }}
+                            {% else %}
+                                <!-- Provide an alternative content if image_url is not available -->
+                                {{ booking.name }} (Image not available)
+                            {% endif %}
+
+                            
+                        </td>
+                        <td>{{ booking.datetime.strftime('%d-%m-%Y %H:%M') }}</td>
+
+                        <td>${{ booking.price }}</td>
                         <td>{{ booking.rental_start_datetime }}</td>
                         <td>{{ booking.expected_return_datetime }}</td>
                         <td>
-                            <form action="{{ url_for('update_booking') }}" method="post">
+                            <form class="extend-form" action="{{ url_for('update_booking') }}" method="post">
                                 <input type="date" name="new_end_date" required>
                                 <input type="time" name="new_end_time" required>
-                                <input type="hidden" id="update_instance_id" name="instance_id" value="{{ booking.instance_id }}">
-                                <input type="hidden" id="start_date" name="start_date" value="{{ booking.rental_start_datetime }}">
-                                <input type="hidden" id="price_per_day" name="price" value="{{ booking.price }}">
-                                <input type="hidden" id="update_hire_id" name="hire_id" value="{{ booking.hire_id }}">
+                                <input type="hidden" name="instance_id" value="{{ booking.instance_id }}">
+                                <input type="hidden" name="start_date" value="{{ booking.rental_start_datetime }}">
+                                <input type="hidden" name="price" value="{{ booking.price }}">
+                                <input type="hidden" name="hire_id" value="{{ booking.hire_id }}">
                                 <button type="submit" class="btn btn-primary btn-sm">Extend</button>
                             </form>
                         </td>
@@ -58,6 +81,6 @@
 
 {% block myjs %}
     <script>
-
+        // Custom JavaScript can be added here
     </script>
 {% endblock %}
