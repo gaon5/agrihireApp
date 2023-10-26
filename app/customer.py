@@ -223,7 +223,12 @@ def seconds_to_days_hours_seconds(seconds):
 
 @app.route('/payment_form', methods=['GET', 'POST'])
 def payment_form():
-    end_date_obj = session['end_date_obj']
+    end_date_obj = session.get('end_date_obj')
+    if end_date_obj:
+        formatted_end_date = end_date_obj.strftime('%Y-%m-%d %H:%M:%S')
+
+    else:
+        formatted_end_date = None
     instance_id = session['instance_id']
     hire_id = session['hire_id']
     extension_duration = session['extension_duration_seconds']
@@ -245,7 +250,7 @@ def payment_form():
             session['error_msg'] = 'Payment failed. Please try again.'
         session['end_date_obj'] = session['instance_id'] = session['hire_id'] = session['extension_duration_seconds'] = session['additional_cost'] = ''
         return redirect(url_for('bookings'))
-    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, end_date_obj=end_date_obj,
+    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, end_date_obj=formatted_end_date,
                            additional_cost=additional_cost, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 

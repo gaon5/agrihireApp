@@ -204,7 +204,7 @@ def register_account(email, password, title, given_name, surname, question, answ
     account = operate_sql("""SELECT user_id from user_account WHERE email=%s;""", (email,), fetch=0, close=0)
     sql = """INSERT INTO customer (user_id,title_id,first_name,last_name,question_id,answer,state,phone_number,region_id,city_id,street_name,birth_date) 
                 VALUES (%s,%s,%s,%s,%s,%s,1,%s,%s,%s,%s,%s);"""
-    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%Y-%m-%d').date()))
+    operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%d %b %Y').date()))
 
 
 def get_id(user_id):
