@@ -4,36 +4,60 @@
     Payment
 {% endblock %}
 
+{% block mycss %}
+    <style>
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        .info-item strong {
+            font-weight: bold;
+        }
+        .info-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .info-card-header {
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            background-color: #f8f9fa;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
     <div class="container mt-5">
         <h1 class="mb-4">Payment Details</h1>
-        
-        <!-- Booking Information -->
-        <div class="card mb-4">
-            <div class="card-header">
-                Booking Information
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>Equipment Name:</strong> {{ booking['name'] }}</li>
-                <li class="list-group-item"><strong>Original Booking Date:</strong> {{ booking['datetime'] }}</li>
-                <li class="list-group-item"><strong>Price Per Day:</strong> {{ booking['price'] }}</li>
-                <li class="list-group-item"><strong>Hire Start:</strong> {{ booking['rental_start_datetime'] }}</li>
-                <li class="list-group-item"><strong>New Hire End:</strong> {{ end_date_obj }}</li>
-                <li class="list-group-item"><strong>Extension Duration:</strong> {{ extension_duration|duration_format }}</li>
-                <li class="list-group-item"><strong>Total fee for extending hire:</strong> {{ additional_cost }}</li>
-            </ul>
+
+        <!-- Booking Information in Card Format -->
+        <div class="info-card">
+            <div class="info-card-header">Booking Information</div>
+            <div class="info-item"><strong>Equipment Name:</strong> {{ booking['name'] }}</div>
+            <div class="info-item"><strong>Original Booking Date:</strong> {{ booking['datetime'].strftime('%d-%m-%Y %H:%M') }}</div>
+            <div class="info-item"><strong>Price Per Day:</strong> {{ booking['price'] }}</div>
+            <div class="info-item"><strong>Hire Start:</strong> {{ booking['rental_start_datetime'].strftime('%d-%m-%Y %H:%M') }}</div>
+            <div class="info-item"><strong>New Hire End:</strong> {{ end_date_obj.strftime('%d-%m-%Y %H:%M') }}</div>
+            <div class="info-item"><strong>Extension Duration:</strong> {{ extension_duration|duration_format }}</div>
+            <div class="info-item"><strong>Total Fee:</strong> {{ additional_cost }}</div>
         </div>
-        
+
         <!-- Payment Form -->
         <div class="card">
-            <div class="card-header">
-                Select Payment Type
-            </div>
+           
             <div class="card-body">
                 <form action="{{ url_for('payment_form') }}" method="post">
-
                     <div class="mb-3">
-                        <label for="payment_type" class="form-label">Payment Type:</label>
+                        <label for="payment_type" class="form-label">Select Payment Type:</label>
                         <select name="payment_type" id="payment_type" class="form-control">
                             <option value="1">Paypal</option>
                             <option value="2">Master Card</option>
