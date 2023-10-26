@@ -134,5 +134,26 @@
 {% endblock %}
 
 {% block myjs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 获取表单和支付方式的单选按钮
+        var form = document.querySelector('form');
+        var paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
 
+        form.addEventListener('submit', function (event) {
+            var selectedMethod = false;
+
+            // 遍历所有支付方式的单选按钮，检查是否有被选中的
+            paymentMethods.forEach(function(method) {
+                if (method.checked) selectedMethod = true;
+            });
+
+            // 如果没有选择支付方式，阻止表单提交并显示警告
+            if (!selectedMethod) {
+                event.preventDefault();
+                alert('Please select a payment method before proceeding.');
+            }
+        });
+    });
+</script>
 {% endblock %}

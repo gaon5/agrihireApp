@@ -50,11 +50,11 @@
                     </div>
                 </div>
                 <br>
-                <form id="license" method="POST" action="/driver_license">
+                <form id="license" method="POST" action="/payment">
                     <input type="hidden" id="driver_license" name="driver_license">
-                    <input type="hidden" name="total_amount_final" value="{{ price }}">
-                    <input type="hidden" name="selected_ids" value="{{ selectedItemList|join(',') }}">
-                    <input type="hidden" name="selected_quantities" value="{{ selected_quantities_list|join(',') }}">
+                    <input type="hidden" name="totalAmountFinal" value="{{ price }}">
+                    <input type="hidden" name="selectedCartItemIds" value="{{ selectedItemList|join(',') }}">
+                    <input type="hidden" name="selectedQuantities" value="{{ selected_quantities_list|join(',') }}">
                     <input type="hidden" name="methods" value="{{ methods|join(',') }}">
                     <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
                 </form>
@@ -94,6 +94,13 @@
             // 将驾照号码设置到隐藏的输入字段中
             var hiddenInput = document.getElementById('driver_license');
             hiddenInput.value = licenseNumber;
+
+            if (!licenseNumber) {
+                // 驾照号为空，阻止表单提交
+                event.preventDefault();  // 阻止表单的默认提交行为
+                alert("Please enter your driver's license number.");  // 弹出警告窗口提示用户
+                return false;  // 终止函数执行
+            }
 
             // 现在，手动提交表单
             form.submit();
