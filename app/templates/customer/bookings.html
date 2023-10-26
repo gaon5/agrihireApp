@@ -22,7 +22,6 @@
                     <th>Hire Start</th>
                     <th>Hire End</th>
                     <th>Extend Return Date</th>
-                    <th>Delete Booking</th>
 
                 </tr>
                 </thead>
@@ -42,16 +41,8 @@
                                 <input type="hidden" id="start_date" name="start_date" value="{{ booking.rental_start_datetime }}">
                                 <input type="hidden" id="price_per_day" name="price" value="{{ booking.price }}">
                                 <input type="hidden" id="update_hire_id" name="hire_id" value="{{ booking.hire_id }}">
-                                
                                 <button type="submit" class="btn btn-primary btn-sm">Extend</button>
                             </form>
-                            
-                            
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
-                                    onclick="confirmDelete({{ booking.instance_id }}, {{ booking.hire_id }})">Delete
-                            </button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -63,35 +54,10 @@
             </div>
         {% endif %}
     </div>
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
-         aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Confirm</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <form action="{{ url_for('delete_booking') }}" method="post">
-                        <input type="hidden" id="delete_instance_id" name="instance_id">
-                        <input type="hidden" id="delete_hire_id" name="hire_id">
-                        <button type="submit" class="btn btn-danger my-1">Yes</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 
 {% block myjs %}
     <script>
-        function confirmDelete(instance_id, hire_id) {
-            document.getElementById("delete_instance_id").value = instance_id;
-            document.getElementById("delete_hire_id").value = hire_id;
-        }
+
     </script>
 {% endblock %}

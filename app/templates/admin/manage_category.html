@@ -1,12 +1,12 @@
-{% extends "base.html" %}
+{% extends 'admin/manage_base.html' %}
 
 
-{% block mytitle %}
+{% block inside_title %}
 
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
     <style>
         #navigation-container {
             display: flex;
@@ -42,9 +42,9 @@
 {% endblock %}
 
 
-{% block body %}
+{% block inside_body %}
 
-    <div class="container mt-3">
+    <div class="mt-3">
         <div class="row justify-content-center">
             <div class="col-md-8" style="text-align: center">
                 <br>
@@ -53,9 +53,9 @@
         </div>
     </div>
     <br>
-    <div class="container mt-3">
+    <div class="mt-3">
         <div class="row justify-content-center">
-            <div class="col-md-5">
+            <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
                         <h5>Add Category</h5><br>
@@ -76,16 +76,16 @@
     </div>
     <br>
     <div class="row justify-content-center">
-        <div class="col-md-5">
+        <div class="col-md-8">
             <br>
-            {% if category_list %}
+            {% if get_classify()[1] %}
                 <div class="table-header">
                     <div class="header-cell">Main Category</div>
                     <div class="header-cell"></div>
                 </div>
                 <div class="card mb-2">
                     <div class="card-body">
-                        {% for category in category_list %}
+                        {% for category in get_classify()[1] %}
                             <form action="{{ url_for('manage_category') }}" method="post">
                                 <div class="row" style="margin: 5px;">
                                     <div class="col-md-8 d-flex align-items-center justify-content-center">
@@ -115,7 +115,7 @@
 {% endblock %}
 
 
-{% block myjs %}
+{% block inside_js %}
     <script>
         function confirmDelete() {
             // Display a confirmation dialog

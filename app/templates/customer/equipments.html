@@ -101,7 +101,7 @@
             <div class="col-md-3 col-sm-12">
                 <h5 class="pt-5" style="color: #ff4c00; font-weight: 700;">Category</h5>
                 <ul style="padding: 0; list-style: none;">
-                    {% for category in category_list %}
+                    {% for category in get_classify()[0] %}
                         <li style="margin: 20px 0;">
                             <div>
                                 <input type="radio" id="{{ category.category_id }}" style="display: none">
@@ -139,17 +139,20 @@
                                     </span></h5>
                                     <p class="card-text truncated-text" title="{{ equipment.description }}">{{ equipment.description }}</p>
                                     <p class="card-text m-0" style="font-size: 28px">$ {{ equipment.price }}<span style="font-size: 14px">/Day</span></p>
-                                    {% if not wishlist %}
+                                    {% if check_permissions() < 2 %}
+                                        {% if not check_permissions() %}
                                         <div class="tile_login pb-1">
                                             <a href="{{ url_for('login') }}" class="link_">Log in to your account</a>
                                         </div>
+                                        {% endif %}
+                                        <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
+                                           class="btn btn-primary" style="font-size: 14px">Hire Now</a>
+                                    {% else %}
+                                        <a href="#" class="btn btn-primary" style="font-size: 14px">管理</a>
                                     {% endif %}
-                                    <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
-                                       class="btn btn-primary" style="font-size: 14px">See Detail</a>
                                 </div>
                                 <a href="{{ url_for('add_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}"
-                                   class="image1-switcher position-absolute top-0 end-0 mx-3 my-2"
-                                   style="width: 20px;height:20px"></a>
+                                   class="image1-switcher position-absolute top-0 end-0 mx-3 my-2" style="width: 20px;height:20px"></a>
                             </div>
                         </div>
                     {% endfor %}

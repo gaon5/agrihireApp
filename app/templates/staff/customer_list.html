@@ -1,61 +1,52 @@
-{% extends 'base.html' %}
+{% extends 'staff/manage_base.html' %}
 
-{% block mycss %}
+<!--Customer List-->
+
+{% block inside_css %}
     <style>
-        th.header {
-            background-color: #eecd5c;
+        table, th.header {
             vertical-align: middle;
+        }
+
+        td {
+            vertical-align: middle;
+            width: -75px;
+        }
+        table, th, td {
+            background-color: transparent !important;
+        }
+        .input-group {
+            float: none;
+            width: 40%;
+            margin-left: 30%;
+            margin-top: 1%;
         }
     </style>
 {% endblock %}
 
-{% block body %}
-    <div class="container mt-3">
-        <div class="row justify-content-center">
-            <div class="col-md-10" style="text-align: center">
-                <table class="table align-middle mb-0 bg-white">
+{% block inside_body %}
+    <div class="mt-3">
+        <div class="row">
+            <div class="col-md-12" style="text-align: center">
+                <table class="table table-hover align-middle mb-0" id="myTable">
                     <thead>
-                    <tr>
-                        <th class="header">Customer</th>
-                        <th class="header">Phone Number</th>
-                        <th class="header">Equipment</th>
-                        <th class="header">Status</th>
-                        <th class="header">Start Date-Time</th>
-                        <th class="header">Return Date-Time</th>
-                        <th class="header">Actual Return Date-Time</th>
-                    </tr>
+                        <tr>
+                            <th class="header">ID</th>
+                            <th class="header">Name</th>
+                            <th class="header">Phone Number</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {% for item in equipment %}
-                        <tr>
+                    {% for customer in customers %}
+                        <tr id="{{ customer.customer_id }}" style="cursor: pointer;">
                             <td>
-                                <p class="fw-normal mb-1">{{ item.Customer }}</p>
+                                <p class="fw-normal mb-1">{{ customer.customer_id }}</p>
                             </td>
                             <td>
-                                <p class="fw-normal mb-1">{{ item.phone_number }}</p>
+                                <p class="fw-normal mb-1">{{ customer.first_name }} {{ customer.last_name }}</p>
                             </td>
                             <td>
-                                <p class="fw-normal mb-1">{{ item.Equipment }}</p>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning text-dark">{{ item.Status }}</span>
-                            </td>
-                            <td>
-                                <p class="fw-normal mb-1">{{ item.sDate }}</p>
-                                <p class="small mb-0 ms-2">{{ item.sTime }}</p>
-                            </td>
-                            <td>
-                                <p class="fw-normal mb-1">{{ item.rDate }}</p>
-                                <p class="small mb-0 ms-2">{{ item.rTime }}</p>
-                            </td>
-                            <td>
-                                {% if item.aDate == None or item.aTime== None %}
-                                    <p class="fw-normal mb-1"></p>
-                                    <p class="small mb-0 ms-2"></p>
-                                {% else %}
-                                    <p class="fw-normal mb-1">{{ item.aDate }}</p>
-                                    <p class="small mb-0 ms-2">{{ item.aTime }}</p>
-                                {% endif %}
+                                <p class="fw-normal mb-1">{{ customer.phone_number }}</p>
                             </td>
                         </tr>
                     {% endfor %}
@@ -64,4 +55,17 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block inside_js %}
+<script>
+    $(document).ready(function() {
+        $("tr").click(function() {
+            const rowId = $(this).attr('id');
+            if(rowId) {
+                window.location.href = "{{ url_for('customer_details') }}?customer_id=" + rowId;
+            }
+        });
+    });
+</script>
 {% endblock %}

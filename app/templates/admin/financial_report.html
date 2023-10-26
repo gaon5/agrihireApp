@@ -1,16 +1,16 @@
-{% extends "base.html" %}
+{% extends 'admin/manage_base.html' %}
 
 
-{% block mytitle %}
+{% block inside_title %}
     Financial Report
 {% endblock %}
 
 
-{% block mycss %}
+{% block inside_css %}
 {% endblock %}
 
 
-{% block body %}
+{% block inside_body %}
 <div style="min-height: 800px">
     <div class="container mt-3">
         <div class="row justify-content-center">
@@ -87,17 +87,19 @@
                         <div class="col-md-5">
                             <h5 style="text-align: center">Revenue per Category</h5>
                             <canvas style="text-align: center;" id="myChart1"></canvas>
-                            <br>
+                        </div>
+                        <div class="col-md-5">
                             <h5 style="text-align: center">Revenue per Payment Method</h5>
                             <canvas style="text-align: center;" id="myChart2"></canvas>
-                            {% if income_list %}
-                                <br>
+                        </div>
+                        {% if income_list %}
+                            <br>
+                            <div class="col-md-8">
                                 <h5 style="text-align: center">Monthly Income</h5>
                                 <canvas style="text-align: center" id="myChart3"></canvas>
-                            {% endif %}
-                            <br></br>
-                            <h3 style="text-align: center">Total revenue: ${{ total_revenue }}</h3>
-                        </div>
+                            </div>
+                        {% endif %}
+                        <h3 style="text-align: center">Total revenue: ${{ total_revenue }}</h3>
                     </div>
                 </div>
                 <br>
@@ -112,7 +114,7 @@
 {% endblock %}
 
 
-{% block myjs %}
+{% block inside_js %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const ctx1 = document.getElementById('myChart1');
