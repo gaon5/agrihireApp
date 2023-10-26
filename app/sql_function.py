@@ -1121,3 +1121,36 @@ def check_existing_main_image(equipment_id):
 def deleting_image(equipment_id, image_id):
     sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
     operate_sql(sql, (equipment_id, image_id))
+
+
+def equipment_instance():
+    sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status,i.instance_id, s.name AS instance_name
+            FROM equipment e
+            LEFT JOIN equipment_instance i ON e.equipment_id = i.equipment_id
+            LEFT JOIN instance_status s ON i.instance_status = s.instance_id;"""
+    sql_list = operate_sql(sql)
+    return sql_list
+
+
+def instance_status():
+    sql = """SELECT * FROM hire.instance_status;"""
+    sql = operate_sql (sql)
+    return sql
+
+
+def all_equipment():
+    sql = """SELECT * FROM hire.equipment;"""
+    sql = operate_sql(sql)
+    return sql
+
+
+def change_status(instance_status, instance_id, equipment_id):
+    sql_data = get_cursor()
+    sql = """UPDATE hire.equipment_instance SET instance_status = %s WHERE instance_id=%s"""
+    value = (instance_status, instance_id)
+    sql_data.execute(sql,value)
+    if instance_status == None:
+        instance_status = 1 
+        sql = """INSERT INTO hire.equipment_instance (equipment_id, instance_status) VALUES (%s, %s);""" 
+        value = (equipment_id, instance_status)
+        sql_data.execute(sql, value)
