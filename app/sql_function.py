@@ -507,13 +507,22 @@ def get_equipment_by_id(equipment_id):
 
 
 def get_equipment_by_id_(equipment_id):
-    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description, 
-                e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id  
+    # sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description,
+    #             e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e
+    #             LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
+    #             LEFT JOIN classify c on e.equipment_id = c.equipment_id
+    #             LEFT JOIN sub_category s on s.sub_id = c.sub_id
+    #             LEFT JOIN category ca on ca.category_id = s.category_id
+    #             WHERE e.equipment_id=%s;"""
+    sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description,e.detail,
+                MAX(ei.image_id) as image_id, GROUP_CONCAT(ei.image_url) AS image_urls, MAX(ei.priority) as priority, s.name AS sub_name, ca.name AS ca_name
+                FROM equipment e
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
                 LEFT JOIN sub_category s on s.sub_id = c.sub_id
                 LEFT JOIN category ca on ca.category_id = s.category_id
-                WHERE e.equipment_id=%s;"""
+                WHERE e.equipment_id = %s
+                GROUP BY e.equipment_id, e.name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description, e.detail, s.name, ca.name;"""
     equipment = operate_sql(sql, (equipment_id,))
     for item in equipment:
         if item['image_urls']:
@@ -533,18 +542,19 @@ def get_equipment_disable_list(detail_id):
     sql = """SELECT ei.instance_id,ei.instance_status,ers.rental_start_datetime,ers.expected_return_datetime,ers.actual_return_datetime FROM equipment_instance ei
                 LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
                 LEFT JOIN rental_status rs on ers.rental_status_id = rs.rental_status_id
-                WHERE ei.equipment_id=%s AND ers.rental_status_id!=4;"""
+                WHERE ei.equipment_id=%s AND (ers.rental_status_id IS NULL OR ers.rental_status_id!=4);"""
     instances = operate_sql(sql, (detail_id,))
     date_dict = {}
     for instance in instances:
-        start_date = instance['rental_start_datetime'].date()
-        if instance['actual_return_datetime']:
-            end_date = instance['actual_return_datetime'].date() + timedelta(days=1)
-        else:
-            end_date = instance['expected_return_datetime'].date() + timedelta(days=1)
-        date_list = [start_date + timedelta(days=x) for x in range(0, (end_date-start_date).days + 1)]
-        for date in date_list:
-            date_dict[date] = date_dict.get(date, 0) + 1
+        if instance['rental_start_datetime']:
+            start_date = instance['rental_start_datetime'].date()
+            if instance['actual_return_datetime']:
+                end_date = instance['actual_return_datetime'].date() + timedelta(days=1)
+            else:
+                end_date = instance['expected_return_datetime'].date() + timedelta(days=1)
+            date_list = [start_date + timedelta(days=x) for x in range(0, (end_date-start_date).days + 1)]
+            for date in date_list:
+                date_dict[date] = date_dict.get(date, 0) + 1
     sql = """SELECT count(*) AS count FROM equipment_instance ei
                     LEFT JOIN instance_status i on ei.instance_status = i.instance_id
                     WHERE equipment_id=%s"""
@@ -555,14 +565,17 @@ def get_equipment_disable_list(detail_id):
     today = datetime.now().date()
     available_count = 0
     for instance in instances:
-        status = instance['instance_status']
-        rental_start = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
-        expected_return = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
-        if status == 1:
-            available_count += 1
-        elif status == 2 and (today < rental_start or today > expected_return):
-            available_count += 1
-        elif status in [3, 4] and (not rental_start or not expected_return or (today < rental_start or today > expected_return)):
+        if instance['rental_start_datetime']:
+            status = instance['instance_status']
+            rental_start = instance['rental_start_datetime'].date() if instance['rental_start_datetime'] else None
+            expected_return = instance['expected_return_datetime'].date() if instance['expected_return_datetime'] else None
+            if status == 1:
+                available_count += 1
+            elif status == 2 and (today < rental_start or today > expected_return):
+                available_count += 1
+            elif status in [3, 4] and (not rental_start or not expected_return or (today < rental_start or today > expected_return)):
+                available_count += 1
+        else:
             available_count += 1
     return formatted_dates, available_count
 

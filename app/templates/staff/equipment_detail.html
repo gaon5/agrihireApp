@@ -23,7 +23,7 @@
             <p>Height: {{ item.height }}mm</p>
             <p>Description: {{ item.description }}</p>
             <p>Detail: {{ item.detail }}</p>
-            <a role="button" id="update" class="btn btn-primary" href="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}">Update</a>
+            <a role="button" id="update" class="btn nav-link_ active" href="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}">Update</a>
         </div>
     {% endfor %}
 {% endblock %}

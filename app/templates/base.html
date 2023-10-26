@@ -104,20 +104,23 @@
             background-color: #EECD5C; /* 更改背景颜色 */
         }
 
-        .nav-link {
+        .nav-link_ {
             border: 2px solid #eeeec3; /* 为每个链接添加边框 */
             border-radius: 5px; /* 可选：为边框添加圆角 */
             margin-bottom: 5px; /* 添加下外边距，使链接之间有间隔 */
             padding-left: 50px;
             padding-right: 50px;
             text-align: center; /* 文本居中 */
+            background-color: #ceb568; /* 鼠标悬停时的背景颜色 */
         }
 
-        .nav-link:hover {
-            background-color: #eacd76; /* 鼠标悬停时的背景颜色 */
+        .nav-link_:hover {
+            background-color: #f8d662;
+            border: 2px solid #eeeec3; /* 为每个链接添加边框 */
+            border-radius: 5px; /* 可选：为边框添加圆角 */
         }
 
-        .nav-link.active {
+        .nav-link_.active {
             background-color: #b29b5b; /* 激活链接的背景颜色 */
             font-weight: bold; /* 激活链接的字体加粗 */
         }
@@ -243,12 +246,12 @@
 {% if breadcrumbs %}
     <div class="container mt-4">
         <ul class="breadcrumb">
-            <li class="breadcrumb-item active"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active"><a style="text-decoration: none; color: black" href="/">Home</a></li>
             {% for breadcrumb in breadcrumbs %}
                 {% if loop.last %}
                     <li class="breadcrumb-item active">{{ breadcrumb.text }}</li>
                 {% else %}
-                    <li class="breadcrumb-item"><a href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a></li>
+                    <li class="breadcrumb-item"><a style="text-decoration: none; color: black" href="{{ breadcrumb.url }}">{{ breadcrumb.text }}</a></li>
                 {% endif %}
             {% endfor %}
         </ul>
