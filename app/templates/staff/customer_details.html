@@ -1,0 +1,46 @@
+{% extends 'staff/manage_base.html' %}
+
+<!--Selected Equipment Details-->
+
+{% block inside_body %}
+    <div class="" style="min-height: 250px">
+        <h1 class="my-4">{{ aCustomer.first_name }} {{ aCustomer.last_name }}</h1>
+        <p>Title: {{ aCustomer.title }}</p>
+        <p>Phone Number: {{ aCustomer.phone_number }}</p>
+        <p>Home Address: {{ aCustomer.street_name }}, {{ aCustomer.city }}, {{ aCustomer.region }}</p>
+        <p>Birth Date: {{ aCustomer.birth_date}}</p>
+    </div>
+    <h3>Made Bookings</h3>
+    
+    <div class="mt-3">
+        <div class="row">
+            <div class="col-md-12" style="text-align: center">
+                <table class="table table-hover align-middle mb-0" id="myTable">
+                    <thead>
+                        <tr>
+                            <th class="header">Equipment Name</th>
+                            <th class="header">Rent Start Date</th>
+                            <th class="header">Rent End Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for booking in bookings %}
+                        <tr id="{{ customer.customer_id }}" style="cursor: pointer;">
+                            <td>
+                                <p class="fw-normal mb-1">{{ booking.name }}</p>
+                            </td>
+                            <td>
+                                <p class="fw-normal mb-1">{{ booking.rental_start_datetime}}</p>
+                            </td>
+                            <td>
+                                <p class="fw-normal mb-1">{{ booking.expected_return_datetime }}</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <br>
+{% endblock %}

@@ -5,6 +5,21 @@
 {% endblock %}
 
 {% block mycss %}
+    <style>
+        .question {
+            font-weight: bold;
+            color: #6B4226; /* Dark Brown */
+        }
+        .answer {
+            margin-bottom: 10px;
+            background-color: #FFF7E6; /* Light Gold */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .list-group-item:not(:last-child) {
+            margin-bottom: 10px;
+        }
+    </style>
 
 {% endblock %}
 
@@ -20,13 +35,16 @@
                 <h2>Hiring with Hirepool</h2>
             </div>
             <div class="col-md-8">
-                <ul class="list-group">
-                    <li class="list-group-item">How do I book equipment to hire? <br> Answer: Use our online portal or contact our customer service.</li>
-                    <li class="list-group-item">Should I book equipment to hire? <br> Answer: Yes, to ensure availability and secure your needed equipment.</li>
-                    <li class="list-group-item">What is the minimum hire period? <br> Answer: Typically, it's one day, but it varies by equipment.</li>
-                    <li class="list-group-item">Is a bond required for hire items? <br> Answer: Yes, a refundable bond is often required for safety reasons.</li>
-                    <li class="list-group-item">When will my bond/deposit be refunded? <br> Answer: Within 3-5 business days after the equipment is returned in good condition.</li>
-                </ul>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <p class="question">How do I book equipment to hire?</p>
+                        <p class="answer">Use our online portal or contact our customer service.</p>
+                    </div>
+                    <div class="list-group-item">
+                        <p class="question">Should I book equipment to hire?</p>
+                        <p class="answer">Yes, to ensure availability and secure your needed equipment.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -36,13 +54,17 @@
                 <h2>Online Ordering</h2>
             </div>
             <div class="col-md-8">
-                <ul class="list-group">
-                    <li class="list-group-item">How do I make a reservation online? <br> Answer: Browse our catalog, select equipment, and follow the reservation steps.</li>
-                    <li class="list-group-item">How can I get a quote? <br> Answer: Add items to your cart and proceed to 'Get a Quote' option.</li>
-                    <li class="list-group-item">What if I'm unsure about what equipment to hire? <br> Answer: Contact our experts for guidance.</li>
-                    <li class="list-group-item">What if I have made an online booking and no longer need the booking? <br> Answer: You can cancel through the portal or contact us directly.</li>
-                    <li class="list-group-item">How will I know if my booking is confirmed? <br> Answer: A confirmation email will be sent with the details.</li>
-                </ul>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <p class="question">How do I make a reservation online? </p>
+                        <p class="answer"> Browse our catalog, select equipment, and follow the reservation steps.</p>
+                    </div>
+                    <div class="list-group-item">
+                        <p class="question">How can I get a quote?</p>
+                        <p class="answer">Add items to your cart and proceed to 'Get a Quote' option.</p>
+                    </div>
+                    <!-- ... Other questions and answers ... -->
+                </div>
             </div>
         </section>
 
@@ -52,35 +74,24 @@
                 <h2>Delivery and Pickup</h2>
             </div>
             <div class="col-md-8">
-                <ul class="list-group">
-                    <li class="list-group-item">Can Hirepool deliver the equipment? <br> Answer: Yes, we offer delivery for most equipment.</li>
-                    <li class="list-group-item">If you deliver the equipment will the paperwork be done then? <br> Answer: Yes, all necessary paperwork will be handled upon delivery.</li>
-                    <li class="list-group-item">Will I be given a demonstration and/or instructions on how to use the equipment? <br> Answer: Absolutely, our team will ensure you know how to safely use the equipment.</li>
-                    <li class="list-group-item">Can I hire equipment from one branch and drop it off at a different branch? <br> Answer: Yes, with prior arrangements and depending on availability.</li>
-                    <li class="list-group-item">Can I return the equipment after hours? <br> Answer: Check with your hiring branch for after-hours procedures.</li>
-                </ul>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <p class="question">Can Hirepool deliver the equipment?  </p>
+                        <p class="answer">Yes, we offer delivery for most equipment.</p>
+                    </div>
+                    <div class="list-group-item">
+                        <p class="question">Will I be given a demonstration and/or instructions on how to use the equipment? </p>
+                        <p class="answer"> Absolutely, our team will ensure you know how to safely use the equipment.</p>
+                    </div>
+                    <!-- ... Other questions and answers ... -->
+                </div>
             </div>
         </section>
 
-        <!-- General Section -->
-        <section id="general" class="row mb-5">
-            <div class="col-md-4">
-                <h2>General</h2>
-            </div>
-            <div class="col-md-8">
-                <ul class="list-group">
-                    <li class="list-group-item">How do I book equipment to hire? <br> Answer: Use our online system or call our hotline.</li>
-                    <li class="list-group-item">Do I get a discount if I return the equipment early? <br> Answer: This depends on the terms of your rental agreement.</li>
-                    <li class="list-group-item">What happens if I return the equipment late? <br> Answer: Additional charges may apply based on the rental agreement.</li>
-                    <li class="list-group-item">Can I hire equipment from one branch and drop it off at a different branch? <br> Answer: Generally yes, but it's best to check with us first.</li>
-                    <li class="list-group-item">How do I contact Hirepool? <br> Answer: Reach out to us via email, phone, or our website's contact form.</li>
-                </ul>
-            </div>
-        </section>
+       
 
-        <!-- Contact -->
         <h2>Contact Us for More Questions</h2>
-        <p class="lead">You can reach us at: info@darfield.co.nz</p>
+        <p class="lead">You can reach us at: <a href="mailto:info@darfield.co.nz">info@darfield.co.nz</a></p>
     </div>
 
 {% endblock %}

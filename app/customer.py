@@ -105,9 +105,7 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
-    count = sql_function.get_equipment_count(detail_id)
-    disable_list = sql_function.get_equipment_disable_list(detail_id)
-
+    disable_list, count = sql_function.get_equipment_disable_list(detail_id)
     if equipment[0]['sub_id'] != sub_id:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -117,7 +115,7 @@ def equipment_detail(category, sub, detail_id):
         if check_permissions() == 1:
             wishlist = sql_function.get_user_wishlist(session['user_id'], detail_id)
     return render_template('customer/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, wishlist=wishlist,
-                           sub_list=sub_list, count=count, msg=last_msg, error_msg=last_error_msg)
+                           sub_list=sub_list, count=count, disable_list=disable_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/user_wishlist', methods=['GET', 'POST'])
@@ -165,6 +163,20 @@ def remove_favorite(equipment_id):
         return redirect(previous_url)
 
 
+# @app.route('/bookings')
+# def bookings():
+#     breadcrumbs = [{"text": "Bookings", "url": "#"}]
+#     last_msg = session.get('msg', '')
+#     last_error_msg = session.get('error_msg', '')
+#     session['msg'] = session['error_msg'] = ''
+#     if 'loggedIn' in session:
+#         sql_bookings = sql_function.get_bookings(session['user_id'])
+#         return render_template('customer/bookings.html', bookings=sql_bookings, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+#     else:
+#         session['error_msg'] = 'You are not logged in, please login first.'
+#         return redirect(url_for('index'))
+
+
 @app.route('/bookings')
 def bookings():
     breadcrumbs = [{"text": "Bookings", "url": "#"}]
@@ -173,11 +185,20 @@ def bookings():
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
         sql_bookings = sql_function.get_bookings(session['user_id'])
+        for booking in sql_bookings:
+            if booking['rental_start_datetime']:
+                booking['rental_start_datetime'] = booking['rental_start_datetime'].strftime('%d-%m-%Y %H:%M')
+            else:
+                booking['rental_start_datetime'] = 'N/A'
+            
+            if booking['expected_return_datetime']:
+                booking['expected_return_datetime'] = booking['expected_return_datetime'].strftime('%d-%m-%Y %H:%M')
+            else:
+                booking['expected_return_datetime'] = 'N/A'
         return render_template('customer/bookings.html', bookings=sql_bookings, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
-
 
 @app.route('/update_booking', methods=['POST'])
 def update_booking():
@@ -194,7 +215,7 @@ def update_booking():
     combined_datetime_str = f"{new_end_date} {new_end_time}"
     # Convert the string end_date and rental_start to datetime objects for comparison
     end_date_obj = datetime.strptime(combined_datetime_str, '%Y-%m-%d %H:%M')
-    rental_start_obj = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+    rental_start_obj = datetime.strptime(start_date, '%d-%m-%Y %H:%M')
     # Check if the difference between end_date and rental_start exceeds one week
     if end_date_obj > rental_start_obj + timedelta(weeks=1):
         session['error_msg'] = 'You can only extend the hire period up to a week from the start date.'
@@ -207,7 +228,7 @@ def update_booking():
     # Check if extension duration exceeds 12 hours beyond the complete days
     if extension_duration.seconds > 12 * 3600:
         additional_cost += 0.75 * cost_per_day
-    session['end_date_obj'] = end_date_obj
+    session['end_date_obj'] = end_date_obj.strftime('%Y-%m-%d %H:%M:%S')
     session['instance_id'] = instance_id
     session['hire_id'] = hire_id
     session['extension_duration_seconds'] = extension_duration_seconds
@@ -215,17 +236,27 @@ def update_booking():
     return redirect(url_for('payment_form'))
 
 
+
+
+
 @app.template_filter('duration_format')
 def seconds_to_days_hours_seconds(seconds):
     # Convert seconds to days, hours, and seconds
     days, remainder = divmod(seconds, 86400)  # 86400 seconds in a day
     hours, seconds = divmod(remainder, 3600)  # 3600 seconds in an hour
-    return f"{days} Days {hours} Hours {seconds} Seconds"
+    return f"{days} Days {hours} Hours"
 
 
 @app.route('/payment_form', methods=['GET', 'POST'])
 def payment_form():
-    end_date_obj = session['end_date_obj']
+    end_date_str = session.get('end_date_obj')
+    if end_date_str:
+        # Convert the end_date_str back to a datetime object
+        end_date_obj = datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S')
+        formatted_end_date = end_date_obj.strftime('%d-%m-%Y %H:%M')
+    else:
+        formatted_end_date = None
+    
     instance_id = session['instance_id']
     hire_id = session['hire_id']
     extension_duration = session['extension_duration_seconds']
@@ -247,7 +278,7 @@ def payment_form():
             session['error_msg'] = 'Payment failed. Please try again.'
         session['end_date_obj'] = session['instance_id'] = session['hire_id'] = session['extension_duration_seconds'] = session['additional_cost'] = ''
         return redirect(url_for('bookings'))
-    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, end_date_obj=end_date_obj,
+    return render_template('customer/payment_form.html', booking=booking, extension_duration=extension_duration, formatted_end_date=formatted_end_date,
                            additional_cost=additional_cost, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
@@ -259,11 +290,11 @@ def faq():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     breadcrumbs = [{"text": "Contact Us", "url": "#"}]
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
+    last_msg = session.get('msg', '')  # Retrieve and clear the message in one step
+    last_error_msg = session.get('error_msg', '')  # Retrieve and clear the error message in one step
     session['msg'] = session['error_msg'] = ''
     if request.method == 'POST':
-        # Get form data (to be stored or processed)
+        # Get form data
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         email = request.form.get('email')
@@ -271,9 +302,15 @@ def contact():
         location = request.form.get('location')
         enquiry_type = request.form.get('enquiry_type')
         enquiry_details = request.form.get('enquiry_details')
-# send to database
-        last_msg = "'Your enquiry has been submitted successfully!'"
+
+        # Insert into database
+        if sql_function.insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
+            last_error_msg = "Your enquiry has been submitted successfully!"
+        else:
+            session['error_msg'] = "There was an error submitting your enquiry. Please try again."
+
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+
 
 
 @app.route('/customer_cart')

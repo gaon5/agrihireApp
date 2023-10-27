@@ -30,6 +30,7 @@
 
         .btn {
             width: 50%;
+            color: black;
         }
 
         .column {
@@ -40,6 +41,7 @@
             padding: 10px;
             margin: 5% auto;
             box-sizing: border-box;
+            background-color: #ffffff;
         }
 
         .row::after {
@@ -105,20 +107,20 @@
             <div class="column rounded">
                 <h2>Manage</h2>
                 <ul id="remove">
-                    <li><a href="{{ url_for('manage_customer') }}"><button type="button" class="btn btn-outline-warning ">Customers</button></a></li>
-                    <li><a href="{{ url_for('manage_staff') }}"><button type="button" class="btn btn-outline-warning ">Staff</button></a></li>
-                    <li><a href="{{ url_for('manage_category') }}"><button type="button" class="btn btn-outline-warning ">Category</button></a></li>
-                    <li><a href="{{ url_for('manage_subcategory') }}"><button type="button" class="btn btn-outline-warning ">Sub Category</button></a></li>
-                    <li><a href="#"><button type="button" class="btn btn-outline-warning ">Equipment</button></a></li>
+                    <li><a href="{{ url_for('manage_customer') }}"><button type="button" class="btn btn-warning ">Customers</button></a></li>
+                    <li><a href="{{ url_for('manage_staff') }}"><button type="button" class="btn btn-warning ">Staff</button></a></li>
+                    <li><a href="{{ url_for('manage_category') }}"><button type="button" class="btn btn-warning ">Category</button></a></li>
+                    <li><a href="{{ url_for('manage_subcategory') }}"><button type="button" class="btn btn-warning ">Sub Category</button></a></li>
+                    <li><a href="#"><button type="button" class="btn btn-warning ">Equipment</button></a></li>
                 </ul>
             </div>
 
             <div class="column rounded">
                 <h2>Reports</h2>
                 <ul id="remove">
-                    <li><a href="{{ url_for('financial_report') }}"><button type="button" class="btn btn-outline-warning ">Financial</button></a></li>
-                    <li><a href="{{ url_for('equipment_report') }}"><button type="button" class="btn btn-outline-warning ">Equipment Utilization</button></a></li>
-                    <li><a href="{{ url_for('maintenance_report') }}"><button type="button" class="btn btn-outline-warning ">Maintenance</button></a></li>
+                    <li><a href="{{ url_for('financial_report') }}"><button type="button" class="btn btn-warning ">Financial</button></a></li>
+                    <li><a href="{{ url_for('equipment_report') }}"><button type="button" class="btn btn-warning ">Equipment Utilization</button></a></li>
+                    <li><a href="{{ url_for('maintenance_report') }}"><button type="button" class="btn btn-warning ">Maintenance</button></a></li>
                 </ul>
             </div>
         </div>

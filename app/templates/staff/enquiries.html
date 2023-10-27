@@ -1,0 +1,34 @@
+{% extends 'staff/manage_base.html' %}
+
+<!--Selected Equipment Details-->
+
+{% block inside_body %}
+    <div class="container mt-3">
+        <h1>Enquiries</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Enquiries</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enquiry in enquiries %}
+                    <tr>
+                        <td>{{ enquiry['contact_id'] }}</td>
+                        <td>{{ enquiry['first_name'] }} {{ enquiry['last_name'] }}</td>
+                        <td>{{ enquiry['email'] }}</td>
+                        <td>{{ enquiry['enquiry_details'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Bootstrap JavaScript and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+abtDEsb3A5D6g" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ44jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3sJBJWlmApmW3axdHN4PAn8EM+eU5F65Rj2v8HigYYTjMA+0M6J6D1" crossorigin="anonymous"></script>
+{% endblock %}

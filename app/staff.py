@@ -322,22 +322,56 @@ def search_result():
         session['error_msg'] = 'Search field cannot be left blank.'
         return redirect(url_for('equipment_list'))
 
-
-@app.route('/staff/customerlist')
+# route to get a list of customers
+@app.route('/staff/customer_list')
 def customer_list():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Customers List", "url": "#"}]
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    equipment = sql_function.customer_list()
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('login'))
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
-    return render_template('staff/customer_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+    # get a list of customers
+    customers = sql_function.get_customer_list()
+    # reformat the birth date 
+    for customer in customers:
+        customer['birth_date'] = customer['birth_date'].strftime('%d %b %Y') 
+    return render_template('staff/customer_list.html', breadcrumbs=breadcrumbs, customers=customers, msg=last_msg, error_msg=last_error_msg)
 
+
+@app.route('/staff/customer_details', methods=['GET', 'POST'])
+def customer_details():
+    customer_id = request.args['customer_id']
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Customer List", "url": "/staff/customer_list"}, {"text": "Details", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 2:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    customers = sql_function.get_customer_list()
+    # Get the selected customer
+    for customer in customers:
+        if str(customer['customer_id']) == customer_id:
+            aCustomer = customer
+            user_id = customer['user_id']
+    # format the date
+    aCustomer['birth_date'] = aCustomer['birth_date'].strftime('%d %b %Y')
+    # get every booking made by the customers
+    bookings = sql_function.get_bookings(user_id)
+    for booking in bookings:
+        booking['rental_start_datetime'] = booking['rental_start_datetime'].strftime('%d %b %Y')
+        booking['expected_return_datetime'] = booking['expected_return_datetime'].strftime('%d %b %Y')
+    return render_template('staff/customer_details.html', customer_id=customer_id, aCustomer=aCustomer, breadcrumbs=breadcrumbs,
+                            customer=customer, bookings=bookings,
+                            msg=last_msg, error_msg=last_error_msg)
 
 @app.route('/staff/equipment_list')
 def equipment_list():
@@ -353,3 +387,61 @@ def equipment_list():
         return redirect(url_for('index'))
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+
+@app.route('/staff/get_enquiries')
+def get_enquiries():
+    # Check if user is logged in
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))  # Assume there is a login route defined
+    
+    # Check if user has required permissions
+    if check_permissions() != 2: # Implement check_permissions
+        session['error_msg'] = 'You are not authorized to access this page.'
+        return redirect(url_for('dashboard'))  # Redirect to a safe page
+
+    # Fetch enquiries from database
+    enquiries = sql_function.get_all_enquiries()
+    
+    # Display enquiries
+    return render_template('staff/enquiries.html', enquiries=enquiries)
+
+
+@app.route('/staff/set_instance', methods = ["POST", "GET"])
+def set_instance():
+    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipments List", "url": "#"}]
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))
+    if check_permissions() != 2:
+        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
+        return redirect(url_for('index'))
+    equipment = sql_function.equipment_instance()
+    for i in equipment:
+        item=i
+    all = sql_function.all_equipment()
+    i_status = sql_function.instance_status()
+    if request.method == 'POST':
+        equipment_id = request.form.get('equipment_id')
+        chosen_status = request.form.get('instance')
+        current_status = request.form.get('instance_status')
+        if current_status and current_status != 'None':
+            instance_id = int(current_status.split()[0])
+            current_id = int(current_status.split()[1])   
+        else:
+            # Handle the case where current_status is 'None' or None
+            # You can set appropriate default values or handle it as needed.
+            instance_id = None  # Set to a suitable default value or handle the case.
+            current_id = None
+        print('current:')
+        print(current_status)
+        print(current_id)
+        sql_function.change_status(chosen_status, instance_id, equipment_id)
+        session['msg'] = 'Status has changed successfully!'
+        return redirect(url_for('set_instance'))    
+    return render_template('staff/equipment_instance.html',breadcrumbs=breadcrumbs,item=item, i_status=i_status, all=all, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+
+  
