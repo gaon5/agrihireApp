@@ -50,7 +50,7 @@
                     </div>
                 </div>
                 <br>
-                <form id="license" method="POST" action="/payment">
+                <form id="license" method="POST" action= "{{ url }}">
                     <input type="hidden" id="driver_license" name="driver_license">
                     <input type="hidden" name="totalAmountFinal" value="{{ price }}">
                     <input type="hidden" name="selectedCartItemIds" value="{{ selectedItemList|join(',') }}">

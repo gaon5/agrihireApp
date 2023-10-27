@@ -278,38 +278,7 @@
             }
 
             if ($(this).hasClass('hire-button')) {
-                // 用户点击了 "hire now" 按钮
-                // 在这里，我们将收集所需的额外信息并发送到服务器
-
-                // 假设表单中有一个名为 'equipment_price' 的隐藏字段，用于存储设备价格
-                const equipmentPrice = form.find('input[name="equipment_price"]').val();
-
-                const selectedQuantities = 1;
-
-                // 计算日期差异和总价格
-                const dateTimeRange = datetimeInput.val().split(' - ');  // 假设日期时间范围是一个字符串，形式为 "start - end"
-                const startTime = new Date(dateTimeRange[0]);
-                const endTime = new Date(dateTimeRange[1]);
-                const difference = endTime - startTime;
-                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                let hours = (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-                if (0 < hours && hours <= 4) {
-                    hours = 0.75;
-                } else if (hours > 4) {
-                    hours = 1;
-                } else {
-                    hours = 0;
-                }
-                const totalDays = days + hours;
-                const totalAmountFinal = totalDays * parseFloat(equipmentPrice); // 计算最终总价格
-
-                // 更新表单的action，并添加额外的字段，然后提交表单
-                form.attr('action', '/payment');  // 设置表单提交的路径
-                // 将新字段添加到表单中
-                $('<input>').attr('type', 'hidden').attr('name', 'totalAmountFinal').val(totalAmountFinal).appendTo(form);
-                $('<input>').attr('type', 'hidden').attr('name', 'selectedQuantities').val(selectedQuantities).appendTo(form);
-
-                // 提交表单
+                form.attr('action', '/hire_now');  
                 form.submit();
             } else if ($(this).hasClass('add-to-cart-button')) {
                 const currentProduct = $(this).closest('.row');

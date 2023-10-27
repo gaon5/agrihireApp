@@ -965,10 +965,18 @@ def update_equipment_rental_status(instance_id,cart_item_id,user_id):
     time_diff = end_time - start_time
     return time_diff
 
+def hire_now_update_equipment_rental_status(instance_id,user_id,start_time,end_time):
+    customer_id = get_id(user_id)
+    sql = """INSERT INTO equipment_rental_status (instance_id,customer_id,rental_start_datetime,expected_return_datetime,rental_status_id)
+            VALUES (%s,%s,%s,%s,2);"""
+    operate_sql(sql, (instance_id,customer_id,start_time,end_time,))
+
+
 def check_driver_lisence(equipment_id):
     sql = """SELECT requires_drive_license, price FROM equipment
                 WHERE equipment_id = %s;"""
     driver_lisence = operate_sql(sql, (equipment_id,))
+    # print(driver_lisence)
     driver_lisence_id = driver_lisence[0]['requires_drive_license']
     price = driver_lisence[0]['price']
     # print(driver_lisence_id)
