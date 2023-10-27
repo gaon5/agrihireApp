@@ -165,6 +165,9 @@ def update_equipment(detail_id):
     main, sub, x, x = sql_function.get_classify()
     if request.method == 'POST':
         equipment_id = request.form.get('equipment_id')
+        image_ids = request.form.getlist('image_id')
+        print('image_id:')
+        print(image_ids)
         main_image = request.files['mainimage']
         image = request.files['image']
         sub_category = request.form.get('sub_category')
@@ -183,7 +186,7 @@ def update_equipment(detail_id):
         capitalize_name = equipment.title()
         main_image_exist = sql_function.check_existing_main_image(equipment_id)
         images = []
-        if main_image or image:
+        if main_image.filename:
             images.append([upload_image(main_image), 1])
         if image.filename:
             images.append([upload_image(image), 0])
@@ -194,10 +197,10 @@ def update_equipment(detail_id):
         else:
             raise ValueError("Invalid value for driver's license")
         sql_function.updating_equipment(capitalize_name, price, stock, length, width, height, driver_license, threshold, description, detail, equipment_id,
-                                        images, sub_category)
+                                        images,image_ids,sub_category)
         session['msg'] = 'Updated successfully!'
-        return redirect(url_for('more_detail'))
-    return render_template('staff/update_equipment.html', detail_id=detail_id, img=img, main=main, sub=sub, equipment=equipment,
+        return redirect(url_for('more_detail', detail_id = detail_id))
+    return render_template('staff/update_equipment.html',detail_id=detail_id, img=img, main=main, sub=sub, equipment=equipment,
                            image_priority=image_priority, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 

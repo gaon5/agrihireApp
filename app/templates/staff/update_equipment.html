@@ -36,29 +36,16 @@
                 <form action="{{ url_for('update_equipment', detail_id = item['equipment_id']) }}" method="POST" enctype="multipart/form-data" id="myForm1">
                     <!-- Hidden Field -->
                     <input type="hidden" name="equipment_id" id="equipment_id" value="{{ item.equipment_id }}"/>
-                    <div class="col-md-3 mt-3">
+                    <div class="col-md-3 mt-4">
                         <!-- Current Image(s) -->
-                        {% if item.image_urls %}
-                            <!-- Check if there's a main image (priority 1) and display it with the label -->
-                            {% set main_image_shown = false %}
-                            {% for pic in image_priority %}
-                                {% if pic.priority == 1 and not main_image_shown %}
-                                    <div class="card">
-                                        <img src="{{ url_for('static', filename=pic.image_url) }}" alt="{{item.image_id}}" data-value="{{ item.image_id }}" class="card_img_top" height="200" width="200">
-                                    </div>
-                                    {% set main_image_shown = true %}
-                                {% endif %}
-                            {% endfor %}
-                            <!-- Display other images (priority != 1) -->
-                            {% for pic in image_priority %}
-                                {% if pic.priority != 1 %}
-                                    <div class="card">
-                                        <img src="{{ url_for('static', filename=pic.image_url) }}" alt="{{item.image_id}}" data-value="{{ item.image_id }}" class="card_img_top" height="200" width="200">
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
-                    </div>
+                        {% for pic in image_priority %}
+                            <div>
+                                <input type="hidden" name="image_id" value="{{ pic.image_id }}">
+                            </div>
+                            <div class="card">
+                                <img src="{{ url_for('static', filename=pic.image_url) }}" alt="{{ pic.image_id }}" data-value="{{ pic.image_id }}" class="card_img_top" height="200" width="200">
+                            </div>
+                        {% endfor %}
                     <!-- Main Image -->
                     <div class="relative mb-3">
                         <label for="mainimage" class="asterisk mt-2"><span style="color:red">*</span></label>
