@@ -743,15 +743,14 @@ def delete_wishlist(user_id, equipment_id):
 def get_bookings(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
-                LEFT JOIN hire_status AS hs ON hl.status_id = hs.status_id
-                LEFT JOIN hire_item hi on hl.hire_id = hi.hire_id
-                LEFT JOIN equipment_instance ei on ei.instance_id = hi.instance_id
-                LEFT JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
-                LEFT JOIN equipment e on e.equipment_id = eig.equipment_id
-                LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
-                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC ;"""
+                INNER JOIN hire_status AS hs ON hl.status_id = hs.status_id
+                INNER JOIN hire_item hi on hl.hire_id = hi.hire_id
+                INNER JOIN equipment_instance ei on ei.instance_id = hi.instance_id
+                INNER JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
+                INNER JOIN equipment e on e.equipment_id = eig.equipment_id
+                INNER JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
+                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC;"""
     bookings = operate_sql(sql, (customer_id,))
-    print(bookings)
     return bookings
 
 def get_booking(hire_id, instance_id):
@@ -1101,15 +1100,6 @@ def get_equipment_id(instance_id):
                 WHERE instance_id = %s"""
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
-
-# get latest customer_list
-def get_customer_list():
-    sql = """SELECT * from customer
-                INNER JOIN title ON title.title_id = customer.title_id
-                INNER JOIN city on city.city_id = customer.city_id
-                INNER JOIN region on region.region_id = customer.region_id"""
-    customers = operate_sql(sql)
-    return customers 
 
 
 
