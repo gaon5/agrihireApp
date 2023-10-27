@@ -452,10 +452,10 @@ def payment():
     driver_license = request.form.get('driver_license')
 
     # 将字符串形式的ids和quantities转换为列表
-    print(selected_ids)
-    print(selected_quantities)
-    print(total_amount_final)
-    print(driver_license)
+    # print(selected_ids)
+    # print(selected_quantities)
+    # print(total_amount_final)
+    # print(driver_license)
     if selected_ids:
         selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_.strip()]
     else:
