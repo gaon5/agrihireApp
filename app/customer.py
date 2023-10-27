@@ -324,8 +324,17 @@ def customer_cart():
         return redirect(url_for('index'))
     user_id = session['user_id']
     equipment_list = sql_function.my_cart(user_id)
+    # print(equipment_list)
+
     total_amount = 0
     for equipment in equipment_list:
+        equipment_id = equipment['equipment_id']
+        disable_list,count = sql_function.get_equipment_disable_list(equipment_id)
+        print(disable_list)
+        print(count)
+        disable_dict = {equipment['cart_item_id']:disable_list}
+        print(disable_dict)
+
         start_time = equipment['start_time']
         end_time = equipment['end_time']
         # 计算时间差
@@ -352,7 +361,7 @@ def customer_cart():
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
-                           error_msg=last_error_msg)
+                           error_msg=last_error_msg, disable_dict = disable_dict)
 
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
@@ -468,7 +477,6 @@ def payment():
             # print(booking_equipment_id)
             # print(equipment_list)
             if booking_equipment_id in equipment_list and not driver_license:
-                session['msg'] = "Please provide your driver license"
                 session['driver_lisence_equipments_price'] = total_amount_final
                 session['driver_lisence_equipments_cart_id'] = selected_ids_list
                 session['driver_lisence_equipments_quantities'] = selected_quantities_list
@@ -551,11 +559,56 @@ def driver_license():
         return redirect(url_for('index'))
     
     driver_license = request.form.get('driver_license')
-    print(driver_license)
+    # print(driver_license)
     price = session['driver_lisence_equipments_price']
     selectedItemList = session['driver_lisence_equipments_cart_id']
     selected_quantities_list = session['driver_lisence_equipments_quantities']
     methods = session['method_list']
+    session.pop('driver_lisence_equipments_price', None)
+    session.pop('driver_lisence_equipments_cart_id', None)
+    session.pop('driver_lisence_equipments_quantities', None)
+    session.pop('method_list', None)
         
     return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=price, selectedItemList=selectedItemList,
                            selected_quantities_list=selected_quantities_list, methods=methods)
+
+
+@app.route('/hire_now', methods=['POST','get'])
+def hire_now():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    
+    equipment_id = request.form.get('equipment_id')
+    # print(equipment_id)
+    datetimes = request.form.get('datetimes')
+    start_str, end_str = datetimes.split(' - ')
+    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
+    driver_license = sql_function.check_driver_lisence(equipment_id)
+    need_lisence = driver_license[0]
+    unit_price = driver_license[1]
+    time_diff = end_time - start_time
+    # 获取时间差的总秒数
+    total_seconds = time_diff.total_seconds()
+    # 计算具体的天数、小时数、分钟数
+    days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+    hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+    if 0 < hours <= 4:
+        days = days + 0.75
+    elif hours == 0:
+        days = days
+    else:
+        days = days + 1
+    
+    total_item_price = float(unit_price) * days
+    methods = sql_function.payment_method()
+    if need_lisence == 1:
+        session['driver_lisence_equipments_price'] = total_item_price
+        session['driver_lisence_equipments_cart_id'] = equipment_id
+        session['driver_lisence_equipments_quantities'] = 1
+        session['method_list'] = methods
+        return redirect(url_for('driver_license'))
+    
+    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_item_price,
+                               selectedItemList=equipment_id, selected_quantities_list=1, methods=methods)
