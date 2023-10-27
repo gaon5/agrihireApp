@@ -149,9 +149,7 @@
                                            class="btn nav-link_ active" style="font-size: 14px">Hire Now</a>
                                     {% else %}
                                         {% if check_permissions() == 2 %}
-                                        <a href="{{ url_for('more_detail', detail_id = equipment.equipment_id) }}" class="btn nav-link_ active" style="font-size: 14px">Manage</a>
-                                        {% elif check_permissions() == 3 %}
-                                        <a href="{{ url_for('more_detail', detail_id = equipment.equipment_id) }}" class="btn nav-link_ active" style="font-size: 14px">Manage</a>
+                                            <a href="{{ url_for('more_detail', detail_id = equipment.equipment_id) }}" class="btn nav-link_ active" style="font-size: 14px">Manage</a>
                                         {% endif %}
                                     {% endif %}
                                 </div>
