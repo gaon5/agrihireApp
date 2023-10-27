@@ -166,13 +166,9 @@ def update_equipment(detail_id):
     if request.method == 'POST':
         equipment_id = request.form.get('equipment_id')
         image_ids = request.form.getlist('image_id')
-        print('image_id:')
-        print(image_ids)
         main_image = request.files['mainimage']
         image = request.files['image']
         sub_category = request.form.get('sub_category')
-        print('sub_category')
-        print(sub_category)
         equipment = request.form.get('ename')
         price = request.form.get('price')
         stock = request.form.get('stock')
