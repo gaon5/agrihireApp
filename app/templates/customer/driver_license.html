@@ -40,8 +40,8 @@
                 <div class="form-container">
                     <!-- 表单内容 -->
                     <div class="mb-3 mt-3">
-                        <label for="plate" class="form-label">Car Plate:</label>
-                        <input type="text" class="form-control" id="plate" placeholder="Enter Plate number" name="plate_number" required>
+                        <label for="lisence_number" class="form-label">Driver Lisence Number:</label><span style="color:red">*</span>
+                        <input type="text" class="form-control" id="lisence_number" placeholder="Enter Plate number" name="lisence_number" required>
                     </div>
                     <div class="mb-3">
                         <label for="license" class="form-label">Driver License:</label>
@@ -50,11 +50,11 @@
                     </div>
                 </div>
                 <br>
-                <form id="license" method="POST" action="/driver_license">
+                <form id="license" method="POST" action="/payment">
                     <input type="hidden" id="driver_license" name="driver_license">
-                    <input type="hidden" name="total_amount_final" value="{{ price }}">
-                    <input type="hidden" name="selected_ids" value="{{ selectedItemList|join(',') }}">
-                    <input type="hidden" name="selected_quantities" value="{{ selected_quantities_list|join(',') }}">
+                    <input type="hidden" name="totalAmountFinal" value="{{ price }}">
+                    <input type="hidden" name="selectedCartItemIds" value="{{ selectedItemList|join(',') }}">
+                    <input type="hidden" name="selectedQuantities" value="{{ selected_quantities_list|join(',') }}">
                     <input type="hidden" name="methods" value="{{ methods|join(',') }}">
                     <button type="submit" class="btn btn-primary" style="font-size: 14px">Next Step</button>
                 </form>
@@ -78,5 +78,33 @@
 
 
 {% block myjs %}
+<script>
+    // 等待文档加载完毕
+    document.addEventListener('DOMContentLoaded', function() {
+        // 获取表单元素
+        var form = document.getElementById('license');
+        // 监听表单的提交事件
+        form.addEventListener('submit', function(event) {
+            // 阻止表单的默认提交行为，这样我们就可以自定义提交过程
+            event.preventDefault();
 
+            // 获取用户输入的驾照号码
+            var licenseNumber = document.getElementById('lisence_number').value;
+
+            // 将驾照号码设置到隐藏的输入字段中
+            var hiddenInput = document.getElementById('driver_license');
+            hiddenInput.value = licenseNumber;
+
+            if (!licenseNumber) {
+                // 驾照号为空，阻止表单提交
+                event.preventDefault();  // 阻止表单的默认提交行为
+                alert("Please enter your driver's license number.");  // 弹出警告窗口提示用户
+                return false;  // 终止函数执行
+            }
+
+            // 现在，手动提交表单
+            form.submit();
+        });
+    });
+</script>
 {% endblock %}

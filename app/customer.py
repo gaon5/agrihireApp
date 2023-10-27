@@ -357,18 +357,17 @@ def customer_cart():
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
 def add_to_cart():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     datetimes = request.form.get('datetimes')
+    previous_url = str(request.referrer)
     start_str, end_str = datetimes.split(' - ')
     start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     equipment_id = request.form.get('equipment_id')
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
-    session['msg'] = session['error_msg'] = ''
-    previous_url = str(request.referrer)
-    if not (start_time and end_time and equipment_id):
-        session['error_msg'] = 'Please select the required date and time.'
-        return redirect(previous_url)
+    
+    
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
@@ -414,13 +413,16 @@ def edit_details():
     start_time = request.form.get('start_time')
     end_time = request.form.get('end_time')
     cart_item_id = request.form.get('cart_item_id')
+    start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
+    end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
         return redirect(url_for('customer_cart'))
+    elif end_time <= start_time:
+        session['error_msg'] = 'Return time must be after rental time.'
+        return redirect(url_for('customer_cart'))
     else:
-        start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
         sql_function.edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time)
         session['msg'] = "Update successfully"
         return redirect(url_for('customer_cart'))
@@ -428,6 +430,9 @@ def edit_details():
 
 @app.route('/payment', methods=['POST', 'GET'])
 def payment():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
@@ -435,18 +440,25 @@ def payment():
     selected_ids = request.form.get('selectedCartItemIds')
     selected_quantities = request.form.get('selectedQuantities')
     total_amount_final = request.form.get('totalAmountFinal')
+    driver_license = request.form.get('driver_license')
 
     # 将字符串形式的ids和quantities转换为列表
-    selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_]
-    selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
-    # print(selected_ids_list)
-    # print(selected_quantities_list)
-    # print(total_amount_final)
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
-    session['msg'] = session['error_msg'] = ''
+    print(selected_ids)
+    print(selected_quantities)
+    print(total_amount_final)
+    print(driver_license)
+    if selected_ids:
+        selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_.strip()]
+    else:
+        selected_ids_list = []
+    
+    if selected_quantities:
+        selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
+    else:
+        selected_quantities_list = []
+    
     methods = sql_function.payment_method()
-    if selected_ids_list == ['']:
+    if selected_ids_list == []:
         session['error_msg'] = 'Please choose the equipment in your cart to place order.'
         return redirect(url_for('customer_cart'))
     else:
@@ -455,10 +467,14 @@ def payment():
             booking_equipment_id = sql_function.booking_equipment(each)
             # print(booking_equipment_id)
             # print(equipment_list)
-            if booking_equipment_id in equipment_list:
-                # session['msg'] = "Please provide your driver license"
-                return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
-                                       selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
+            if booking_equipment_id in equipment_list and not driver_license:
+                session['msg'] = "Please provide your driver license"
+                session['driver_lisence_equipments_price'] = total_amount_final
+                session['driver_lisence_equipments_cart_id'] = selected_ids_list
+                session['driver_lisence_equipments_quantities'] = selected_quantities_list
+                session['method_list'] = methods
+                return redirect(url_for('driver_license'))
+            
         for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
             booking_equipment_id = sql_function.booking_equipment(selected_id)
             max_count = sql_function.max_count(booking_equipment_id)
@@ -471,14 +487,15 @@ def payment():
                                selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
 
 
-@app.route('/complete_payment', methods=['POST'])
+@app.route('/complete_payment', methods=['POST','get'])
 def complete_payment():
-    if 'loggedIn' not in session:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('index'))
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    
     # 检查请求是否包含POST数据
     if request.method == 'POST':
         # 获取表单数据
@@ -486,18 +503,18 @@ def complete_payment():
         selected_items = json.loads(selected_items_json)  # 将JSON字符串转换回Python列表
 
         price = request.form['price']  # 获取价格
-        payment_method = request.form['paymentMethod']  # 获取用户选择的支付方式
-        print(selected_items)
-        print(price)
-        print(payment_method)
+        payment_method = request.form.get('paymentMethod')  # 获取用户选择的支付方式
+        # print(selected_items)
+        # print(price)
+        # print(payment_method)
         selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
         selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
 
         # 打印调试信息，或进行其他处理
-        print(selected_quantities)
+        # print(selected_quantities)
         user_id = session['user_id']
         hire_id = sql_function.hire_list_update(price, user_id)
-        print(hire_id)
+        # print(hire_id)
         sql_function.payment_update(hire_id, payment_method)
         for i in range(0, len(selected_items)):
             booking_equipment_id = sql_function.booking_equipment(selected_items[i])
@@ -524,29 +541,21 @@ def complete_payment():
         return redirect(url_for('customer_cart'))
 
 
-@app.route('/driver_license', methods=['POST'])
+@app.route('/driver_license', methods=['POST','get'])
 def driver_license():
-    if 'loggedIn' not in session:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('index'))
     last_msg = session.get('msg', '')
     last_error_msg = session.get('error_msg', '')
     session['msg'] = session['error_msg'] = ''
-    last_msg = "Received your driver license"
-    selected_ids = request.form.get('selected_ids')
-    selected_ids_list = [int(id_) for id_ in selected_ids.split(',')]
-
-    selected_quantities = request.form.get('selected_quantities')
-    selected_quantities_list = [int(qty) for qty in selected_quantities.split(',')]
-
-    total_amount_final = request.form.get('total_amount_final')
-    methods_str = request.form.get('methods')
-    # 将字符串转换回列表
-    methods_list = methods_str.split(',')
-    print(selected_ids_list)
-    print(selected_quantities_list)
-    print(methods_list)
-    print(total_amount_final)
-
-    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final, selectedItemList=selected_ids_list,
-                           selected_quantities_list=selected_quantities_list, methods=methods_list)
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    
+    driver_license = request.form.get('driver_license')
+    print(driver_license)
+    price = session['driver_lisence_equipments_price']
+    selectedItemList = session['driver_lisence_equipments_cart_id']
+    selected_quantities_list = session['driver_lisence_equipments_quantities']
+    methods = session['method_list']
+        
+    return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=price, selectedItemList=selectedItemList,
+                           selected_quantities_list=selected_quantities_list, methods=methods)

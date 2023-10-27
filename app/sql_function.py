@@ -949,6 +949,11 @@ def check_cart(user_id):
 
 def update_equipment_rental_status(instance_id,cart_item_id,user_id):
     customer_id = get_id(user_id)
+    sql = """SELECT equipment_id FROM hire.shopping_cart_item
+                WHERE customer_id = %s;"""
+    equipment_id_list = operate_sql(sql, (customer_id,))
+    equipment_id = equipment_id_list[0]['equipment_id']
+    print(equipment_id)
     sql = """SELECT start_time, end_time FROM hire.shopping_cart_item
                 WHERE cart_item_id = %s;"""
     time_list = operate_sql(sql, (cart_item_id,))

@@ -66,6 +66,11 @@
             background-image: url('{{ url_for('static', filename='image/heart21.png') }}');
         }
 
+        input[readonly] {
+        background-color: white; /* 或任何您希望用于只读字段的其他颜色 */
+        cursor: pointer; /* 更改光标，指示该字段是可交互的 */
+        }
+
     </style>
 {% endblock %}
 
@@ -140,9 +145,7 @@
                         <p class="text-center">Current Quantity: {{ count }}</p>
                         <div class="d-flex justify-content-center pt-3">
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
-                                <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px">
-                                <input type="hidden" id="start_time">
-                                <input type="hidden" id="end_time">
+                                <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px" readonly>
                                 <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
                                 <br>
                                 {% if count == 0 %}
@@ -262,6 +265,14 @@
             event.preventDefault();
 
             const form = $(this).closest('form');
+            const datetimeInput = form.find('input[name="datetimes"]');  // 查找日期时间输入
+
+            // 检查日期时间输入是否为空
+            if (!datetimeInput.val()) {
+                // 如果为空，向用户显示错误消息（这里只是一个基本示例，您可以根据需要调整错误处理）
+                alert('Please select the date and time.');  // 这里可以是一个更复杂的错误消息显示，比如模态窗口或自定义的浮动提示
+                return;  // 阻止后续代码执行
+            }
 
             if ($(this).hasClass('hire-button')) {
                 form.attr('action', '/your_hire_route');
