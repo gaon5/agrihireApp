@@ -200,6 +200,7 @@ def bookings():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
 
+
 @app.route('/update_booking', methods=['POST'])
 def update_booking():
     if 'loggedIn' not in session:

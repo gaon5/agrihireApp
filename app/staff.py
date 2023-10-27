@@ -388,6 +388,7 @@ def equipment_list():
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
 
+
 @app.route('/staff/get_enquiries')
 def get_enquiries():
     # Check if user is logged in
@@ -443,5 +444,3 @@ def set_instance():
         session['msg'] = 'Status has changed successfully!'
         return redirect(url_for('set_instance'))    
     return render_template('staff/equipment_instance.html',breadcrumbs=breadcrumbs,item=item, i_status=i_status, all=all, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
-
-  

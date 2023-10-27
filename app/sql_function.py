@@ -562,7 +562,7 @@ def get_equipment_disable_list(detail_id):
     dates = [date for date, count in date_dict.items() if count == int(equipment_count['count'])]
     formatted_dates = [date.strftime('%d/%m/%Y') for date in dates]
 
-    today = datetime.now().date()
+    today = datetime.now().date()+ timedelta(days=1)
     available_count = 0
     for instance in instances:
         if instance['rental_start_datetime']:
