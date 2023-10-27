@@ -184,13 +184,9 @@ def update_equipment(detail_id):
         main_image_exist = sql_function.check_existing_main_image(equipment_id)
         images = []
         if main_image or image:
-            if main_image_exist['COUNT(*)'] > 0:
-                session['error_msg'] = "Please delete existing main image to add a new image."
-                return redirect(url_for('update_equipment', detail_id=detail_id))
-            else:
-                images.append([upload_image(main_image), 1])
-            if image.filename:
-                images.append([upload_image(image), 0])
+            images.append([upload_image(main_image), 1])
+        if image.filename:
+            images.append([upload_image(image), 0])
         if driver_license == 'yes':
             driver_license = 1
         elif driver_license == 'no':
@@ -271,25 +267,6 @@ def delete_equipment():
     sql_function.deleting_equipment(equipment_id)
     session['msg'] = "Deleted successfully"
     return redirect(url_for('equipment_list', equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
-
-
-@app.route('/staff/delete_image/<detail_id>/<image_id>', methods=['GET','POST'])
-def delete_image(detail_id, image_id):
-    breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Delete Equipment", "url": "#"}]
-    last_msg = session.get('msg', '')
-    last_error_msg = session.get('error_msg', '')
-    session['msg'] = session['error_msg'] = ''
-    if 'loggedIn' not in session:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('login'))
-    if check_permissions() != 2:
-        session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
-        return redirect(url_for('index'))
-    equipment = sql_function.get_equipment_by_id_(detail_id)
-    sql_function.deleting_image(detail_id, image_id)
-    session['msg'] = "Deleted successfully"
-    return redirect(url_for('update_equipment', detail_id=detail_id, equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
-
 
 @app.route('/staff/search_result', methods=['GET', 'POST'])
 def search_result():

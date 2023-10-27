@@ -44,11 +44,7 @@
                             {% for pic in image_priority %}
                                 {% if pic.priority == 1 and not main_image_shown %}
                                     <div class="card">
-                                        <p>Main Image: </p>
                                         <img src="{{ url_for('static', filename=pic.image_url) }}" alt="{{item.image_id}}" data-value="{{ item.image_id }}" class="card_img_top" height="200" width="200">
-                                    </div>
-                                    <div class="card-footer text-center">
-                                        <a role="button" class="btn btn-danger" id="delete" href="{{url_for('delete_image', detail_id=item.equipment_id, image_id=item.image_id)}}" onclick="return confirm('Are you sure you want to delete this image?')">Delete</a></td>
                                     </div>
                                     {% set main_image_shown = true %}
                                 {% endif %}
@@ -58,9 +54,6 @@
                                 {% if pic.priority != 1 %}
                                     <div class="card">
                                         <img src="{{ url_for('static', filename=pic.image_url) }}" alt="{{item.image_id}}" data-value="{{ item.image_id }}" class="card_img_top" height="200" width="200">
-                                    </div>
-                                    <div class="card-footer text-center">
-                                        <a role="button" class="btn btn-danger" id="2" href="{{url_for('delete_image', detail_id=item.equipment_id, image_id=pic.image_id)}}" onclick="return confirm('Are you sure you want to delete this image?')">Delete</a></td>
                                     </div>
                                 {% endif %}
                             {% endfor %}
@@ -74,7 +67,7 @@
                     <!-- Image -->
                     <div class="relative mb-3">
                         <label for="image" class="asterisk mt-2"></label>
-                        <input type="file" class="form-control asterisk-inside" name="image" id="image" accept="image/*" multiple="true">
+                        <input type="file" class="form-control asterisk-inside" name="image" id="image" accept="image/*">
                     </div>
                     <!-- Equipment Name -->
                     <div class="relative mb-3">

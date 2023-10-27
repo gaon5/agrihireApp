@@ -636,8 +636,8 @@ def updating_equipment(name, price, count, length, width, height, requires_drive
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail, equipment_id)
     sql_data.execute(sql, value)
     for i in images:
-        sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s);"""
-        value = (equipment_id, i[0], i[1])
+        sql = """UPDATE hire.equipment_img SET image_url = %s, priority = %s WHERE equipment_id=%s;"""
+        value = (i[0], i[1], equipment_id,)
         print(sql % value)
         sql_data.execute(sql, value)
     sql = """DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"""
@@ -1136,11 +1136,6 @@ def check_existing_main_image(equipment_id):
     main_image_exist = sql_data.fetchone()
     print(main_image_exist)
     return main_image_exist
-
-
-def deleting_image(equipment_id, image_id):
-    sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
-    operate_sql(sql, (equipment_id, image_id))
 
 def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
     sql = ("INSERT INTO contact (first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
