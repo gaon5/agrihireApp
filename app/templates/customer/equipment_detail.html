@@ -148,13 +148,8 @@
                                 <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px" readonly>
                                 <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
                                 <br>
-                                {% if count == 0 %}
-                                    <button type="button" class="btn nav-link_ active mt-3" style="font-size: 14px" disabled>Insufficient Quantity</button>
-                                    <button type="button" class="btn nav-link_ add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
-                                {% else %}
-                                    <button type="button" class="btn nav-link_ active hire-button mt-3" style="font-size: 14px">Hire Now</button>
-                                    <button type="button" class="btn nav-link_ add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
-                                {% endif %}
+                                <button type="button" class="btn nav-link_ hire-button mt-3" style="font-size: 14px">Hire Now</button>
+                                <button type="button" class="btn nav-link_ active add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
                             </form>
                         </div>
                         <a href="{{ url_for('add_favorite', equipment_id=equipment[0]['equipment_id'] ) }}" id="favorite"
@@ -176,7 +171,8 @@
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+{#    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>#}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/daterangepicker/daterangepicker.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script>
         $(function () {
@@ -195,6 +191,7 @@
                 maxDate: new Date().fp_incr(91),
                 maxSpan: {"days": 7},
                 isInvalidDate: isDateDisabled,
+                timePickerIncrement: 10,
                 locale: {
                     format: 'DD/M/Y HH:mm'
                 }

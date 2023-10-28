@@ -299,7 +299,7 @@ def search_result():
         return redirect(url_for('equipment_list'))
 
 # route to get a list of customers
-@app.route('/staff/customer_list')
+@app.route('/staff/customer_list', methods=['GET', 'POST'])
 def customer_list():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Customers List", "url": "#"}]
     last_msg = session.get('msg', '')
@@ -311,11 +311,15 @@ def customer_list():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
-    # get a list of customers
-    customers = sql_function.get_customer_list()
+    if request.method == 'POST':
+        search = request.form.get('search')
+        customers, count = sql_function.search_customer(search, 0)
+    else:
+        # get a list of customers
+        customers, count = sql_function.search_customer('', 0)
     # reformat the birth date 
     for customer in customers:
-        customer['birth_date'] = customer['birth_date'].strftime('%d %b %Y') 
+        customer['birth_date'] = customer['birth_date'].strftime('%d %b %Y')
     return render_template('staff/customer_list.html', breadcrumbs=breadcrumbs, customers=customers, msg=last_msg, error_msg=last_error_msg)
 
 
@@ -332,7 +336,7 @@ def customer_details():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
-    customers = sql_function.get_customer_list()
+    customers, count = sql_function.search_customer('', 0)
     # Get the selected customer
     for customer in customers:
         if str(customer['customer_id']) == customer_id:
@@ -363,6 +367,7 @@ def equipment_list():
         return redirect(url_for('index'))
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
+
 
 @app.route('/staff/get_enquiries')
 def get_enquiries():
@@ -419,5 +424,3 @@ def set_instance():
         session['msg'] = 'Status has changed successfully!'
         return redirect(url_for('set_instance'))    
     return render_template('staff/equipment_instance.html',breadcrumbs=breadcrumbs,item=item, i_status=i_status, all=all, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
-
-  

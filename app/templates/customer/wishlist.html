@@ -102,7 +102,7 @@
                             <p class="card-text truncated-text" title="{{ equipment.description }}">{{ equipment.description }}</p>
                             <p class="card-text m-0" style="font-size: 28px">$ {{ equipment.price }}<span style="font-size: 14px">/Day</span></p>
                             <a href="/equipments/{{ equipment.ca_name }}/{{ equipment.sc_name }}/detail/{{ equipment.equipment_id }}"
-                               class="btn btn-primary" style="font-size: 14px">See Detail</a>
+                               class="btn nav-link_ active" style="font-size: 14px">Hire Now</a>
                         </div>
                         <a href="{{ url_for('remove_favorite', equipment_id=equipment.equipment_id ) }}" id="favorite{{ equipment.equipment_id }}"
                            class="image2-switcher position-absolute top-0 end-0 mx-3 my-2"

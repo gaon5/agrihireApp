@@ -562,7 +562,7 @@ def get_equipment_disable_list(detail_id):
     dates = [date for date, count in date_dict.items() if count == int(equipment_count['count'])]
     formatted_dates = [date.strftime('%d/%m/%Y') for date in dates]
 
-    today = datetime.now().date()
+    today = datetime.now().date()+ timedelta(days=1)
     available_count = 0
     for instance in instances:
         if instance['rental_start_datetime']:
@@ -577,11 +577,12 @@ def get_equipment_disable_list(detail_id):
                 available_count += 1
         else:
             available_count += 1
-    return formatted_dates, available_count
+    string_key_dict = {date.strftime('%Y-%m-%d'): count for date, count in date_dict.items()}
+    return formatted_dates, available_count, string_key_dict
 
 
 def get_pickup_equipment(the_date):
-    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM hire.equipment_rental_status AS ers
+    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
                 INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
                 WHERE (rental_status_id = 1) AND (DATE(rental_start_datetime) = %s)
@@ -591,7 +592,7 @@ def get_pickup_equipment(the_date):
 
 
 def get_return_equipment(the_date):
-    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM hire.equipment_rental_status AS ers
+    sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
                 INNER JOIN equipment AS e ON e.equipment_id = ei.equipment_id
                 WHERE (rental_status_id = 2) AND (DATE(expected_return_datetime) = %s)
@@ -631,7 +632,7 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
 
 def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images,image_ids, sub_id):
     sql_data = get_cursor()
-    sql = """UPDATE hire.equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
+    sql = """UPDATE equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
                 detail=%s WHERE equipment_id= %s;"""
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail, equipment_id)
     sql_data.execute(sql, value)
@@ -639,50 +640,50 @@ def updating_equipment(name, price, count, length, width, height, requires_drive
         if index < len(images):
             image = images[index]
             if image:
-                sql = """UPDATE hire.equipment_img SET image_url = %s, priority = %s WHERE image_id = %s;"""
+                sql = """UPDATE equipment_img SET image_url = %s, priority = %s WHERE image_id = %s;"""
                 value = (image[0], image[1], image_id)
                 print(sql % value)
                 sql_data.execute(sql, value)
         else:
             pass
-    sql = """DELETE FROM hire.equipment_instance WHERE equipment_id = %s;"""
+    sql = """DELETE FROM equipment_instance WHERE equipment_id = %s;"""
     value = (equipment_id,)
     sql_data.execute(sql,value)
     for i in range(int(count)):
-        sql = """INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (%s, 1);"""
+        sql = """INSERT INTO equipment_instance(equipment_id, instance_status) VALUES (%s, 1);"""
         value = (equipment_id,)
         sql_data.execute(sql,value)
-    sql = """DELETE FROM hire.classify WHERE equipment_id = %s;"""
+    sql = """DELETE FROM classify WHERE equipment_id = %s;"""
     value = (equipment_id,)
     sql_data.execute(sql,value)
-    sql = """INSERT INTO hire.classify(sub_id, equipment_id) VALUES (%s, %s);"""
+    sql = """INSERT INTO classify(sub_id, equipment_id) VALUES (%s, %s);"""
     value = (sub_id,equipment_id)
     sql_data.execute(sql, value)
 
 
 def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, images, sub_id):
     sql_data = get_cursor()
-    sql = """INSERT INTO hire.equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
+    sql = """INSERT INTO equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
                 detail) VALUES (%s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s);"""
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail)
     sql_data.execute(sql, value)
     sql_data.execute("""SET @equipment_id = LAST_INSERT_ID();""")
     for i in images:
-        sql = """INSERT INTO hire.equipment_img(equipment_id, image_url, priority) VALUES (@equipment_id, %s, %s);"""
+        sql = """INSERT INTO equipment_img(equipment_id, image_url, priority) VALUES (@equipment_id, %s, %s);"""
         value = (i[0], i[1])
         print(sql % value)
         sql_data.execute(sql, value)
     for i in range(int(count)):
-        sql_data.execute("""INSERT INTO hire.equipment_instance(equipment_id, instance_status) VALUES (@equipment_id, 1)""")
-    sql = """INSERT INTO hire.classify(sub_id, equipment_id) VALUES (%s, @equipment_id);"""
+        sql_data.execute("""INSERT INTO equipment_instance(equipment_id, instance_status) VALUES (@equipment_id, 1)""")
+    sql = """INSERT INTO classify(sub_id, equipment_id) VALUES (%s, @equipment_id);"""
     value = (sub_id,)
     sql_data.execute(sql, value)
 
 def deleting_equipment(equipment_id):
-    operate_sql("""DELETE FROM hire.equipment_img WHERE equipment_id = %s;""", (equipment_id,))
-    operate_sql("""DELETE FROM hire.classify WHERE equipment_id = %s;""",(equipment_id,))
-    operate_sql("""DELETE FROM hire.equipment_instance WHERE equipment_id = %s;""", (equipment_id,))
-    operate_sql("""DELETE FROM hire.equipment WHERE equipment_id = %s;""", (equipment_id,))
+    operate_sql("""DELETE FROM equipment_img WHERE equipment_id = %s;""", (equipment_id,))
+    operate_sql("""DELETE FROM classify WHERE equipment_id = %s;""",(equipment_id,))
+    operate_sql("""DELETE FROM equipment_instance WHERE equipment_id = %s;""", (equipment_id,))
+    operate_sql("""DELETE FROM equipment WHERE equipment_id = %s;""", (equipment_id,))
 
 
 #
@@ -747,16 +748,15 @@ def delete_wishlist(user_id, equipment_id):
 #
 def get_bookings(user_id):
     customer_id = get_id(user_id)
-    sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
-                LEFT JOIN hire_status AS hs ON hl.status_id = hs.status_id
-                LEFT JOIN hire_item hi on hl.hire_id = hi.hire_id
-                LEFT JOIN equipment_instance ei on ei.instance_id = hi.instance_id
-                LEFT JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
-                LEFT JOIN equipment e on e.equipment_id = eig.equipment_id
-                LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
-                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC ;"""
+    sql = """SELECT e.equipment_id, hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
+                INNER JOIN hire_status AS hs ON hl.status_id = hs.status_id
+                INNER JOIN hire_item hi on hl.hire_id = hi.hire_id
+                INNER JOIN equipment_instance ei on ei.instance_id = hi.instance_id
+                INNER JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
+                INNER JOIN equipment e on e.equipment_id = eig.equipment_id
+                INNER JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
+                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC;"""
     bookings = operate_sql(sql, (customer_id,))
-    print(bookings)
     return bookings
 
 def get_booking(hire_id, instance_id):
@@ -847,7 +847,7 @@ def update_equipment_instance(booking_equipment_id,equipment_quantity):
 
 
 def max_count(booking_equipment_id):
-    sql = """SELECT count(*) FROM hire.equipment_instance
+    sql = """SELECT count(*) FROM equipment_instance
                 WHERE equipment_id = %s AND instance_status = 1;"""
     max_count = operate_sql(sql, (booking_equipment_id,))
     max = max_count[0]['count(*)']
@@ -872,7 +872,7 @@ def update_payment(hire_id, status_id, payment_type_id):
 
 
 def payment_method():
-    sql = """SELECT * FROM hire.payment_type;"""
+    sql = """SELECT * FROM payment_type;"""
     payment_method = operate_sql(sql)
     methods = [method['name'] for method in payment_method]
     # print(methods)
@@ -880,9 +880,7 @@ def payment_method():
 
 
 def payment_update(hire_id,payment_method):
-    sql = """SELECT payment_type_id
-                FROM payment_type
-                WHERE name = %s;"""
+    sql = """SELECT payment_type_id FROM payment_type WHERE name = %s;"""
     payment_type_id = operate_sql(sql, (payment_method,), fetch=0, close=0)
     payment_type_id_value = payment_type_id['payment_type_id']
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -898,7 +896,7 @@ def payment_update(hire_id,payment_method):
 #
 def booking_equipment(cart_item_id):
     sql = """SELECT equipment_id
-                FROM hire.shopping_cart_item
+                FROM shopping_cart_item
                 WHERE cart_item_id = %s"""
     booking_equipment = operate_sql(sql, (cart_item_id,))
     booking_equipment_id = booking_equipment[0]['equipment_id']
@@ -922,7 +920,7 @@ def my_cart(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT sci.cart_item_id, sci.customer_id, sci.equipment_id,sci.count as quantity, sci.start_time,sci.end_time, e.name,  
                 e.price, e.count as max_count, ei.image_url
-                FROM hire.shopping_cart_item as sci
+                FROM shopping_cart_item as sci
                 inner join equipment as e on sci.equipment_id = e.equipment_id
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
@@ -941,7 +939,7 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
 
 def check_cart(user_id):
     customer_id = get_id(user_id)
-    sql = """SELECT sci.equipment_id FROM hire.shopping_cart_item as sci
+    sql = """SELECT sci.equipment_id FROM shopping_cart_item as sci
                 inner join equipment as e on sci.equipment_id = e.equipment_id
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
@@ -954,12 +952,12 @@ def check_cart(user_id):
 
 def update_equipment_rental_status(instance_id,cart_item_id,user_id):
     customer_id = get_id(user_id)
-    sql = """SELECT equipment_id FROM hire.shopping_cart_item
+    sql = """SELECT equipment_id FROM shopping_cart_item
                 WHERE customer_id = %s;"""
     equipment_id_list = operate_sql(sql, (customer_id,))
     equipment_id = equipment_id_list[0]['equipment_id']
     print(equipment_id)
-    sql = """SELECT start_time, end_time FROM hire.shopping_cart_item
+    sql = """SELECT start_time, end_time FROM shopping_cart_item
                 WHERE cart_item_id = %s;"""
     time_list = operate_sql(sql, (cart_item_id,))
     start_time = time_list[0]['start_time']
@@ -1071,7 +1069,7 @@ def get_annual_maintenances(start_date):
     return sql_list
 
 def get_monthly_bookings(start_date):
-    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM equipment_rental_status
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
                 INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
                 INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
@@ -1081,7 +1079,7 @@ def get_monthly_bookings(start_date):
     return sql_list
 
 def get_annual_bookings(start_date):
-    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM hire.equipment_rental_status
+    sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM equipment_rental_status
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
                 INNER JOIN classify ON classify.equipment_id = equipment_instance.equipment_id
                 INNER JOIN sub_category ON sub_category.sub_id = classify.sub_id
@@ -1092,10 +1090,10 @@ def get_annual_bookings(start_date):
 
 
 def stats_dashboard():
-    customer_stat = operate_sql("""SELECT COUNT(customer_id) FROM hire.customer WHERE state = 1;""", close=0)
-    staff_stat = operate_sql("""SELECT COUNT(staff_id) FROM hire.staff WHERE state = 1;""", close=0)
-    equipment_stat = operate_sql("""SELECT COUNT(equipment_id) FROM hire.equipment;""", close=0)
-    booking_stat = operate_sql("""SELECT COUNT(log_id) FROM hire.hire_log;""")
+    customer_stat = operate_sql("""SELECT COUNT(customer_id) FROM customer WHERE state = 1;""", close=0)
+    staff_stat = operate_sql("""SELECT COUNT(staff_id) FROM staff WHERE state = 1;""", close=0)
+    equipment_stat = operate_sql("""SELECT COUNT(equipment_id) FROM equipment;""", close=0)
+    booking_stat = operate_sql("""SELECT COUNT(log_id) FROM hire_log;""")
     return customer_stat, staff_stat, equipment_stat, booking_stat
 
 
@@ -1106,15 +1104,6 @@ def get_equipment_id(instance_id):
                 WHERE instance_id = %s"""
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
-
-# get latest customer_list
-def get_customer_list():
-    sql = """SELECT * from customer
-                INNER JOIN title ON title.title_id = customer.title_id
-                INNER JOIN city on city.city_id = customer.city_id
-                INNER JOIN region on region.region_id = customer.region_id"""
-    customers = operate_sql(sql)
-    return customers 
 
 
 
@@ -1164,24 +1153,24 @@ def equipment_instance():
 
 
 def instance_status():
-    sql = """SELECT * FROM hire.instance_status;"""
+    sql = """SELECT * FROM instance_status;"""
     sql = operate_sql (sql)
     return sql
 
 
 def all_equipment():
-    sql = """SELECT * FROM hire.equipment;"""
+    sql = """SELECT * FROM equipment;"""
     sql = operate_sql(sql)
     return sql
 
 
 def change_status(instance_status, instance_id, equipment_id):
     sql_data = get_cursor()
-    sql = """UPDATE hire.equipment_instance SET instance_status = %s WHERE instance_id=%s"""
+    sql = """UPDATE equipment_instance SET instance_status = %s WHERE instance_id=%s"""
     value = (instance_status, instance_id)
     sql_data.execute(sql,value)
     if instance_status == None:
         instance_status = 1 
-        sql = """INSERT INTO hire.equipment_instance (equipment_id, instance_status) VALUES (%s, %s);""" 
+        sql = """INSERT INTO equipment_instance (equipment_id, instance_status) VALUES (%s, %s);""" 
         value = (equipment_id, instance_status)
         sql_data.execute(sql, value)

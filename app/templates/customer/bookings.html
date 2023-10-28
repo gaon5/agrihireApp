@@ -48,8 +48,6 @@
                                 <!-- Provide an alternative content if image_url is not available -->
                                 {{ booking.name }} (Image not available)
                             {% endif %}
-
-                            
                         </td>
                         <td>{{ booking.datetime.strftime('%d-%m-%Y %H:%M') }}</td>
 
@@ -58,10 +56,10 @@
                         <td>{{ booking.expected_return_datetime }}</td>
                         <td>
                             <form class="extend-form" action="{{ url_for('update_booking') }}" method="post">
-                                <input type="date" name="new_end_date" required>
-                                <input type="time" name="new_end_time" required>
+                                <input type="text" id="datetimes{{ booking['instance_id'] }}" name="datetimes" placeholder="Select Date & Times" value="" style="width: 170px" readonly>
                                 <input type="hidden" name="instance_id" value="{{ booking.instance_id }}">
                                 <input type="hidden" name="start_date" value="{{ booking.rental_start_datetime }}">
+                                <input type="hidden" name="end_date" value="{{ booking.expected_return_datetime }}">
                                 <input type="hidden" name="price" value="{{ booking.price }}">
                                 <input type="hidden" name="hire_id" value="{{ booking.hire_id }}">
                                 <button type="submit" class="btn btn-primary btn-sm">Extend</button>
@@ -80,7 +78,29 @@
 {% endblock %}
 
 {% block myjs %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/daterangepicker/daterangepicker.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script>
-        // Custom JavaScript can be added here
+        const disabledDates = JSON.parse('{{ disable_lists|tojson }}');
+        {% for booking in bookings %}
+            function isDateDisabled(date) {
+                const formatted = date.format('DD/M/Y');
+                let id = String({{ booking['instance_id'] }});
+                return disabledDates[id].indexOf(formatted) !== -1;
+            }
+
+            $('input[id="datetimes{{ booking['instance_id'] }}"]').daterangepicker({
+                singleDatePicker: true,
+                timePicker: true,
+                timePicker24Hour: true,
+                minDate: "{{ booking.expected_return_datetime[:10] }}",
+                isInvalidDate: isDateDisabled,
+                timePickerIncrement: 10,
+                locale: {
+                    format: 'DD/M/Y  HH:mm'
+                }
+            });
+        {% endfor %}
     </script>
 {% endblock %}
