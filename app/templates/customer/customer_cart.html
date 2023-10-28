@@ -142,7 +142,7 @@
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
                                 <button class="quantity-btn" onclick="decrementQuantity({{ equipment.cart_item_id }})">-</button>
                                 <input type="number" id="quantityInput_{{ equipment.cart_item_id }}" data-max-count="{{ equipment.max_count }}" value="{{ equipment.quantity }}" min="1"
-                                    max="{{ equipment.max_count }}" style="width: 50px; text-align: center; margin: 0 5px;">
+                                    max="{{ equipment.max_count }}" style="width: 50px; text-align: center; margin: 0 5px;" disabled>
                                 <button class="quantity-btn" onclick="incrementQuantity({{ equipment.cart_item_id }})">+</button>
                             </div>
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
@@ -199,7 +199,7 @@
                             <label for="Quantity" class="form-label">Quantity</label>
                             <div style="display: flex; align-items: center;">
                                 <button type="button" class="quantity-btn" onclick="decrementModalQuantity()">-</button>
-                                <input type="text" class="form-control" id="Quantity" name="quantity" value="1" readonly
+                                <input type="number" class="form-control" id="Quantity" name="quantity" value="1" readonly
                                     data-max-count="10" style="width: 60px; text-align: center; margin: 0 5px;">
                                 <button type="button" class="quantity-btn" onclick="incrementModalQuantity()">+</button>
                             </div>
@@ -310,8 +310,10 @@
 
             function isDateDisabled(date) {
                 const formatted = date.format('DD/M/Y');
-                let id = String(cart_item_id);
-                return disabledDates[id].indexOf(formatted) !== -1;
+                let value = document.getElementById('Quantity').value
+                let dates = Object.entries(disabledDates[cart_item_id]).filter(([date, count]) => count >= 3 - value).map(([date]) => new Date(date));
+                const formattedDates = dates.map(date => date.toLocaleDateString('en-GB'));
+                return formattedDates.indexOf(formatted) !== -1;
             }
 
             $('input[name="datetimes"]').daterangepicker({
@@ -349,8 +351,25 @@
             $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
                 $(this).val('');
             });
-
-            document.getElementById('Quantity').value = 1;
+            $('input[name="datetimes"]').on('show.daterangepicker', function (ev, picker) {
+                picker.isInvalidDate = function (date) {
+                    // Your updated logic for isInvalidDate goes here
+                    const formatted = date.format('DD/M/Y');
+                    let value = document.getElementById('Quantity').value;
+                    let dates = Object.entries(disabledDates[cart_item_id])
+                        .filter(([date, count]) => count >= 3 - value)
+                        .map(([date]) => new Date(date));
+                    const formattedDates = dates.map(date => date.toLocaleDateString('en-GB'));
+                    return formattedDates.indexOf(formatted) !== -1;
+                };
+            });
+            let rowDiv = buttonElement.closest('.row');
+            let quantityInput = rowDiv.querySelector('input[type="number"]');
+            let targetInput = document.getElementById('Quantity');
+            targetInput.value = quantityInput.value;
+            targetInput.dataset.maxCount = quantityInput.dataset.maxCount;
+            document.getElementById('Quantity').max = quantityInput.max;
+            document.getElementById('Quantity').mix = quantityInput.mix;
             for (const i in equipment_list){
                 if (equipment_list[i]['cart_item_id'] === cart_item_id){
                     const timePickerInput = $('input[name="datetimes"]');

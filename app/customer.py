@@ -105,7 +105,7 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
-    disable_list, count = sql_function.get_equipment_disable_list(detail_id)
+    disable_list, count, date_dict = sql_function.get_equipment_disable_list(detail_id)
     if equipment[0]['sub_id'] != sub_id:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -187,7 +187,7 @@ def bookings():
         sql_bookings = sql_function.get_bookings(session['user_id'])
         disable_lists = {}
         for booking in sql_bookings:
-            disable_list, count = sql_function.get_equipment_disable_list(booking["equipment_id"])
+            disable_list, count, date_dict = sql_function.get_equipment_disable_list(booking["equipment_id"])
             instance_id = booking['instance_id']
             disable_lists[instance_id] = disable_list
             if booking['rental_start_datetime']:
@@ -338,9 +338,9 @@ def customer_cart():
             days = days
         else:
             days = days + 1
-        disable_list, count = sql_function.get_equipment_disable_list(equipment["equipment_id"])
+        disable_list, count, date_dict = sql_function.get_equipment_disable_list(equipment["equipment_id"])
         cart_item_id = equipment['cart_item_id']
-        disable_lists[cart_item_id] = disable_list
+        disable_lists[cart_item_id] = date_dict
         unit_price = float(equipment['price'])
         total_item_price = unit_price * days
         equipment['price'] = total_item_price

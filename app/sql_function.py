@@ -577,7 +577,8 @@ def get_equipment_disable_list(detail_id):
                 available_count += 1
         else:
             available_count += 1
-    return formatted_dates, available_count
+    string_key_dict = {date.strftime('%Y-%m-%d'): count for date, count in date_dict.items()}
+    return formatted_dates, available_count, string_key_dict
 
 
 def get_pickup_equipment(the_date):
