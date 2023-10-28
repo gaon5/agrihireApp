@@ -142,7 +142,7 @@
                             <div class="col-md-1 d-flex align-items-center justify-content-center">
                                 <button class="quantity-btn" onclick="decrementQuantity({{ equipment.cart_item_id }})">-</button>
                                 <input type="number" id="quantityInput_{{ equipment.cart_item_id }}" data-max-count="{{ equipment.max_count }}" value="{{ equipment.quantity }}" min="1"
-                                    max="{{ equipment.max_count }}" style="width: 50px; text-align: center; margin: 0 5px;">
+                                    max="{{ equipment.max_count }}" style="width: 50px; text-align: center; margin: 0 5px;" disabled>
                                 <button class="quantity-btn" onclick="incrementQuantity({{ equipment.cart_item_id }})">+</button>
                             </div>
                             <div class="col-md-2 d-flex align-items-center justify-content-center">
@@ -199,20 +199,15 @@
                             <label for="Quantity" class="form-label">Quantity</label>
                             <div style="display: flex; align-items: center;">
                                 <button type="button" class="quantity-btn" onclick="decrementModalQuantity()">-</button>
-                                <input type="text" class="form-control" id="Quantity" name="quantity" value="1" readonly
+                                <input type="number" class="form-control" id="Quantity" name="quantity" value="1" readonly
                                     data-max-count="10" style="width: 60px; text-align: center; margin: 0 5px;">
                                 <button type="button" class="quantity-btn" onclick="incrementModalQuantity()">+</button>
                             </div>
                         </div>
                         <!-- Date Input -->
-                        <div class="mb-3">
-                            <label for="RentalDate" class="form-label">Rental Date</label>
-                            <input type="text" id="start_time_updated" name="start_time" placeholder="Rental Date & Time">
-                        </div>
-                        <div class="mb-3">
-                            <label for="ReturnDate" class="form-label">Return Date</label>
-                            <input type="text" id="end_time_updated" name="end_time" placeholder="Return Date & Time">
-                        </div>
+
+                        <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px" readonly>
+
                         <!-- Optional: Include a hidden input if you need to pass any specific ID or token -->
                         <input type="hidden" name="cart_item_id" id="cart_item_id_modal1" />
                     </div>
@@ -251,6 +246,9 @@
 
 
 {% block myjs %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/daterangepicker/daterangepicker.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
     <script>
         function adjustQuantity(cartItemId, increment = true, isModal = false) {
             let inputId = isModal ? 'Quantity' : 'quantityInput_' + cartItemId;
@@ -305,51 +303,81 @@
 
             updateTotalAmount();
         }
-
-        flatpickr("#start_time_updated", {
-            enableTime: true, // 启用时间选择
-            noCalendar: false, // 显示日期选择器
-            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
-            time_24hr: true, // 使用24小时制时间格式
-            disable: [], //可以添加为设备租借完了的日子
-            minDate: new Date().fp_incr(1),
-            maxDate: new Date().fp_incr(91),
-        });
-
-        flatpickr("#end_time_updated", {
-            enableTime: true, // 启用时间选择
-            noCalendar: false, // 显示日期选择器
-            dateFormat: "d-m-Y H:i", // 更新日期格式以包括小时和分钟
-            time_24hr: true, // 使用24小时制时间格式
-            disable: [],
-            minDate: new Date().fp_incr(1),
-            maxDate: new Date().fp_incr(91),
-        });
-
+        const disabledDates = JSON.parse('{{ disable_lists|tojson }}');
+        const equipment_list = JSON.parse('{{ equipment_list|tojson }}');
         function openEditModal(buttonElement, cart_item_id) {
-            // Find the closest .row element relative to the clicked button
-            let rowDiv = buttonElement.closest('.row');
-
-            // From the row, find the quantity input element and the start and end time elements
-            let quantityInput = rowDiv.querySelector('input[type="number"]');
-            let startTimeElement = rowDiv.querySelector('span[id^="startTime_"]');
-            let endTimeElement = rowDiv.querySelector('span[id^="endTime_"]');
-
             // Set the modal's input values based on the found elements' values
-            document.getElementById('Quantity').value = quantityInput.value;
-            document.getElementById('start_time_updated').value = startTimeElement.textContent.trim();
-            document.getElementById('end_time_updated').value = endTimeElement.textContent.trim();
 
-            // Set the cart item id in the modal's hidden input
+            function isDateDisabled(date) {
+                const formatted = date.format('DD/M/Y');
+                let value = document.getElementById('Quantity').value
+                let dates = Object.entries(disabledDates[cart_item_id]).filter(([date, count]) => count >= 3 - value).map(([date]) => new Date(date));
+                const formattedDates = dates.map(date => date.toLocaleDateString('en-GB'));
+                return formattedDates.indexOf(formatted) !== -1;
+            }
+
+            $('input[name="datetimes"]').daterangepicker({
+                autoUpdateInput: false,
+                timePicker: true,
+                timePicker24Hour: true,
+                minDate: new Date().fp_incr(1),
+                maxDate: new Date().fp_incr(91),
+                maxSpan: {"days": 7},
+                isInvalidDate: isDateDisabled,
+                timePickerIncrement: 10,
+                locale: {
+                    format: 'DD/M/Y HH:mm'
+                }
+            });
+
+            $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+                const startDate = picker.startDate;
+                const endDate = picker.endDate;
+
+                const currentDate = startDate.clone();
+                while (currentDate.isBefore(endDate) || currentDate.isSame(endDate)) {
+                    if (isDateDisabled(currentDate)) {
+                        alert("The selected range contains invalid dates. Please select again.");
+                        picker.startDate = picker.oldStartDate;
+                        picker.endDate = picker.oldEndDate;
+                        picker.updateView();
+                        return;
+                    }
+                    currentDate.add(1, 'days');
+                }
+                $(this).val(picker.startDate.format('DD/M/Y HH:mm') + ' - ' + picker.endDate.format('DD/M/Y HH:mm'));
+            });
+
+            $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
+            $('input[name="datetimes"]').on('show.daterangepicker', function (ev, picker) {
+                picker.isInvalidDate = function (date) {
+                    // Your updated logic for isInvalidDate goes here
+                    const formatted = date.format('DD/M/Y');
+                    let value = document.getElementById('Quantity').value;
+                    let dates = Object.entries(disabledDates[cart_item_id])
+                        .filter(([date, count]) => count >= 3 - value)
+                        .map(([date]) => new Date(date));
+                    const formattedDates = dates.map(date => date.toLocaleDateString('en-GB'));
+                    return formattedDates.indexOf(formatted) !== -1;
+                };
+            });
+            let rowDiv = buttonElement.closest('.row');
+            let quantityInput = rowDiv.querySelector('input[type="number"]');
+            let targetInput = document.getElementById('Quantity');
+            targetInput.value = quantityInput.value;
+            targetInput.dataset.maxCount = quantityInput.dataset.maxCount;
+            document.getElementById('Quantity').max = quantityInput.max;
+            document.getElementById('Quantity').mix = quantityInput.mix;
+            for (const i in equipment_list){
+                if (equipment_list[i]['cart_item_id'] === cart_item_id){
+                    const timePickerInput = $('input[name="datetimes"]');
+                    timePickerInput.val(equipment_list[i]['start_time'] + ' - ' + equipment_list[i]['end_time']);
+                }
+            }
             document.getElementById('cart_item_id_modal1').value = cart_item_id;
         }
-
-        document.querySelectorAll('.btn-primary').forEach(btn => {
-            btn.addEventListener('click', function() {
-                let cartItemId = this.getAttribute('data-cart-item-id');
-                openEditModal(cartItemId);
-            });
-        });
 
         function confirmDelete(cart_item_id) {
             document.getElementById("cart_item_id_modal").value = cart_item_id;

@@ -98,20 +98,16 @@ def register():
         answer = request.form.get('answer')
         account = sql_function.get_account(email)
         if account:
-            cities = sql_function.city_list if hasattr(sql_function, 'city_list') and sql_function.city_list is not None else []
-
             # Email already exists
             last_error_msg = 'Email already exists!'
             return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list,
-                                   breadcrumbs=breadcrumbs, cities=cities, msg=last_msg, error_msg=last_error_msg)
+                                   breadcrumbs=breadcrumbs, cities=sql_function.city_list, msg=last_msg, error_msg=last_error_msg)
         # Insert account data into database
         sql_function.register_account(email, password, title, given_name, surname, question, answer, phone_number, region_id, city_id, address, birth_date)
         session['msg'] = 'Registration success!'
         return redirect(url_for('login'))
-    cities = sql_function.city_list if hasattr(sql_function, 'city_list') and sql_function.city_list is not None else []
-
     return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs,
-                           regions=sql_function.region_list, cities=cities, msg=last_msg, error_msg=last_error_msg)
+                           regions=sql_function.region_list, cities=sql_function.city_list, msg=last_msg, error_msg=last_error_msg)
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])

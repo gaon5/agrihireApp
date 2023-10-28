@@ -8,6 +8,13 @@
 
 {% block inside_css %}
     <style>
+        table, th.header, td {
+            vertical-align: middle;
+            text-align: center;
+        }
+        table, th, td {
+            background-color: transparent !important;
+        }
         #navigation-container {
             display: flex;
             align-items: center;
@@ -79,49 +86,51 @@
         <div class="col-md-12">
             <br>
             {% if maintenance_list %}
-                <div class="table-header">
-                    <div class="header-cell">Instance</div>
-                    <div class="header-cell">Start Date</div>
-                    <div class="header-cell">End Date</div>
-                    <div class="header-cell">Type</div>
-                    <div class="header-cell">Status</div>
-                    <div class="header-cell">Notes</div>
-                    <div class="header-cell"></div>
-                </div>
-                <div class="card mb-3">
-                    <div class="card-body">
+                <table class="table table-hover align-middle mb-0" id="myTable">
+                    <thead>
+                        <tr>
+                            <th class="header">Instance</th>
+                            <th class="header">Start Date</th>
+                            <th class="header">End Date</th>
+                            <th class="header">Type</th>
+                            <th class="header">Status</th>
+                            <th class="header">Notes</th>
+                            <th class="header"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {% for maintenance in maintenance_list %}
                             <form action="{{ url_for('maintenance_list') }}" method="post">
-                                <div class="row" style="margin: 5px;">
-                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
-                                        {{ maintenance.instance_id }}
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                        {{ maintenance.start_date }}
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                        {{ maintenance.end_date }}
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                        {{ maintenance.type }}
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-center">
-                                        {{ maintenance.status }}
-                                    </div>
-                                    <div class="col-md-2 d-flex align-items-center justify-content-left">
-                                        {{ maintenance.notes }}
-                                    </div>
-                                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <tr style="cursor: pointer;">
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.instance_id }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.start_date }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.end_date }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.type }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.status }}</p>
+                                    </td>
+                                    <td>
+                                        <p class="fw-normal mb-1">{{ maintenance.notes }}</p>
+                                    </td>
+                                    <td>
                                         <input type="hidden" name="instance_id" id="instance_id" value="{{ maintenance.instance_id }}">
                                         <button type="submit" class="btn btn-primary">
                                             Finish
                                         </button>
-                                    </div>
-                                </div>
+                                    </td>
+                                </tr>
                             </form>
                         {% endfor %}
-                    </div>
-                </div>
+                    </tbody>
+                </table> 
             {% else %}
                 <p>There is no equipment for pickup</p>
             {% endif %}

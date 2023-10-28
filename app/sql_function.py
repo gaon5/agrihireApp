@@ -562,7 +562,7 @@ def get_equipment_disable_list(detail_id):
     dates = [date for date, count in date_dict.items() if count == int(equipment_count['count'])]
     formatted_dates = [date.strftime('%d/%m/%Y') for date in dates]
 
-    today = datetime.now().date()
+    today = datetime.now().date()+ timedelta(days=1)
     available_count = 0
     for instance in instances:
         if instance['rental_start_datetime']:
@@ -577,7 +577,8 @@ def get_equipment_disable_list(detail_id):
                 available_count += 1
         else:
             available_count += 1
-    return formatted_dates, available_count
+    string_key_dict = {date.strftime('%Y-%m-%d'): count for date, count in date_dict.items()}
+    return formatted_dates, available_count, string_key_dict
 
 
 def get_pickup_equipment(the_date):
@@ -629,17 +630,22 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (instance_id,))
 
 
-def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images, sub_id):
+def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images,image_ids, sub_id):
     sql_data = get_cursor()
     sql = """UPDATE equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
                 detail=%s WHERE equipment_id= %s;"""
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail, equipment_id)
     sql_data.execute(sql, value)
-    for i in images:
-        sql = """INSERT INTO equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s);"""
-        value = (equipment_id, i[0], i[1])
-        print(sql % value)
-        sql_data.execute(sql, value)
+    for index, image_id in enumerate(image_ids):
+        if index < len(images):
+            image = images[index]
+            if image:
+                sql = """UPDATE equipment_img SET image_url = %s, priority = %s WHERE image_id = %s;"""
+                value = (image[0], image[1], image_id)
+                print(sql % value)
+                sql_data.execute(sql, value)
+        else:
+            pass
     sql = """DELETE FROM equipment_instance WHERE equipment_id = %s;"""
     value = (equipment_id,)
     sql_data.execute(sql,value)
@@ -742,16 +748,15 @@ def delete_wishlist(user_id, equipment_id):
 #
 def get_bookings(user_id):
     customer_id = get_id(user_id)
-    sql = """SELECT hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
-                LEFT JOIN hire_status AS hs ON hl.status_id = hs.status_id
-                LEFT JOIN hire_item hi on hl.hire_id = hi.hire_id
-                LEFT JOIN equipment_instance ei on ei.instance_id = hi.instance_id
-                LEFT JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
-                LEFT JOIN equipment e on e.equipment_id = eig.equipment_id
-                LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
-                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC ;"""
+    sql = """SELECT e.equipment_id, hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
+                INNER JOIN hire_status AS hs ON hl.status_id = hs.status_id
+                INNER JOIN hire_item hi on hl.hire_id = hi.hire_id
+                INNER JOIN equipment_instance ei on ei.instance_id = hi.instance_id
+                INNER JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
+                INNER JOIN equipment e on e.equipment_id = eig.equipment_id
+                INNER JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
+                WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC;"""
     bookings = operate_sql(sql, (customer_id,))
-    print(bookings)
     return bookings
 
 def get_booking(hire_id, instance_id):
@@ -875,9 +880,7 @@ def payment_method():
 
 
 def payment_update(hire_id,payment_method):
-    sql = """SELECT payment_type_id
-                FROM payment_type
-                WHERE name = %s;"""
+    sql = """SELECT payment_type_id FROM payment_type WHERE name = %s;"""
     payment_type_id = operate_sql(sql, (payment_method,), fetch=0, close=0)
     payment_type_id_value = payment_type_id['payment_type_id']
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -1120,22 +1123,13 @@ def get_equipment_id(instance_id):
     equipment_id = operate_sql(sql, (instance_id,), fetch=0)['equipment_id']
     return equipment_id
 
-# get latest customer_list
-def get_customer_list():
-    sql = """SELECT * from customer
-                INNER JOIN title ON title.title_id = customer.title_id
-                INNER JOIN city on city.city_id = customer.city_id
-                INNER JOIN region on region.region_id = customer.region_id"""
-    customers = operate_sql(sql)
-    return customers 
-
 
 
 
 # 有疑问
 def image_priority(equipment_id):
-    sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_url, ei.priority FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;;"""
+    sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_id, ei.image_url, ei.priority FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;"""
     image_priority = operate_sql(sql, (equipment_id,))
     return image_priority
 
@@ -1154,11 +1148,6 @@ def check_existing_main_image(equipment_id):
     main_image_exist = sql_data.fetchone()
     print(main_image_exist)
     return main_image_exist
-
-
-def deleting_image(equipment_id, image_id):
-    sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
-    operate_sql(sql, (equipment_id, image_id))
 
 def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
     sql = ("INSERT INTO contact (first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "

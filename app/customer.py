@@ -105,7 +105,7 @@ def equipment_detail(category, sub, detail_id):
         return redirect(url_for('equipments'))
     breadcrumbs.append({"text": "Detail", "url": ""})
     equipment = sql_function.get_equipment_by_id(detail_id)
-    disable_list, count = sql_function.get_equipment_disable_list(detail_id)
+    disable_list, count, date_dict = sql_function.get_equipment_disable_list(detail_id)
     if equipment[0]['sub_id'] != sub_id:
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('equipments'))
@@ -185,20 +185,20 @@ def bookings():
     session['msg'] = session['error_msg'] = ''
     if 'loggedIn' in session:
         sql_bookings = sql_function.get_bookings(session['user_id'])
+        disable_lists = {}
         for booking in sql_bookings:
+            disable_list, count, date_dict = sql_function.get_equipment_disable_list(booking["equipment_id"])
+            instance_id = booking['instance_id']
+            disable_lists[instance_id] = disable_list
             if booking['rental_start_datetime']:
-                booking['rental_start_datetime'] = booking['rental_start_datetime'].strftime('%d-%m-%Y %H:%M')
-            else:
-                booking['rental_start_datetime'] = 'N/A'
-            
+                booking['rental_start_datetime'] = booking['rental_start_datetime'].strftime('%d/%m/%Y %H:%M')
             if booking['expected_return_datetime']:
-                booking['expected_return_datetime'] = booking['expected_return_datetime'].strftime('%d-%m-%Y %H:%M')
-            else:
-                booking['expected_return_datetime'] = 'N/A'
-        return render_template('customer/bookings.html', bookings=sql_bookings, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
+                booking['expected_return_datetime'] = booking['expected_return_datetime'].strftime('%d/%m/%Y %H:%M')
+        return render_template('customer/bookings.html', bookings=sql_bookings, disable_lists=disable_lists, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
     else:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
+
 
 @app.route('/update_booking', methods=['POST'])
 def update_booking():
@@ -206,23 +206,24 @@ def update_booking():
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
     start_date = request.form.get('start_date')
+    end_date = request.form.get('end_date')
     cost_per_day = float(request.form.get('price'))
     instance_id = request.form.get('instance_id')
     hire_id = request.form.get('hire_id')
-    new_end_date = request.form.get('new_end_date')
-    new_end_time = request.form.get('new_end_time')
-    # Combine the date and time to form a datetime string
-    combined_datetime_str = f"{new_end_date} {new_end_time}"
-    # Convert the string end_date and rental_start to datetime objects for comparison
-    end_date_obj = datetime.strptime(combined_datetime_str, '%Y-%m-%d %H:%M')
-    rental_start_obj = datetime.strptime(start_date, '%d-%m-%Y %H:%M')
+    end_date_obj = request.form.get('datetimes')
+    if not end_date_obj:
+        session['error_msg'] = 'Input is empty.'
+        return redirect(str(request.referrer))
+    end_date_obj = datetime.strptime(end_date_obj, '%d/%m/%Y %H:%M')
+    rental_start_obj = datetime.strptime(start_date, '%d/%m/%Y %H:%M')
+    rental_end_obj = datetime.strptime(end_date, '%d/%m/%Y %H:%M')
     # Check if the difference between end_date and rental_start exceeds one week
     if end_date_obj > rental_start_obj + timedelta(weeks=1):
         session['error_msg'] = 'You can only extend the hire period up to a week from the start date.'
         return redirect(url_for('bookings'))
     # Calculate the additional cost for the extension
-    extension_duration = end_date_obj - rental_start_obj
-    extension_duration_seconds = (end_date_obj - rental_start_obj).total_seconds()
+    extension_duration = end_date_obj - rental_end_obj
+    extension_duration_seconds = (end_date_obj - rental_end_obj).total_seconds()
     extension_days = extension_duration.days
     additional_cost = extension_days * cost_per_day
     # Check if extension duration exceeds 12 hours beyond the complete days
@@ -234,9 +235,6 @@ def update_booking():
     session['extension_duration_seconds'] = extension_duration_seconds
     session['additional_cost'] = additional_cost
     return redirect(url_for('payment_form'))
-
-
-
 
 
 @app.template_filter('duration_format')
@@ -256,7 +254,6 @@ def payment_form():
         formatted_end_date = end_date_obj.strftime('%d-%m-%Y %H:%M')
     else:
         formatted_end_date = None
-    
     instance_id = session['instance_id']
     hire_id = session['hire_id']
     extension_duration = session['extension_duration_seconds']
@@ -312,7 +309,6 @@ def contact():
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
-
 @app.route('/customer_cart')
 def customer_cart():
     breadcrumbs = [{"text": "Cart", "url": "#"}]
@@ -327,6 +323,7 @@ def customer_cart():
     # print(equipment_list)
 
     total_amount = 0
+    disable_lists = {}
     for equipment in equipment_list:
         equipment_id = equipment['equipment_id']
         disable_list,count = sql_function.get_equipment_disable_list(equipment_id)
@@ -350,6 +347,9 @@ def customer_cart():
             days = days
         else:
             days = days + 1
+        disable_list, count, date_dict = sql_function.get_equipment_disable_list(equipment["equipment_id"])
+        cart_item_id = equipment['cart_item_id']
+        disable_lists[cart_item_id] = date_dict
         unit_price = float(equipment['price'])
         total_item_price = unit_price * days
         equipment['price'] = total_item_price
@@ -375,8 +375,6 @@ def add_to_cart():
     start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
     end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     equipment_id = request.form.get('equipment_id')
-    
-    
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
@@ -419,11 +417,11 @@ def edit_details():
         return redirect(url_for('index'))
     user_id = session['user_id']
     quantity = request.form.get('quantity')
-    start_time = request.form.get('start_time')
-    end_time = request.form.get('end_time')
+    datetimes = request.form.get('datetimes')
+    start_str, end_str = datetimes.split(' - ')
+    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     cart_item_id = request.form.get('cart_item_id')
-    start_time = datetime.strptime(start_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
-    end_time = datetime.strptime(end_time, '%d-%m-%Y %H:%M').strftime('%Y-%m-%d %H:%M:%S')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
         session['error_msg'] = 'Please select the required date and time and quantity.'
@@ -460,12 +458,12 @@ def payment():
         selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_.strip()]
     else:
         selected_ids_list = []
-    
+
     if selected_quantities:
         selected_quantities_list = [int(quantity) for quantity in selected_quantities.split(',') if quantity]
     else:
         selected_quantities_list = []
-    
+
     methods = sql_function.payment_method()
     if selected_ids_list == []:
         session['error_msg'] = 'Please choose the equipment in your cart to place order.'
@@ -482,7 +480,7 @@ def payment():
                 session['driver_lisence_equipments_quantities'] = selected_quantities_list
                 session['method_list'] = methods
                 return redirect(url_for('driver_license'))
-            
+
         for selected_id, selected_quantity in zip(selected_ids_list, selected_quantities_list):
             booking_equipment_id = sql_function.booking_equipment(selected_id)
             max_count = sql_function.max_count(booking_equipment_id)
@@ -503,7 +501,7 @@ def complete_payment():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
-    
+
     # 检查请求是否包含POST数据
     if request.method == 'POST':
         # 获取表单数据
@@ -557,7 +555,7 @@ def driver_license():
     if 'loggedIn' not in session:
         session['error_msg'] = 'You are not logged in, please login first.'
         return redirect(url_for('index'))
-    
+
     driver_license = request.form.get('driver_license')
     # print(driver_license)
     price = session['driver_lisence_equipments_price']
