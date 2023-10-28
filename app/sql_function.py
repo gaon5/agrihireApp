@@ -630,17 +630,22 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
     operate_sql(sql, (instance_id,))
 
 
-def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images, sub_id):
+def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images,image_ids, sub_id):
     sql_data = get_cursor()
     sql = """UPDATE equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
                 detail=%s WHERE equipment_id= %s;"""
     value = (name, price, count, length, width, height, requires_drive_license, min_stock_threshold, description, detail, equipment_id)
     sql_data.execute(sql, value)
-    for i in images:
-        sql = """INSERT INTO equipment_img(equipment_id, image_url, priority) VALUES (%s, %s, %s);"""
-        value = (equipment_id, i[0], i[1])
-        print(sql % value)
-        sql_data.execute(sql, value)
+    for index, image_id in enumerate(image_ids):
+        if index < len(images):
+            image = images[index]
+            if image:
+                sql = """UPDATE equipment_img SET image_url = %s, priority = %s WHERE image_id = %s;"""
+                value = (image[0], image[1], image_id)
+                print(sql % value)
+                sql_data.execute(sql, value)
+        else:
+            pass
     sql = """DELETE FROM equipment_instance WHERE equipment_id = %s;"""
     value = (equipment_id,)
     sql_data.execute(sql,value)
@@ -1105,8 +1110,8 @@ def get_equipment_id(instance_id):
 
 # 有疑问
 def image_priority(equipment_id):
-    sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_url, ei.priority FROM equipment e 
-                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;;"""
+    sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_id, ei.image_url, ei.priority FROM equipment e 
+                LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;"""
     image_priority = operate_sql(sql, (equipment_id,))
     return image_priority
 
@@ -1125,11 +1130,6 @@ def check_existing_main_image(equipment_id):
     main_image_exist = sql_data.fetchone()
     print(main_image_exist)
     return main_image_exist
-
-
-def deleting_image(equipment_id, image_id):
-    sql = "DELETE FROM equipment_img WHERE equipment_id = %s AND image_id = %s"
-    operate_sql(sql, (equipment_id, image_id))
 
 def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
     sql = ("INSERT INTO contact (first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
