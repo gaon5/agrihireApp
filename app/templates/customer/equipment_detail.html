@@ -147,6 +147,9 @@
                             <form action="/equipment_detail/{{ detail_id }}" method="post">
                                 <input type="text" name="datetimes" placeholder="Select Date & Times" value="" style="width: 300px" readonly>
                                 <input type="hidden" name="equipment_id" value="{{ equipment[0]['equipment_id'] }}">
+                                <input type="hidden" id="equipment_price" value="{{equipment[0]['price']}}">
+                                <input type="hidden" id="driver_license" name="driver_license">
+
                                 <br>
                                 <button type="button" class="btn nav-link_ hire-button mt-3" style="font-size: 14px">Hire Now</button>
                                 <button type="button" class="btn nav-link_ active add-to-cart-button mt-3" style="font-size: 14px">Add To Cart</button>
@@ -272,7 +275,7 @@
             }
 
             if ($(this).hasClass('hire-button')) {
-                form.attr('action', '/your_hire_route');
+                form.attr('action', '/hire_now');  
                 form.submit();
             } else if ($(this).hasClass('add-to-cart-button')) {
                 const currentProduct = $(this).closest('.row');

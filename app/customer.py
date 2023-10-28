@@ -320,9 +320,18 @@ def customer_cart():
         return redirect(url_for('index'))
     user_id = session['user_id']
     equipment_list = sql_function.my_cart(user_id)
+    # print(equipment_list)
+
     total_amount = 0
     disable_lists = {}
     for equipment in equipment_list:
+        equipment_id = equipment['equipment_id']
+        disable_list,count = sql_function.get_equipment_disable_list(equipment_id)
+        # print(disable_list)
+        # print(count)
+        disable_dict = {equipment['cart_item_id']:disable_list}
+        # print(disable_dict)
+
         start_time = equipment['start_time']
         end_time = equipment['end_time']
         # 计算时间差
@@ -352,7 +361,7 @@ def customer_cart():
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
-                           error_msg=last_error_msg, disable_lists=disable_lists)
+                           error_msg=last_error_msg, disable_dict = disable_dict)
 
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
@@ -441,10 +450,10 @@ def payment():
     driver_license = request.form.get('driver_license')
 
     # 将字符串形式的ids和quantities转换为列表
-    print(selected_ids)
-    print(selected_quantities)
-    print(total_amount_final)
-    print(driver_license)
+    # print(selected_ids)
+    # print(selected_quantities)
+    # print(total_amount_final)
+    # print(driver_license)
     if selected_ids:
         selected_ids_list = [int(id_) for id_ in selected_ids.split(',') if id_.strip()]
     else:
@@ -466,7 +475,6 @@ def payment():
             # print(booking_equipment_id)
             # print(equipment_list)
             if booking_equipment_id in equipment_list and not driver_license:
-                session['msg'] = "Please provide your driver license"
                 session['driver_lisence_equipments_price'] = total_amount_final
                 session['driver_lisence_equipments_cart_id'] = selected_ids_list
                 session['driver_lisence_equipments_quantities'] = selected_quantities_list
@@ -482,7 +490,7 @@ def payment():
                 session['error_msg'] = f'The quantity for equipment ID {selected_id} exceeds the maximum allowed value of {max_count}.'
                 return redirect(url_for('customer_cart'))
         return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_amount_final,
-                               selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods)
+                               selectedItemList=selected_ids_list, selected_quantities_list=selected_quantities_list, methods=methods,url =url_for('complete_payment') )
 
 
 @app.route('/complete_payment', methods=['POST','get'])
@@ -549,11 +557,156 @@ def driver_license():
         return redirect(url_for('index'))
 
     driver_license = request.form.get('driver_license')
-    print(driver_license)
+    # print(driver_license)
     price = session['driver_lisence_equipments_price']
     selectedItemList = session['driver_lisence_equipments_cart_id']
     selected_quantities_list = session['driver_lisence_equipments_quantities']
     methods = session['method_list']
-
+    session.pop('driver_lisence_equipments_price', None)
+    session.pop('driver_lisence_equipments_cart_id', None)
+    session.pop('driver_lisence_equipments_quantities', None)
+    session.pop('method_list', None)
+        
     return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=price, selectedItemList=selectedItemList,
-                           selected_quantities_list=selected_quantities_list, methods=methods)
+                           selected_quantities_list=selected_quantities_list, methods=methods,url = url_for('payment'))
+
+
+@app.route('/hire_now', methods=['POST','get'])
+def hire_now():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    
+    equipment_id = request.form.get('equipment_id')
+    equipment_id_str = str(equipment_id)
+    # print(equipment_id_str)
+    datetimes = request.form.get('datetimes')
+    start_str, end_str = datetimes.split(' - ')
+    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
+    driver_license = sql_function.check_driver_lisence(equipment_id)
+    need_lisence = driver_license[0]
+    unit_price = driver_license[1]
+    time_diff = end_time - start_time
+    # # # 获取时间差的总秒数
+    total_seconds = time_diff.total_seconds()
+    # # # 计算具体的天数、小时数、分钟数
+    days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+    hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+    if 0 < hours <= 4:
+        days = days + 0.75
+    elif hours == 0:
+        days = days
+    else:
+        days = days + 1
+    
+    total_item_price = float(unit_price) * days
+    total_item_price_str = str(total_item_price)
+    session['start_time'] = start_time
+    session['end_time'] = end_time
+    methods = sql_function.payment_method()
+    if need_lisence == 1:
+        session['driver_lisence_equipments_price'] = total_item_price
+        session['driver_lisence_equipments_cart_id'] = equipment_id
+        session['driver_lisence_equipments_quantities'] = 1
+        session['method_list'] = methods
+        return redirect(url_for('hire_now_driver_license'))
+    
+    # print(total_item_price)
+    # print(equipment_id)
+    # print(str(1))
+    # print(methods)
+    max_count = sql_function.max_count(equipment_id)
+
+    if 1 > max_count:
+        session['error_msg'] = f'The quantity for equipment ID {equipment_id} exceeds the maximum allowed value of {max_count}.'
+        return redirect(url_for('customer_cart'))
+    
+    return render_template('customer/payment.html', msg=last_msg, error_msg=last_error_msg, price=total_item_price_str,
+                               selectedItemList=equipment_id_str, selected_quantities_list=str(1), methods=methods, url =url_for('hire_now_complete_payment'))
+
+
+
+@app.route('/hire_now_driver_license', methods=['POST','get'])
+def hire_now_driver_license():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    
+    driver_license = request.form.get('driver_license')
+    # print(driver_license)
+    price = session['driver_lisence_equipments_price']
+    selectedItemList = session['driver_lisence_equipments_cart_id']
+    # print(selectedItemList)
+    selected_quantities_list = session['driver_lisence_equipments_quantities']
+    methods = session['method_list']
+    session.pop('driver_lisence_equipments_price', None)
+    session.pop('driver_lisence_equipments_cart_id', None)
+    session.pop('driver_lisence_equipments_quantities', None)
+    session.pop('method_list', None)
+        
+    return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=price, selectedItemList=selectedItemList,
+                           selected_quantities_list=selected_quantities_list, methods=methods,url = url_for('hire_now_payment'))
+
+
+@app.route('/hire_now_complete_payment', methods=['POST','get'])
+def hire_now_complete_payment():
+    last_msg = session.get('msg', '')
+    last_error_msg = session.get('error_msg', '')
+    session['msg'] = session['error_msg'] = ''
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('index'))
+    
+    # 检查请求是否包含POST数据
+    if request.method == 'POST':
+        # 获取表单数据
+        equipment_id_json = request.form.get('selectedItemList')  # 这是一个JSON字符串
+        equipment_id = json.loads(equipment_id_json)  # 将JSON字符串转换回Python列表
+
+        price = request.form['price']  # 获取价格
+        payment_method = request.form.get('paymentMethod')  # 获取用户选择的支付方式
+        # print(selected_items)
+        # print(price)
+        # print(payment_method)
+        selected_quantities_json = request.form.get('selectedQuantitiesList')  # 这是一个JSON字符串
+        selected_quantities = json.loads(selected_quantities_json)  # 将JSON字符串转换回Python列表
+
+        # 打印调试信息，或进行其他处理
+        # print(selected_quantities)
+        user_id = session['user_id']
+        hire_id = sql_function.hire_list_update(price, user_id)
+        # print(hire_id)
+        sql_function.payment_update(hire_id, payment_method)
+
+        equipment_quantity = selected_quantities
+        instance_ids = sql_function.update_equipment_instance(equipment_id, equipment_quantity)
+        start_time = session['start_time']
+        end_time = session['end_time']
+        time_diff = end_time - start_time
+        
+        session.pop('start_time', None)
+        session.pop('end_time', None)
+        
+        for instance_id in instance_ids:
+            sql_function.hire_now_update_equipment_rental_status(instance_id, user_id,start_time,end_time)
+            total_seconds = time_diff.total_seconds()
+            # 计算具体的天数、小时数、分钟数
+            days, remainder = divmod(total_seconds, 86400)  # 86400 seconds per day
+            hours, remainder = divmod(remainder, 3600)  # 3600 seconds per hour
+            if 0 < hours <= 4:
+                days = days + 0.75
+            elif hours == 0:
+                days = days
+            else:
+                days = days + 1
+            sql_function.update_hire_item(hire_id, instance_id, equipment_quantity, equipment_id, days)
+        
+        session['msg'] = "Order complete. Please check in your bookings. "
+        return redirect(url_for('customer_cart'))
+    else:
+        # 例如，重定向到首页或错误页面
+        return redirect(url_for('customer_cart'))
