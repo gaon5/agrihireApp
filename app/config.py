@@ -2,7 +2,7 @@ dbpass = "88LcNrALs5NpRjjF"
 dbhost = "leoselfcloud.top"
 dbport = "3306"
 dbname = "hire"
-dbuser = "root"
+dbuser = "hire"
 
 # dbpass = "Kidduomude1412"
 # dbhost = "127.0.0.1"
