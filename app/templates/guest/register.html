@@ -142,7 +142,7 @@
                         <div class="mb-3 relative">
                             <span class="asterisk mt-2">*</span>
                             <select class="form-select asterisk-inside" id="question" name="question" value="{{ request.form['question'] }}" >
-                                <option selected="selected" disabled>Choose A Security Question</option>
+                                <option selected="selected" disabled>Choose a Security Question</option>
                                 {% for question in questions %}
                                     <option value="{{ question['question_id'] }}">{{ question['question'] }}</option>
                                 {% endfor %}
