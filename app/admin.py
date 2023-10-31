@@ -143,11 +143,11 @@ def manage_staff():
         phone_number = request.form.get('phone_number')
         user_id = request.form.get('user_id')
         user_detail = sql_function.get_account(email)
-        if user_detail:
-            if int(user_id) != user_detail['user_id']:
-                session['error_msg'] = 'Email already exists!'
-                return redirect(str(request.referrer))
         if user_id:
+            if user_detail:
+                if int(user_id) != user_detail['user_id']:
+                    session['error_msg'] = 'Email already exists!'
+                    return redirect(str(request.referrer))
             last_msg = "Updated successfully"
             sql_function.update_staff_details(first_name, last_name, title, phone_number, email, user_id)
         else:
