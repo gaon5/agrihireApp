@@ -34,7 +34,7 @@ def manage_category():
             category_name = request.form['category_name']
             category_id = request.form['category_id']
             # check the input name is not repeated
-            flag = sql_function.validate_category(category_name)
+            flag = sql_function.validate_category(category_name, category_id)
             if flag:
                 last_error_msg = 'Cannot update this category. Please make sure the category is different from the others'
             else:
@@ -94,7 +94,7 @@ def manage_subcategory():
             subcategory_id = request.form['subcategory_id']
             category_id = request.form['category_id']
             # Check the sub category name is not repeated
-            flag = sql_function.validate_subcategory(subcategory_name, category_id)
+            flag = sql_function.validate_subcategory(subcategory_name, category_id, subcategory_id)
             if flag:
                 last_error_msg = 'Cannot update this sub category. Please make sure the sub category is different from the others'
             else:
