@@ -109,13 +109,15 @@ def check_category(id):
     details = operate_sql(sql, (id,))
     return details
 
-def validate_category(input, category_id):
+def validate_category(input, category_id=None):
     category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
     result = False
     for category in category_list:
         if input.lower() == category['name'].lower():
+            if not category_id:
+                result = True
             # do something only if category_id is not the same (meaning the same name is not applied to the same category)
-            if category['category_id'] != int(category_id): 
+            elif category_id and category['category_id'] != int(category_id): 
                 result = True
     return result
 
@@ -142,13 +144,15 @@ def check_subcategory(id):
     details = operate_sql(sql, (id,))
     return details
 
-def validate_subcategory(input, category_id, sub_category_id):
+def validate_subcategory(input, category_id, sub_category_id=None):
     sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
     result = False
     for sub in sub_category_list:
         if sub['category_id'] == int(category_id) and sub['name'].lower() == input.lower():
+            if not sub_category_id:
+                result = True
             # do something only if sub_category_id is not the same (meaning the same name is not applied to the same sub category)
-            if sub['sub_id'] != int(sub_category_id):
+            elif sub_category_id and sub['sub_id'] != int(sub_category_id):
                 result = True
     return result
 
