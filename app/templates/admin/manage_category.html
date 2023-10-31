@@ -78,14 +78,14 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <br>
-            {% if get_classify()[1] %}
+            {% if get_classify()[0] %}
                 <div class="table-header">
                     <div class="header-cell">Main Category</div>
                     <div class="header-cell"></div>
                 </div>
                 <div class="card mb-2">
                     <div class="card-body">
-                        {% for category in get_classify()[1] %}
+                        {% for category in get_classify()[0] %}
                             <form action="{{ url_for('manage_category') }}" method="post">
                                 <div class="row" style="margin: 5px;">
                                     <div class="col-md-8 d-flex align-items-center justify-content-center">
