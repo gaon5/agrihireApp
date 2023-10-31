@@ -355,6 +355,7 @@ def search_customer(search, page):
 
 
 def add_customer(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, password):
+    birth_date = datetime.strptime(birth_date, '%Y-%m-%d').strftime('%d %b %Y')
     register_account(email, password, title, last_name, first_name, 1, "1", phone_number, region, city, street_name, birth_date)
 
 
