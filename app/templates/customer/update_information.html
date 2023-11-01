@@ -107,6 +107,8 @@
 {% block myjs %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        
+
         //birthdate validation
         flatpickr("#birth_date", {
             minDate: "01 01 1900",
@@ -118,9 +120,10 @@
         const city_list = JSON.parse('{{ city_list|tojson }}');
         const region = document.getElementById('region');
         const city = document.getElementById('city');
-        const title = document.getElementById('city');
-        region.value = {{ details_list.region_id }};
+        const title = document.getElementById('title');
+        // set default value of title
         title.value = {{ details_list.title_id }};
+        region.value = {{ details_list.region_id }};
         for (const i in city_list) {
             if (String(city_list[i].region_id) === region.value) {
                 const option = document.createElement('option');
