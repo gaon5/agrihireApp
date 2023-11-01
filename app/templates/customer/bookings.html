@@ -46,7 +46,7 @@
                                 {{ booking.name }}
                             {% else %}
                                 <!-- Provide an alternative content if image_url is not available -->
-                                {{ booking.name }} (Image not available)
+                                {{ booking.name }}
                             {% endif %}
                         </td>
                         <td>{{ booking.datetime.strftime('%d-%m-%Y %H:%M') }}</td>

@@ -757,12 +757,11 @@ def delete_wishlist(user_id, equipment_id):
 #
 def get_bookings(user_id):
     customer_id = get_id(user_id)
-    sql = """SELECT e.equipment_id, hi.hire_id, hi.instance_id, hl.datetime, e.name, eig.image_url, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
+    sql = """SELECT e.equipment_id, hi.hire_id, hi.instance_id, hl.datetime, e.name, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
                 INNER JOIN hire_status AS hs ON hl.status_id = hs.status_id
                 INNER JOIN hire_item hi on hl.hire_id = hi.hire_id
                 INNER JOIN equipment_instance ei on ei.instance_id = hi.instance_id
-                INNER JOIN equipment_img eig on ei.equipment_id = eig.equipment_id
-                INNER JOIN equipment e on e.equipment_id = eig.equipment_id
+                INNER JOIN equipment e on e.equipment_id = ei.equipment_id
                 INNER JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
                 WHERE hl.customer_id=%s ORDER BY ers.expected_return_datetime DESC;"""
     bookings = operate_sql(sql, (customer_id,))
