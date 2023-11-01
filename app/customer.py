@@ -325,13 +325,6 @@ def customer_cart():
     total_amount = 0
     disable_lists = {}
     for equipment in equipment_list:
-        equipment_id = equipment['equipment_id']
-        disable_list,count = sql_function.get_equipment_disable_list(equipment_id)
-        # print(disable_list)
-        # print(count)
-        disable_dict = {equipment['cart_item_id']:disable_list}
-        # print(disable_dict)
-
         start_time = equipment['start_time']
         end_time = equipment['end_time']
         # 计算时间差
@@ -361,7 +354,7 @@ def customer_cart():
         equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
         equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
-                           error_msg=last_error_msg, disable_dict = disable_dict)
+                           error_msg=last_error_msg, disable_lists = disable_lists)
 
 
 @app.route('/add_to_cart', methods=['POST', 'get'])
