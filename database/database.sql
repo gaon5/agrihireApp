@@ -286,7 +286,7 @@ CREATE TABLE `equipment_instance` (
   KEY `equipment_instance_instance_status_instance_id_fk` (`instance_status`),
   CONSTRAINT `equipment_instance_ibfk_1` FOREIGN KEY (`equipment_id`) REFERENCES `equipment` (`equipment_id`),
   CONSTRAINT `equipment_instance_ibfk_2` FOREIGN KEY (`instance_status`) REFERENCES `instance_status` (`instance_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -295,7 +295,7 @@ CREATE TABLE `equipment_instance` (
 
 LOCK TABLES `equipment_instance` WRITE;
 /*!40000 ALTER TABLE `equipment_instance` DISABLE KEYS */;
-INSERT INTO `equipment_instance` VALUES (1,1,2),(2,1,1),(3,2,3),(4,2,2),(5,3,2),(6,3,2),(7,4,2),(8,4,2),(9,5,2),(10,5,2),(11,6,2),(12,6,2),(13,7,2),(14,7,2),(15,8,2),(16,8,2),(17,9,2),(18,9,2),(19,10,2),(20,10,2),(21,11,2),(22,11,2),(23,12,2),(24,12,1),(25,13,3),(26,13,2),(27,14,1),(28,14,1),(29,15,3),(30,15,3),(31,16,1),(32,16,1),(33,17,1),(34,17,1),(35,18,1),(36,18,1),(37,19,1),(38,19,1),(39,20,1),(40,20,1),(41,21,3),(42,21,3);
+INSERT INTO `equipment_instance` VALUES (1,1,2),(2,1,1),(3,2,3),(4,2,2),(5,3,2),(6,3,2),(7,4,2),(8,4,2),(9,5,2),(10,5,2),(11,6,2),(12,6,2),(13,7,2),(14,7,2),(15,8,2),(16,8,2),(17,9,2),(18,9,2),(19,10,2),(20,10,2),(21,11,2),(22,11,2),(23,12,2),(24,12,1),(25,13,3),(26,13,2),(27,14,1),(28,14,1),(29,15,3),(30,15,3),(31,16,1),(32,16,1),(33,17,1),(34,17,1),(35,18,1),(36,18,1),(37,19,1),(38,19,1),(39,20,1),(40,20,1),(41,21,3),(42,21,3),(43,1,1),(44,1,1),(45,1,1),(46,16,1),(47,16,1);
 /*!40000 ALTER TABLE `equipment_instance` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -791,7 +791,7 @@ CREATE TABLE `shopping_cart_item` (
 
 LOCK TABLES `shopping_cart_item` WRITE;
 /*!40000 ALTER TABLE `shopping_cart_item` DISABLE KEYS */;
-INSERT INTO `shopping_cart_item` VALUES (1,1,4,1,'2023-10-28 00:00:00','2023-10-29 00:00:00'),(4,1,1,1,'2023-11-08 07:00:00','2023-11-09 07:00:00');
+INSERT INTO `shopping_cart_item` VALUES (1,1,4,1,'2023-10-28 00:00:00','2023-10-29 00:00:00'),(4,1,1,1,'2023-11-08 07:00:00','2023-11-10 07:00:00');
 /*!40000 ALTER TABLE `shopping_cart_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -950,4 +950,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-11-01 20:46:10
+-- Dump completed on 2023-11-01 21:28:00
