@@ -1158,11 +1158,12 @@ def check_existing_main_image(equipment_id):
     print(main_image_exist)
     return main_image_exist
 
-def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
-    sql = ("INSERT INTO contact (first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
-           "VALUES (%s, %s, %s, %s, %s, %s, %s)")
+def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):   
+    sql = ("INSERT INTO contact (contact_id, first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
+           "VALUES (NULL,%s, %s, %s, %s, %s, %s, %s)")
     value = (first_name, last_name, email, phone, location, enquiry_type, enquiry_details)
-    return operate_sql(sql, value)
+    operate_sql(sql, value)
+    return True
 
 def get_all_enquiries():
     sql = """SELECT * FROM contact"""

@@ -302,9 +302,9 @@ def contact():
 
         # Insert into database
         if sql_function.insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):
-            last_error_msg = "Your enquiry has been submitted successfully!"
+            last_msg = "Your enquiry has been submitted successfully!"
         else:
-            session['error_msg'] = "There was an error submitting your enquiry. Please try again."
+            last_error_msg = "There was an error submitting your enquiry. Please try again."
 
     return render_template('customer/contact.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
