@@ -283,12 +283,12 @@ def guest_cart():
         return render_template('guest/login.html', msg=msg, breadcrumbs=breadcrumbs)
 
 
-# @app.errorhandler(Exception)
-# def handle_error(error):
-#     """
-#     Receive all unexpected errors
-#     :param error:
-#     :return: error.html
-#     """
-#     print(error)
-#     return render_template('guest/error.html', permissions=check_permissions())
+@app.errorhandler(Exception)
+def handle_error(error):
+    """
+    Receive all unexpected errors
+    :param error:
+    :return: error.html
+    """
+    print(error)
+    return render_template('guest/error.html', permissions=check_permissions())
