@@ -7,8 +7,8 @@
 # dbpass = "Kidduomude1412"
 # dbhost = "127.0.0.1"
 # dbport = "3306"
-# dbname = "hire"
-# dbuser = "hire"
+# dbname = "hire_local"
+# dbuser = "root"
 
 # dbpass = "passwd123"
 # dbhost = "192.168.66.9"
