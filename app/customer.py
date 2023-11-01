@@ -412,8 +412,8 @@ def edit_details():
     quantity = request.form.get('quantity')
     datetimes = request.form.get('datetimes')
     start_str, end_str = datetimes.split(' - ')
-    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
-    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
+    start_time = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
     cart_item_id = request.form.get('cart_item_id')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
@@ -634,7 +634,8 @@ def hire_now_driver_license():
     price = session['driver_lisence_equipments_price']
     selectedItemList = session['driver_lisence_equipments_cart_id']
     # print(selectedItemList)
-    selected_quantities_list = session['driver_lisence_equipments_quantities']
+    selected_quantities_list = [session['driver_lisence_equipments_quantities']]
+    print(selected_quantities_list)
     methods = session['method_list']
     session.pop('driver_lisence_equipments_price', None)
     session.pop('driver_lisence_equipments_cart_id', None)
@@ -642,7 +643,7 @@ def hire_now_driver_license():
     session.pop('method_list', None)
         
     return render_template('customer/driver_license.html', msg=last_msg, error_msg=last_error_msg, price=price, selectedItemList=selectedItemList,
-                           selected_quantities_list=selected_quantities_list, methods=methods,url = url_for('hire_now_payment'))
+                           selected_quantities_list=selected_quantities_list, methods=methods,url = url_for('hire_now_complete_payment'))
 
 
 @app.route('/hire_now_complete_payment', methods=['POST','get'])
