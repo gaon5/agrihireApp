@@ -351,8 +351,8 @@ def customer_cart():
         # print(f"{days} days, {hours} hours, {minutes} minutes")
         # print(equipment['quantity'])
         # print(equipment['max_count'])
-        equipment['start_time'] = datetime.strftime(start_time, '%d-%m-%Y %H:%M')
-        equipment['end_time'] = datetime.strftime(end_time, '%d-%m-%Y %H:%M')
+        equipment['start_time'] = datetime.strftime(start_time, '%d/%m/%Y %H:%M')
+        equipment['end_time'] = datetime.strftime(end_time, '%d/%m/%Y %H:%M')
     return render_template('customer/customer_cart.html', equipment_list=equipment_list, total_amount=total_amount, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg, disable_lists = disable_lists)
 
