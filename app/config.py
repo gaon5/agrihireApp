@@ -22,8 +22,14 @@
 # dbname = "hire"
 # dbuser = "root"
 
-dbuser = "root" #PUT YOUR MySQL username here - usually root
-dbpass = "12345678" #PUT YOUR PASSWORD HERE
+# dbuser = "root" #PUT YOUR MySQL username here - usually root
+# dbpass = "12345678" #PUT YOUR PASSWORD HERE
+# dbhost = "localhost" 
+# dbport = "3306"
+# dbname = "presentation hire"
+
+dbuser = "root" 
+dbpass = "Rooting23"
 dbhost = "localhost" 
 dbport = "3306"
-dbname = "presentation hire"
+dbname = "hire"
