@@ -412,8 +412,8 @@ def edit_details():
     quantity = request.form.get('quantity')
     datetimes = request.form.get('datetimes')
     start_str, end_str = datetimes.split(' - ')
-    start_time = datetime.strptime(start_str, "%d-%m-%Y %H:%M")
-    end_time = datetime.strptime(end_str, "%d-%m-%Y %H:%M")
+    start_time = datetime.strptime(start_str, "%d/%m/%Y %H:%M")
+    end_time = datetime.strptime(end_str, "%d/%m/%Y %H:%M")
     cart_item_id = request.form.get('cart_item_id')
     # print(start_time, end_time, quantity, cart_item_id)
     if not (start_time and end_time and cart_item_id and quantity):
