@@ -1120,7 +1120,7 @@ def stats_dashboard():
     customer_stat = operate_sql("""SELECT COUNT(customer_id) FROM customer WHERE state = 1;""", close=0)
     staff_stat = operate_sql("""SELECT COUNT(staff_id) FROM staff WHERE state = 1;""", close=0)
     equipment_stat = operate_sql("""SELECT COUNT(equipment_id) FROM equipment;""", close=0)
-    booking_stat = operate_sql("""SELECT COUNT(log_id) FROM hire_log;""")
+    booking_stat = operate_sql("""SELECT COUNT(hire_id) FROM hire_list;""")
     return customer_stat, staff_stat, equipment_stat, booking_stat
 
 
