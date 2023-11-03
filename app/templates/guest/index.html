@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 
+<!--HTML base page-->
 
 {% block mytitle %}
-
 {% endblock %}
 
 
 {% block mycss %}
     <style>
         .bg-container {
-            background-image: url('{{ url_for('static', filename='image/background3.jpg') }}'); /* 替换为您的图像URL */
-            background-size: cover; /* 背景图像覆盖整个元素 */
-            background-position: center; /* 背景图像居中 */
-            color: #EECD5C; /* 设置文本颜色为白色，或者您喜欢的其他颜色 */
-            padding: 20px; /* 添加一些内边距 */
+            background-image: url('{{ url_for('static', filename='image/background3.jpg') }}');
+            background-size: cover; 
+            background-position: center; 
+            color: #EECD5C; 
+            padding: 20px; 
         }
 
         .step-box {
-            transition: transform 0.3s ease-in-out; /* 添加过渡效果 */
+            transition: transform 0.3s ease-in-out; 
         }
 
         .step-box:hover {
-            transform: scale(1.1); /* 放大效果 */
+            transform: scale(1.1); 
         }
 
         .custom-caption {
@@ -33,28 +33,28 @@
             position: static;
             padding: 20px;
             margin-left: 50px;
-            color: #4b4029; /* 设置字体颜色为白色，您可以根据需要更改颜色代码 */
-            font-family: 'Arial', sans-serif; /* 设置艺术字体，您可以根据需要更改字体 */
+            color: #4b4029; 
+            font-family: 'Arial', sans-serif; 
         }
 
         .custom-caption h5 {
-            font-size: 24px; /* 设置 h5 标签的字体大小 */
-            margin-bottom: 10px; /* 设置 h5 标签的底部外边距 */
+            font-size: 24px; 
+            margin-bottom: 10px; 
         }
 
         .custom-caption h6 {
-            font-size: 20px; /* 设置 h6 标签的字体大小 */
-            margin-bottom: 10px; /* 设置 h6 标签的底部外边距 */
+            font-size: 20px; 
+            margin-bottom: 10px; 
         }
 
         .custom-caption p {
-            font-size: 16px; /* 设置段落文字的字体大小 */
+            font-size: 16px; 
         }
 
         .carousel-item .row {
             display: flex;
-            align-items: center; /* 垂直居中对齐 */
-            height: 50vh; /* 与图片高度保持一致 */
+            align-items: center; 
+            height: 50vh; 
         }
 
         .carousel-item img {
@@ -63,20 +63,20 @@
         }
 
         .carousel-inner {
-            padding: 20px; /* 在容器的四周都添加20px的内边距 */
+            padding: 20px; 
         }
 
         .nav-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 50vh; /* 使导航栏容器填满左侧区域 */
+            height: 50vh; 
         }
 
         .slogan-text {
-            color: #eacd76; /* 您已经设定的颜色 */
-            text-align: left; /* 文字居中 */
-            font-weight: 700; /* 字体加粗 */
+            color: #eacd76; 
+            text-align: left; 
+            font-weight: 700; 
             font-size: 30px;
             font-family: 'Poppins', sans-serif;
         }
@@ -85,24 +85,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%; /* 或者您想要的任何高度 */
+            height: 100%; 
         }
         .nav-link {
-            border: 2px solid #eeeec3; /* 为每个链接添加边框 */
-            border-radius: 5px; /* 可选：为边框添加圆角 */
-            margin-bottom: 5px; /* 添加下外边距，使链接之间有间隔 */
+            border: 2px solid #eeeec3; 
+            border-radius: 5px; 
+            margin-bottom: 5px; 
             padding-left: 50px;
             padding-right: 50px;
-            text-align: center; /* 文本居中 */
+            text-align: center;
         }
 
         .nav-link:hover {
-            background-color: #eacd76; /* 鼠标悬停时的背景颜色 */
+            background-color: #eacd76; 
         }
 
         .nav-link.active {
-            background-color: #b29b5b; /* 激活链接的背景颜色 */
-            font-weight: bold; /* 激活链接的字体加粗 */
+            background-color: #b29b5b; 
+            font-weight: bold; 
         }
 
     </style>
@@ -129,7 +129,6 @@
                                 Renovation</a></li>
                             <li class="nav-item"><a class="nav-link" href="/equipments/Tool-and-Equipment" style="color:#1d1912">Tool and Equipment</a>
                             </li>
-                            <!-- ... 其他导航链接 ... -->
                         </ul>
                     </div>
                 </nav>
@@ -234,7 +233,7 @@
     <script>
         $(document).ready(function () {
             $('.carousel').carousel({
-                interval: 5000 // 设置为5秒
+                interval: 5000 
             });
         });
     </script>

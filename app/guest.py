@@ -12,7 +12,7 @@ def my_task():
     """
     pass
 
-
+# default route
 @app.route('/')
 def index():
     last_msg = session.get('msg', '')
@@ -20,7 +20,7 @@ def index():
     session['msg'] = session['error_msg'] = ''
     return render_template('guest/index.html', msg=last_msg, error_msg=last_error_msg)
 
-
+# route to log in
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     breadcrumbs = [{"text": "Login", "url": "/login/"}]
@@ -30,9 +30,11 @@ def login():
     if 'loggedIn' in session:
         session['error_msg'] = 'You are already logged in.'
         return redirect(url_for('index'))
+    # if the method is post, get every user inputs
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        # make sure the account already exists for login
         account = sql_function.get_account(email)
         if account is not None:
             user_detail = sql_function.get_user_detail(account['user_id'])
@@ -57,7 +59,7 @@ def login():
             last_error_msg = 'Email or password error.'
     return render_template('guest/login.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to log out
 @app.route('/logout')
 def logout():
     # Remove session data, this will log the user out
@@ -72,7 +74,7 @@ def logout():
     session['msg'] = "Logout successful!"
     return redirect(url_for('index'))
 
-
+# route to register
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     breadcrumbs = [{"text": "Register", "url": "/register"}]
@@ -109,7 +111,7 @@ def register():
     return render_template('guest/register.html', titles=sql_function.title_list, questions=sql_function.question_list, breadcrumbs=breadcrumbs,
                            regions=sql_function.region_list, cities=sql_function.city_list, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to reset password
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
     breadcrumbs = [{"text": "Reset Password", "url": "/reset_password"}]
@@ -120,6 +122,7 @@ def reset_password():
     if 'loggedIn' in session:
         session['error_msg'] = 'You are already logged in.'
         return redirect(url_for('index'))
+    # make sure email address already exists for reseting password
     if email:
         account = sql_function.get_account(email)
         if not account:
@@ -141,7 +144,7 @@ def reset_password():
             return redirect(url_for('change_password'))
     return render_template('guest/reset_password.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to change password
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
     user_id = session['user_id']
@@ -158,7 +161,7 @@ def change_password():
         return redirect(url_for('login'))
     return render_template('guest/change_password.html', user_id=user_id, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to go to different dashboards based on the user's role
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}]
@@ -206,6 +209,7 @@ def edit_detail():
             session['error_msg'] = 'Incorrect permissions'
             return redirect(url_for('index'))
         if request.method == 'POST':
+            # get data from inputs
             details_data = {
                 "first_name": request.form.get('first_name').capitalize(),
                 "last_name": request.form.get('last_name').capitalize(),
@@ -237,7 +241,7 @@ def edit_detail():
         session['error_msg'] = 'Incorrect permissions'
         return redirect(url_for('index'))
 
-
+# route for different users to change password, based on the user's role
 @app.route('/user_change_password', methods=['GET', 'POST'])
 def user_change_password():
     breadcrumbs = [{"text": "Edit My Detail", "url": "/edit_detail"}]
@@ -260,8 +264,10 @@ def user_change_password():
     session['msg'] = session['error_msg'] = ''
     original_password = sql_function.get_account(user_id)['password'].encode('utf-8')
     if request.method == 'POST':
+        # get user inputs
         old_password = request.form.get('old_pw').encode('utf-8')
         new_password = request.form.get('new_pw').encode('utf-8')
+        # make sure the passwords are valid
         if not bcrypt.check_password_hash(original_password, old_password):
             last_error_msg = "Incorrect old password. Please try again."
         elif bcrypt.check_password_hash(original_password, new_password):
@@ -271,7 +277,7 @@ def user_change_password():
             last_msg = "Password changed."
     return render_template(template_map[permission_level], breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to encourage guest to login or register instead of showing cart
 @app.route("/guest_cart")
 def guest_cart():
     if 'loggedIn' in session:
@@ -282,7 +288,7 @@ def guest_cart():
         breadcrumbs = [{"text": "Login", "url": "/login"}]
         return render_template('guest/login.html', msg=msg, breadcrumbs=breadcrumbs)
 
-
+# route to display error page
 @app.errorhandler(Exception)
 def handle_error(error):
     """

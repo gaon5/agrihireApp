@@ -2,6 +2,21 @@ from flask import Flask, url_for, request, redirect, render_template, session
 from datetime import date, datetime, timedelta, time
 from app import app, check_permissions, scheduler, sql_function, upload_image
 
+# route for staff to access the enquiries submitted 
+@app.route('/staff/get_enquiries')
+def get_enquiries():
+    # Check if user is logged in
+    if 'loggedIn' not in session:
+        session['error_msg'] = 'You are not logged in, please login first.'
+        return redirect(url_for('login'))  # Assume there is a login route defined
+    # Check if user has required permissions
+    if check_permissions() != 2: # Implement check_permissions
+        session['error_msg'] = 'You are not authorized to access this page.'
+        return redirect(url_for('dashboard'))  # Redirect to a safe page
+    # Fetch enquiries from database
+    enquiries = sql_function.get_all_enquiries()
+    # Display enquiries
+    return render_template('staff/enquiries.html', enquiries=enquiries)
 
 # route for check out list
 @app.route('/staff/check_out_list', methods=['GET', 'POST'])
@@ -126,7 +141,7 @@ def maintenance_list():
     return render_template('staff/maintenance_list.html', maintenance_list=sql_maintenance_list, breadcrumbs=breadcrumbs, msg=last_msg,
                            error_msg=last_error_msg)
 
-
+# route for displaying further details of an equipment
 @app.route('/staff/more_detail', methods=['GET', 'POST'])
 def more_detail():
     detail_id = request.args['detail_id']
@@ -140,13 +155,12 @@ def more_detail():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get details of an equipment
     equipment = sql_function.get_more_detail(detail_id)
-    # for item in equipment:
-    #     print(item['equipment_id'])
     return render_template('staff/equipment_detail.html', detail_id=detail_id, breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg,
                            error_msg=last_error_msg)
 
-
+# route for updating equipment based on the id
 @app.route('/staff/update_equipment/<detail_id>', methods=['GET', 'POST'])
 def update_equipment(detail_id):
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Update Equipment", "url": "#"}]
@@ -159,10 +173,12 @@ def update_equipment(detail_id):
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get equipment and images
     equipment = sql_function.get_equipment_by_id_(detail_id)
     image_priority = sql_function.image_priority(detail_id)
     img = sql_function.get_more_detail(detail_id)
     main, sub, x, x = sql_function.get_classify()
+    # if the user submits anything, get the submitted form 
     if request.method == 'POST':
         equipment_id = request.form.get('equipment_id')
         image_ids = request.form.getlist('image_id')
@@ -182,16 +198,19 @@ def update_equipment(detail_id):
         capitalize_name = equipment.title()
         main_image_exist = sql_function.check_existing_main_image(equipment_id)
         images = []
+        # upload images
         if main_image.filename:
             images.append([upload_image(main_image), 1])
         if image.filename:
             images.append([upload_image(image), 0])
+        # validate driver license
         if driver_license == 'yes':
             driver_license = 1
         elif driver_license == 'no':
             driver_license = 0
         else:
             raise ValueError("Invalid value for driver's license")
+        # update information of the equipment based on the inputs
         sql_function.updating_equipment(capitalize_name, price, stock, length, width, height, driver_license, threshold, description, detail, equipment_id,
                                         images,image_ids,sub_category)
         session['msg'] = 'Updated successfully!'
@@ -199,7 +218,7 @@ def update_equipment(detail_id):
     return render_template('staff/update_equipment.html',detail_id=detail_id, img=img, main=main, sub=sub, equipment=equipment,
                            image_priority=image_priority, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route for adding an equipment
 @app.route('/staff/add_equipment', methods=['GET', 'POST'])
 def add_equipment():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Add Equipment", "url": "#"}]
@@ -212,7 +231,9 @@ def add_equipment():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get main category and sub category
     main, sub, x, x = sql_function.get_classify()
+    # if the method is post, get the form submitted by the user
     if request.method == 'POST':
         main_image = request.files['mainimage']
         image = request.files['image']
@@ -228,27 +249,26 @@ def add_equipment():
         description = request.form.get('description')
         detail = request.form.get('detail')
         capitalize_name = equipment.title()
-        # category_id = int(category.split()[0])
-        # category_name = ' '.join(category.split()[1:])
-        # sub_category_id = (sub_category.split()[0])
-        # sub_category_name = ' '.join(sub_category.split()[1:])
         images = []
+        # upload images
         if main_image.filename:
             images.append([upload_image(main_image), 1])
         if image.filename:
             images.append([upload_image(image), 0])
+        # validate driver license
         if driver_license == 'yes':
             driver_license = 1
         elif driver_license == 'no':
             driver_license = 0
         else:
             raise ValueError("Invalid value for driver's license")
+        # create a new equipment based on the user inputs
         sql_function.add_equipment(capitalize_name, price, stock, length, width, height, driver_license, threshold, description, detail, images, sub_category)
         session['msg'] = 'Equipment has been added!'
         return redirect(url_for('add_equipment', equipment=equipment))
     return render_template('staff/add_equipment.html', main=main, sub=sub, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route for deleting an equipment
 @app.route('/staff/delete_equipment', methods=['GET','POST'])
 def delete_equipment():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Delete Equipment", "url": "#"}]
@@ -262,11 +282,13 @@ def delete_equipment():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get equipment based on equipment id, and delete the equipment from the database
     equipment = sql_function.get_equipment_by_id_(equipment_id)
     sql_function.deleting_equipment(equipment_id)
     session['msg'] = "Deleted successfully"
     return redirect(url_for('equipment_list', equipment=equipment, breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg))
 
+# route for searching an equipment
 @app.route('/staff/search_result', methods=['GET', 'POST'])
 def search_result():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipment List", "url": "/staff/equipment_list"}, {"text": "Result", "url": "#"}]
@@ -311,18 +333,19 @@ def customer_list():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # if the method is post, return the customers which match the search
     if request.method == 'POST':
         search = request.form.get('search')
         customers, count = sql_function.search_customer(search, 0)
     else:
-        # get a list of customers
+        # get every customer in the database
         customers, count = sql_function.search_customer('', 0)
     # reformat the birth date 
     for customer in customers:
         customer['birth_date'] = customer['birth_date'].strftime('%d %b %Y')
     return render_template('staff/customer_list.html', breadcrumbs=breadcrumbs, customers=customers, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to access customer details 
 @app.route('/staff/customer_details', methods=['GET', 'POST'])
 def customer_details():
     customer_id = request.args['customer_id']
@@ -353,6 +376,7 @@ def customer_details():
                             customer=customer, bookings=bookings,
                             msg=last_msg, error_msg=last_error_msg)
 
+# route for accessing a list of equipments
 @app.route('/staff/equipment_list')
 def equipment_list():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipments List", "url": "#"}]
@@ -365,29 +389,11 @@ def equipment_list():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get a list of equipments
     equipment = sql_function.equipment_details()
     return render_template('staff/equipment_list.html', breadcrumbs=breadcrumbs, equipment=equipment, msg=last_msg, error_msg=last_error_msg)
 
-
-@app.route('/staff/get_enquiries')
-def get_enquiries():
-    # Check if user is logged in
-    if 'loggedIn' not in session:
-        session['error_msg'] = 'You are not logged in, please login first.'
-        return redirect(url_for('login'))  # Assume there is a login route defined
-    
-    # Check if user has required permissions
-    if check_permissions() != 2: # Implement check_permissions
-        session['error_msg'] = 'You are not authorized to access this page.'
-        return redirect(url_for('dashboard'))  # Redirect to a safe page
-
-    # Fetch enquiries from database
-    enquiries = sql_function.get_all_enquiries()
-    
-    # Display enquiries
-    return render_template('staff/enquiries.html', enquiries=enquiries)
-
-
+# route for setting status for an instance of an equipment
 @app.route('/staff/set_instance', methods = ["POST", "GET"])
 def set_instance():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Equipments List", "url": "#"}]
@@ -400,11 +406,15 @@ def set_instance():
     if check_permissions() != 2:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # get every equipment instance
     equipment = sql_function.equipment_instance()
     for i in equipment:
         item=i
+    # get every equipment
     all = sql_function.all_equipment()
+    # get every instance's status
     i_status = sql_function.instance_status()
+    # if the method is post, get user inputs
     if request.method == 'POST':
         equipment_id = request.form.get('equipment_id')
         chosen_status = request.form.get('instance')
@@ -417,9 +427,7 @@ def set_instance():
             # You can set appropriate default values or handle it as needed.
             instance_id = None  # Set to a suitable default value or handle the case.
             current_id = None
-        print('current:')
-        print(current_status)
-        print(current_id)
+        # update status of the equipment
         sql_function.change_status(chosen_status, instance_id, equipment_id)
         session['msg'] = 'Status has changed successfully!'
         return redirect(url_for('set_instance'))    

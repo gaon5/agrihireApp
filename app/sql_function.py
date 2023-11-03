@@ -7,7 +7,7 @@ from collections import defaultdict
 db_conn = None
 connection = None
 
-
+# function to connect to the database with the details in the config.py
 def get_cursor():
     global db_conn
     global connection
@@ -19,7 +19,7 @@ def get_cursor():
     db_conn = connection.cursor(dictionary=True)
     return db_conn
 
-
+# function for running the sql query
 def operate_sql(sql, values=None, fetch=1, close=1):
     """
     Execute an SQL query and return the query result.
@@ -54,10 +54,8 @@ def operate_sql(sql, values=None, fetch=1, close=1):
     try:
         cursor = get_cursor()
         if values:
-            # print(sql % values)
             cursor.execute(sql, values)
         else:
-            # print(sql)
             cursor.execute(sql)
         if sql.startswith("SELECT"):
             if fetch:
@@ -71,10 +69,13 @@ def operate_sql(sql, values=None, fetch=1, close=1):
             cursor.close()
     return temp
 
-
+# get every region
 region_list = operate_sql("""SELECT * FROM `region`;""", close=0)
+# get every title
 title_list = operate_sql("""SELECT * FROM `title`;""", close=0)
+# get every city
 city_list = operate_sql("""SELECT * FROM `city`;""", close=0)
+# get every question
 question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
 
 
@@ -83,6 +84,8 @@ question_list = operate_sql("""SELECT * FROM `security_question`;""", close=0)
 # category and sub_category
 #
 #
+
+# sql function to get every category and subcategory, and reformat the details
 @app.template_global()
 def get_classify():
     category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
@@ -97,11 +100,12 @@ def get_classify():
     details = operate_sql(sql)
     return category_list, sub_category_list, category, details
 
-
+# sql function to insert a new category 
 def insert_category(value):
     sql = """INSERT INTO category (category_id, name) VALUES (NULL, %s)"""
     operate_sql(sql, (value,))
 
+# sql function to get a category and sub category based on category id
 def check_category(id):
     sql="""SELECT * FROM category
             INNER JOIN sub_category ON sub_category.category_id = category.category_id
@@ -109,6 +113,7 @@ def check_category(id):
     details = operate_sql(sql, (id,))
     return details
 
+# sql function to make sure the new category name is unique
 def validate_category(input, category_id=None):
     category_list = operate_sql("""SELECT * FROM `category`;""", close=0)
     result = False
@@ -121,22 +126,24 @@ def validate_category(input, category_id=None):
                 result = True
     return result
 
+# sql function to update a category name
 def edit_category(id, name):
     sql = """UPDATE category 
                 SET name = %s
                 WHERE category_id = %s"""
     operate_sql(sql, (name,id))
 
+# sql function to delete a category
 def delete_category(id):
     sql = """DELETE FROM category WHERE category_id=%s"""
     operate_sql(sql, (id,))
 
-
+# sql function to insert a subcategory
 def insert_subcategory(id, name):
     sql="""INSERT INTO sub_category (sub_id, category_id, name) VALUES (NULL, %s, %s)"""
     operate_sql(sql, (id, name))
 
-
+# sql function to get a sub category based on sub category id
 def check_subcategory(id):
     sql="""SELECT * FROM sub_category 
             INNER JOIN classify ON classify.sub_id = sub_category.sub_id
@@ -144,6 +151,7 @@ def check_subcategory(id):
     details = operate_sql(sql, (id,))
     return details
 
+# sql function to make sure the new sub category name is unique
 def validate_subcategory(input, category_id, sub_category_id=None):
     sub_category_list = operate_sql("""SELECT * FROM `sub_category`;""", close=0)
     result = False
@@ -156,20 +164,21 @@ def validate_subcategory(input, category_id, sub_category_id=None):
                 result = True
     return result
 
+# sql function to update category id assigned to a subcategory
 def change_category(sub_id, main_id):
     sql = """UPDATE sub_category 
                 SET category_id = %s
                 WHERE sub_id = %s"""
     operate_sql(sql, (main_id, sub_id))
 
-
+# sql function to change a subcategory name
 def edit_subcategory(id, name):
     sql = """UPDATE sub_category 
                 SET name = %s
                 WHERE sub_id = %s"""
     operate_sql(sql, (name,id))
 
-
+# sql function to delete a subcategory
 def delete_subcategory(id):
     sql = """DELETE FROM sub_category WHERE sub_id=%s"""
     operate_sql(sql, (id,))
@@ -180,29 +189,31 @@ def delete_subcategory(id):
 # user account
 #
 #
+
+# sql function to get a user account
 def get_account(value):
     sql = """SELECT * FROM user_account WHERE email=%s OR user_id=%s;"""
     account = operate_sql(sql, (value, value,), fetch=0)
     return account
 
-
+# sql function to set password for a user account
 def set_password(password, user_id):
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     operate_sql("""UPDATE user_account SET password=%s WHERE user_id=%s;""", (hashed_password, user_id,))
 
-
+# sql function to update for a user account
 def update_password(password, user_id):
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     sql = "UPDATE user_account SET password=%s WHERE user_id=%s"
     operate_sql(sql, (hashed_password, user_id))
 
-
+# sql function to update last login for a user account
 def set_last_login_date(user_id):
     today = datetime.today().date()
     sql = """UPDATE user_account SET last_login_date=%s WHERE user_id=%s"""
     operate_sql(sql, (today, user_id,))
 
-
+# sql function to register a new user account
 def register_account(email, password, title, given_name, surname, question, answer, phone_number, region_id, city_id, address, birth_date):
     today = datetime.today().date()
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -214,7 +225,7 @@ def register_account(email, password, title, given_name, surname, question, answ
                 VALUES (%s,%s,%s,%s,%s,%s,1,%s,%s,%s,%s,%s);"""
     operate_sql(sql, (account['user_id'], title, given_name, surname, question, answer, phone_number, region_id, city_id, address, datetime.strptime(birth_date, '%d %b %Y').date()))
 
-
+# sql function to get customer/staff/admin id based on user_id
 def get_id(user_id):
     cursor = get_cursor()
     sql = """SELECT staff_id FROM staff WHERE user_id = %s"""
@@ -236,7 +247,7 @@ def get_id(user_id):
         cursor.close()
         return temp['admin_id']
 
-
+# sql function to get user details based on user id
 def get_user_detail(user_id):
     sql = """SELECT ua.user_id, c.customer_id, title_id, first_name, last_name, email, phone_number, birth_date, region_id, city_id, street_name, c.state
             FROM user_account ua
@@ -258,7 +269,7 @@ def get_user_detail(user_id):
     if details:
         return details
 
-
+# sql function to update an admin details
 def update_admin_details(first_name, last_name, title, phone_number, email, user_id):
     sql = """UPDATE `admin` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s
                 WHERE user_id=%s;"""
@@ -267,7 +278,7 @@ def update_admin_details(first_name, last_name, title, phone_number, email, user
                 WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
 
-
+# sql function to get every staff 
 def get_all_staff(page):
     sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
                 DATE_FORMAT(register_date,'%d %b %Y') AS register_date,DATE_FORMAT(last_login_date,'%d %b %Y') AS last_login_date from staff s
@@ -282,7 +293,7 @@ def get_all_staff(page):
     count = math.ceil(count['count'] / 15)
     return staff_list, count
 
-
+# sql function to search for a staff based on search inputs
 def search_staff(search, page):
     sqlSearch = "%" + search + "%"
     sql = """SELECT staff_id,s.user_id AS user_id,title_id,first_name,last_name,phone_number,state,email,
@@ -298,7 +309,7 @@ def search_staff(search, page):
     count = math.ceil(count['count'] / 15)
     return staff_list, count
 
-
+# sql function to add a staff
 def add_staff(first_name, last_name, title, phone_number, email, password):
     today = datetime.today().date()
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -310,25 +321,25 @@ def add_staff(first_name, last_name, title, phone_number, email, password):
                     VALUES (%s,%s,%s,%s,%s,1);"""
     operate_sql(sql, (account['user_id'], title, first_name, last_name, phone_number,))
 
-
+# sql function to delete a staff based on user id
 def delete_staff(user_id):
     sql = """UPDATE staff SET state=0 Where user_id=%s"""
     operate_sql(sql, (user_id,))
 
-
+# sql function to update staff details 
 def update_staff_details(first_name, last_name, title, phone_number, email, user_id):
     sql = """UPDATE `staff` SET first_name=%s,last_name=%s,title_id=%s,phone_number=%s WHERE user_id=%s;"""
     operate_sql(sql, (first_name, last_name, title, phone_number, user_id), close=0)
     sql = """UPDATE `user_account` SET email=%s WHERE user_id=%s;"""
     operate_sql(sql, (email, user_id))
 
-
+# sql function to get every security question and answer for a certai customer
 def get_customer_question(user_id):
     question = operate_sql("""SELECT sq.question_id,sq.question,c.answer FROM customer AS c 
                     LEFT OUTER JOIN security_question sq on sq.question_id = c.question_id WHERE user_id=%s;""", (user_id,), fetch=0)
     return question
 
-
+# sql functionto get every customer
 def get_all_customer(page):
     sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
                 question_id,answer,state,email,DATE_FORMAT(register_date,'%d %b %Y') AS register_date,
@@ -344,7 +355,7 @@ def get_all_customer(page):
     count = math.ceil(count['count'] / 15)
     return customer_list, count
 
-
+# sql function to search for a customer based on search inputs
 def search_customer(search, page):
     sqlSearch = "%" + search + "%"
     sql = """SELECT customer_id,c.user_id AS user_id,title_id,first_name,last_name,phone_number,city_id,region_id,street_name,birth_date,
@@ -361,17 +372,17 @@ def search_customer(search, page):
     count = math.ceil(count['count'] / 15)
     return customer_list, count
 
-
+# sql function to add a customer 
 def add_customer(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, password):
     birth_date = datetime.strptime(birth_date, '%Y-%m-%d').strftime('%d %b %Y')
     register_account(email, password, title, last_name, first_name, 1, "1", phone_number, region, city, street_name, birth_date)
 
-
+# sql function to delete a customer
 def delete_customer(user_id):
     sql = """UPDATE customer SET state=0 Where user_id=%s"""
     operate_sql(sql, (user_id,))
 
-
+# sql function to update customer's details
 def update_customer_details(first_name, last_name, birth_date, title, phone_number, region, city, street_name, email, user_id):
     sql = """UPDATE `customer` SET first_name=%s,last_name=%s,birth_date=%s,title_id=%s,phone_number=%s,region_id=%s,city_id=%s,street_name=%s
                 WHERE user_id=%s;"""
@@ -386,6 +397,8 @@ def update_customer_details(first_name, last_name, birth_date, title, phone_numb
 # equipment
 #
 #
+
+# sql function to get every equipment in the database
 def get_all_equipment(sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
                 LEFT JOIN classify c on e.equipment_id = c.equipment_id
@@ -405,7 +418,7 @@ def get_all_equipment(sql_page):
     count = math.ceil(count['count'] / 12)
     return equipment, count
 
-#################################
+# sql function to get every equipment details from the database
 def equipment_details():
     sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
                 e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
@@ -418,6 +431,7 @@ def equipment_details():
     equipment_details = operate_sql(sql)
     return equipment_details
 
+# sql function to get more details of the equipment
 def get_more_detail(equipment_id):
     sql = """SELECT e.equipment_id, e.name, e.price, e.count, e.requires_drive_license, e.length, e.width, e.height, e.description, e.detail,
             GROUP_CONCAT(ei.image_url) AS image_urls
@@ -432,6 +446,7 @@ def get_more_detail(equipment_id):
             item['image_urls'] = item['image_urls'].split(',')
     return equipment
 
+# sql function to search an equipment based on the search inputs
 def get_equipment_by_search(search, sql_page):
     search = "%" + search + "%"
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment AS e
@@ -453,7 +468,7 @@ def get_equipment_by_search(search, sql_page):
     return equipment, count
 
 
-##########################################
+# sql function to get all equipments that match the search inputs 
 def search_equipment_list(search):
     sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license,e.description, 
                 e.detail, ei.image_url, s.name AS sub_name, ca.name AS ca_name FROM equipment e 
@@ -465,7 +480,7 @@ def search_equipment_list(search):
     result = operate_sql(sql, ('%' + search + '%', '%' + search + '%', '%' + search + '%',))
     return result
 
-
+# sql function to get every equipment in a certain category
 def get_equipment_by_category(category_id, sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
@@ -485,7 +500,7 @@ def get_equipment_by_category(category_id, sql_page):
     count = math.ceil(count['count'] / 12)
     return equipment, count
 
-
+# sql function to get every equipment in a certain subcategory
 def get_equipment_by_sub(sub_id, sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM equipment e
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
@@ -505,7 +520,7 @@ def get_equipment_by_sub(sub_id, sql_page):
     count = math.ceil(count['count'] / 12)
     return equipment, count
 
-
+# sql function to get a equipment based on equipment id
 def get_equipment_by_id(equipment_id):
     sql = """SELECT * FROM equipment e
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id
@@ -514,7 +529,7 @@ def get_equipment_by_id(equipment_id):
     equipment = operate_sql(sql, (equipment_id,))
     return equipment
 
-
+# sql function to get a equipment based on equipment id
 def get_equipment_by_id_(equipment_id):
     # sql = """SELECT e.equipment_id, e.name AS e_name, e.price, e.count, e.length, e.width, e.height, e.requires_drive_license, e.min_stock_threshold, e.description,
     #             e.detail, ei.image_id, GROUP_CONCAT(ei.image_url) AS image_urls, ei.priority, s.name AS sub_name, ca.name AS ca_name FROM equipment e
@@ -538,7 +553,7 @@ def get_equipment_by_id_(equipment_id):
             item['image_urls'] = item['image_urls'].split(',')
     return equipment
 
-
+# sql function to het number of instances of an equipment
 def get_equipment_count(detail_id):
     sql = """SELECT count(*) AS count FROM equipment_instance ei
                 LEFT JOIN instance_status i on ei.instance_status = i.instance_id
@@ -546,7 +561,7 @@ def get_equipment_count(detail_id):
     count = operate_sql(sql, (detail_id,), fetch=0)
     return int(count['count'])
 
-
+# sql function to get dates which are not available for rental for every equipment
 def get_equipment_disable_list(detail_id):
     sql = """SELECT ei.instance_id,ei.instance_status,ers.rental_start_datetime,ers.expected_return_datetime,ers.actual_return_datetime FROM equipment_instance ei
                 LEFT JOIN equipment_rental_status ers on ei.instance_id = ers.instance_id
@@ -589,7 +604,7 @@ def get_equipment_disable_list(detail_id):
     string_key_dict = {date.strftime('%Y-%m-%d'): count for date, count in date_dict.items()}
     return formatted_dates, available_count, string_key_dict
 
-
+# sql function to get every equipment for pickup in a certain date
 def get_pickup_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(rental_start_datetime) AS rental_start_datetime, notes FROM equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
@@ -599,7 +614,7 @@ def get_pickup_equipment(the_date):
     pickup_list = operate_sql(sql, (the_date,))
     return pickup_list
 
-
+# sql function to get every equipment for return in a certain date
 def get_return_equipment(the_date):
     sql = """SELECT ers.equipment_rental_status_id, ers.instance_id, name, customer_id, TIME(expected_return_datetime) AS expected_return_datetime, notes FROM equipment_rental_status AS ers
                 INNER JOIN equipment_instance AS ei ON ei.instance_id = ers.instance_id
@@ -609,6 +624,21 @@ def get_return_equipment(the_date):
     return_list = operate_sql(sql, (the_date,))
     return return_list
 
+# sql function to check out an equipment
+def check_out_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
+    # update the rental status of a booking
+    sql = "UPDATE equipment_rental_status SET rental_status_id = 2 WHERE equipment_rental_status_id = %s;"
+    operate_sql(sql, (equipment_rental_status_id,))
+    # get staff id from user id
+    staff_id = get_id(user_id)
+    # get equipment id from instance id
+    equipment_id = get_equipment_id(instance_id)
+    # insert hire log the necessary details
+    sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
+            VALUES (NULL, %s, %s, 1, 'Equipment hired to a customer', %s);"""
+    operate_sql(sql, (staff_id, current_datetime, equipment_id))
+
+# sql function to return an equipment 
 def return_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
     # get expected return datetime
     sql = """SELECT expected_return_datetime AS expected_return_datetime FROM equipment_rental_status WHERE equipment_rental_status_id = %s"""
@@ -638,7 +668,7 @@ def return_equipment(equipment_rental_status_id, instance_id, user_id, current_d
                 WHERE instance_id = %s"""
     operate_sql(sql, (instance_id,))
 
-
+# sql function to update an equipment's details
 def updating_equipment(name, price, count, length, width, height, requires_drive_license,min_stock_threshold,description, detail, equipment_id, images,image_ids, sub_id):
     sql_data = get_cursor()
     sql = """UPDATE equipment SET name= %s, price= %s, count=%s, length= %s, width=%s, height=%s, requires_drive_license=%s, min_stock_threshold=%s, description=%s, 
@@ -669,7 +699,7 @@ def updating_equipment(name, price, count, length, width, height, requires_drive
     value = (sub_id,equipment_id)
     sql_data.execute(sql, value)
 
-
+# sql function to add a new equipment
 def add_equipment(name, price, count,length, width, height, requires_drive_license, min_stock_threshold, description, detail, images, sub_id):
     sql_data = get_cursor()
     sql = """INSERT INTO equipment(name, price, count, priority, length, width, height, requires_drive_license, min_stock_threshold, description, 
@@ -688,6 +718,7 @@ def add_equipment(name, price, count,length, width, height, requires_drive_licen
     value = (sub_id,)
     sql_data.execute(sql, value)
 
+# sql function to delete a new equipment
 def deleting_equipment(equipment_id):
     operate_sql("""DELETE FROM equipment_img WHERE equipment_id = %s;""", (equipment_id,))
     operate_sql("""DELETE FROM classify WHERE equipment_id = %s;""",(equipment_id,))
@@ -700,6 +731,8 @@ def deleting_equipment(equipment_id):
 # wishlist
 #
 #
+
+# sql function to get every equipment in a customer's wishlist
 def get_equipment_by_wishlist(user_id, sql_page):
     sql = """SELECT e.equipment_id,ei.image_url,e.name,e.description,e.price,s.name AS sc_name,ca.name AS ca_name FROM customer
                 LEFT JOIN wishlist w ON customer.customer_id = w.customer_id
@@ -723,27 +756,27 @@ def get_equipment_by_wishlist(user_id, sql_page):
     count = math.ceil(count['count'] / 15)
     return equipment, count
 
-
+# sql function to get details of a customer's wishlist based on customer's id
 def get_wishlist(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT * FROM wishlist WHERE customer_id=%s;"""
     wishlist = operate_sql(sql, (customer_id,))
     return wishlist
 
-
+# sql function to get details of a customer's wishlist based on customer's id AND equipment id
 def get_user_wishlist(user_id, equipment_id):
     customer_id = get_id(user_id)
     sql = """SELECT * FROM wishlist WHERE customer_id=%s AND equipment_id=%s;"""
     wishlist = operate_sql(sql, (customer_id, equipment_id,))
     return wishlist
 
-
+# sql function to add an equipment into a wishlist
 def add_wishlist(user_id, equipment_id):
     customer_id = get_id(user_id)
     sql = """INSERT INTO wishlist (customer_id, equipment_id) VALUE (%s,%s);"""
     operate_sql(sql, (customer_id, equipment_id,))
 
-
+# sql function to delete an equipment from the wishlist
 def delete_wishlist(user_id, equipment_id):
     customer_id = get_id(user_id)
     sql = """DELETE FROM wishlist WHERE customer_id=%s AND equipment_id=%s;"""
@@ -755,6 +788,8 @@ def delete_wishlist(user_id, equipment_id):
 # booking
 #
 #
+
+# sql function to get bookings of a customer
 def get_bookings(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT e.equipment_id, hi.hire_id, hi.instance_id, hl.datetime, e.name, ers.rental_start_datetime, e.price, ers.expected_return_datetime FROM hire_list AS hl
@@ -767,6 +802,7 @@ def get_bookings(user_id):
     bookings = operate_sql(sql, (customer_id,))
     return bookings
 
+# sql function to get information of a booking
 def get_booking(hire_id, instance_id):
     sql = '''SELECT DISTINCT e.name, hl.datetime, ers.rental_start_datetime, ers.expected_return_datetime, hl.price FROM hire_list AS hl
                 INNER JOIN equipment_rental_status AS ers ON hl.customer_id = ers.customer_id
@@ -780,7 +816,7 @@ def get_booking(hire_id, instance_id):
     else:
         return None
 
-
+# sql function to delete a booking
 def sql_delete_booking(instance_id=None, hire_id=None):
     if instance_id:
         sql = """DELETE FROM hire_item WHERE instance_id=%s;"""
@@ -793,7 +829,7 @@ def sql_delete_booking(instance_id=None, hire_id=None):
         sql = """DELETE FROM hire_list WHERE hire_id=%s"""
         operate_sql(sql, (hire_id,))
 
-
+# sql function to update hire (booking) list by adding a booking
 def hire_list_update(price,user_id):
     customer_id = get_id(user_id)
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -806,13 +842,13 @@ def hire_list_update(price,user_id):
     hire_id = operate_sql(sql, (customer_id, now, price,))
     return hire_id[0]['hire_id']
 
-
+# sql function to extend a hire (booking) period
 def update_booking_end_date(end_date_obj, instance_id):
     # Now that we know the date is valid, we can proceed with the update
     sql = """UPDATE equipment_rental_status SET expected_return_datetime=%s WHERE instance_id=%s;"""
     operate_sql(sql, (end_date_obj, instance_id))
 
-
+# sql function to add booked equipments into a hire (booking) list
 def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
     sql = """SELECT price
                 FROM equipment
@@ -824,21 +860,7 @@ def update_hire_item(hire_id,instance_id,count,booking_equipment_id,days):
             VALUES (%s,%s,%s,%s);"""
     operate_sql(sql, (hire_id,instance_id,count,total_price,))
 
-
-def check_out_equipment(equipment_rental_status_id, instance_id, user_id, current_datetime):
-    # update the rental status of a booking
-    sql = "UPDATE equipment_rental_status SET rental_status_id = 2 WHERE equipment_rental_status_id = %s;"
-    operate_sql(sql, (equipment_rental_status_id,))
-    # get staff id from user id
-    staff_id = get_id(user_id)
-    # get equipment id from instance id
-    equipment_id = get_equipment_id(instance_id)
-    # insert hire log the necessary details
-    sql = """INSERT INTO hire_log (log_id, staff_id, datetime, equipment_status_id, message, equipment_id) 
-            VALUES (NULL, %s, %s, 1, 'Equipment hired to a customer', %s);"""
-    operate_sql(sql, (staff_id, current_datetime, equipment_id))
-
-
+# sql function to update number of instances of a equipment which is going to be booked
 def update_equipment_instance(booking_equipment_id,equipment_quantity):
     sql = """SELECT instance_id FROM equipment_instance
                 WHERE equipment_id = %s AND instance_status = 1
@@ -853,7 +875,7 @@ def update_equipment_instance(booking_equipment_id,equipment_quantity):
         operate_sql(sql, (instance_id,))
     return instance_ids
 
-
+# sql function to calculate maximum number of instances of an equipment
 def max_count(booking_equipment_id):
     sql = """SELECT count(*) FROM equipment_instance
                 WHERE equipment_id = %s AND instance_status = 1;"""
@@ -867,6 +889,8 @@ def max_count(booking_equipment_id):
 # payment
 #
 #
+
+# sql function to add a payment for a booking
 def update_payment(hire_id, status_id, payment_type_id):
     today_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     sql = """INSERT INTO payment (hire_id, status_id, payment_type_id, datetime)
@@ -878,7 +902,7 @@ def update_payment(hire_id, status_id, payment_type_id):
         print(f"Error updating payment: {e}")
         return False
 
-
+# sql function to get every payment method
 def payment_method():
     sql = """SELECT * FROM payment_type;"""
     payment_method = operate_sql(sql)
@@ -886,7 +910,7 @@ def payment_method():
     # print(methods)
     return methods
 
-
+# sql function to add a payment for a booking
 def payment_update(hire_id,payment_method):
     sql = """SELECT payment_type_id FROM payment_type WHERE name = %s;"""
     payment_type_id = operate_sql(sql, (payment_method,), fetch=0, close=0)
@@ -902,6 +926,8 @@ def payment_update(hire_id,payment_method):
 # cart
 #
 #
+
+# sql function to get every equipment in a shopping cart
 def booking_equipment(cart_item_id):
     sql = """SELECT equipment_id
                 FROM shopping_cart_item
@@ -910,7 +936,7 @@ def booking_equipment(cart_item_id):
     booking_equipment_id = booking_equipment[0]['equipment_id']
     return booking_equipment_id
 
-
+# sql function to add an equipment into the shopping cart
 def add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time):
     customer_id = get_id(user_id)
     sql = """INSERT INTO shopping_cart_item (customer_id,equipment_id,count,start_time,end_time)
@@ -918,12 +944,12 @@ def add_equipment_into_cart(user_id, equipment_id, count, start_time, end_time):
     # print(sql % (customer_id,equipment_id,count,start_time,duration))
     operate_sql(sql, (customer_id, equipment_id, count, start_time, end_time,))
 
-
+# sql function to delete an equipment from the shopping cart
 def sql_delete_item(cart_item_id):
     sql = """DELETE FROM shopping_cart_item WHERE cart_item_id=%s"""
     operate_sql(sql, (cart_item_id,))
 
-
+# sql function to display a customer's shopping cart
 def my_cart(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT sci.cart_item_id, sci.customer_id, sci.equipment_id,sci.count as quantity, sci.start_time,sci.end_time, e.name,  
@@ -933,10 +959,10 @@ def my_cart(user_id):
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
                 WHERE sci.customer_id = %s;"""
-    # print(sql % (customer_id,equipment_id,count,start_time,duration))
     equipment_in_cart = operate_sql(sql, (customer_id,))
     return equipment_in_cart
 
+# sql function to edit details of an equipment in the carts
 def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time):
     customer_id = get_id(user_id)
     sql = """UPDATE shopping_cart_item 
@@ -944,7 +970,7 @@ def edit_equipment_in_cart(user_id, cart_item_id, quantity, start_time, end_time
                     WHERE (customer_id = %s) and (cart_item_id = %s)"""
     operate_sql(sql, (quantity, start_time, end_time, customer_id, cart_item_id,))
 
-
+# sql function to display a customer's shopping cart including those requiring driving license
 def check_cart(user_id):
     customer_id = get_id(user_id)
     sql = """SELECT sci.equipment_id FROM shopping_cart_item as sci
@@ -952,12 +978,11 @@ def check_cart(user_id):
                 LEFT JOIN equipment_img as ei on e.equipment_id = ei.equipment_id
                 LEFT JOIN classify as c on e.equipment_id = c.equipment_id
                 WHERE sci.customer_id = %s and e.requires_drive_license = 1;"""
-    # print(sql % (customer_id,equipment_id,count,start_time,duration))
     equipment_require_licence = operate_sql(sql, (customer_id,))
     equipment_id_list = [item['equipment_id'] for item in equipment_require_licence]
     return equipment_id_list
 
-
+# sql function to hire an equipment from the shopping cart 
 def update_equipment_rental_status(instance_id,cart_item_id,user_id):
     customer_id = get_id(user_id)
     sql = """SELECT equipment_id FROM shopping_cart_item
@@ -976,13 +1001,14 @@ def update_equipment_rental_status(instance_id,cart_item_id,user_id):
     time_diff = end_time - start_time
     return time_diff
 
+# sql function to hire an equipment by clicking "hire now" button 
 def hire_now_update_equipment_rental_status(instance_id,user_id,start_time,end_time):
     customer_id = get_id(user_id)
     sql = """INSERT INTO equipment_rental_status (instance_id,customer_id,rental_start_datetime,expected_return_datetime,rental_status_id)
             VALUES (%s,%s,%s,%s,2);"""
     operate_sql(sql, (instance_id,customer_id,start_time,end_time,))
 
-
+# sql function to check whether an equipment requires driving license
 def check_driver_lisence(equipment_id):
     sql = """SELECT requires_drive_license, price FROM equipment
                 WHERE equipment_id = %s;"""
@@ -1000,6 +1026,8 @@ def check_driver_lisence(equipment_id):
 # maintenance
 #
 #
+
+# sql function to get every equipment under maintenance
 def get_maintenance_equipment(today_date):
     details = operate_sql("""SELECT * FROM `equipment_maintenance`;""", close=0)
     # set status to overdue if the maintenance is not completed and the expected return date is in the past
@@ -1017,7 +1045,7 @@ def get_maintenance_equipment(today_date):
     details = operate_sql(sql)
     return details
 
-
+# sql function to mark an equipment's maintenance as 'completed'
 def complete_maintenance(id):
     # update instance's status in the equipment_maintenance table
     sql="""UPDATE equipment_maintenance SET maintenance_status_id=3
@@ -1029,7 +1057,7 @@ def complete_maintenance(id):
     operate_sql(sql, (id,))
 
 
-# report
+# sql function to get monthly payment details and split them via category
 def get_monthly_details(start_date):
     sql = """SELECT payment_id, payment_type.name AS payment_type, hire_list.price AS price, category.name AS category_name FROM payment
                 INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
@@ -1044,6 +1072,7 @@ def get_monthly_details(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+# sql function to get every payment in a month
 def get_monthly_payment(start_date):
     sql = """SELECT payment_id, payment_type.name AS payment_type, hire_list.price AS price FROM payment
                 INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
@@ -1052,6 +1081,7 @@ def get_monthly_payment(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+# sql function to get payment details in a financial year, and split them by category
 def get_annual_details(end_date):
     sql = """SELECT payment_id, payment.datetime AS payment_datetime, payment_type.name AS payment_type, hire_list.price AS price, category.name AS category_name FROM payment
                 INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
@@ -1066,6 +1096,7 @@ def get_annual_details(end_date):
     sql_list = operate_sql(sql, (end_date, end_date))
     return sql_list
 
+# sql function to get every payment in a financial year
 def get_annual_payment(end_date):
     sql = """SELECT payment_id, payment.datetime AS payment_datetime, payment_type.name AS payment_type, hire_list.price AS price FROM payment
                 INNER JOIN payment_type ON payment.payment_type_id = payment_type.payment_type_id
@@ -1074,6 +1105,7 @@ def get_annual_payment(end_date):
     sql_list = operate_sql(sql, (end_date, end_date))
     return sql_list
 
+# sql function to get every maintenance in a month
 def get_monthly_maintenances(start_date):
     sql = """SELECT maintenance_id, maintenance_cost, category.name AS category_name FROM equipment_maintenance
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
@@ -1084,6 +1116,7 @@ def get_monthly_maintenances(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+# sql function to get every maintenance in a year
 def get_annual_maintenances(start_date):
     sql = """SELECT maintenance_id, maintenance_cost, maintenance_start_date, category.name AS category_name FROM equipment_maintenance
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_maintenance.instance_id
@@ -1094,6 +1127,7 @@ def get_annual_maintenances(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+# sql function to get every booking in a month
 def get_monthly_bookings(start_date):
     sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM equipment_rental_status
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
@@ -1104,6 +1138,7 @@ def get_monthly_bookings(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
+# sql function to get every booking in a year
 def get_annual_bookings(start_date):
     sql = """SELECT equipment_rental_status_id, rental_start_datetime, expected_return_datetime, category.name AS category_name FROM equipment_rental_status
                 INNER JOIN equipment_instance ON equipment_instance.instance_id = equipment_rental_status.instance_id
@@ -1114,7 +1149,7 @@ def get_annual_bookings(start_date):
     sql_list = operate_sql(sql, (start_date, start_date))
     return sql_list
 
-
+# sql function to get information for admin dashboard
 def stats_dashboard():
     customer_stat = operate_sql("""SELECT COUNT(customer_id) FROM customer WHERE state = 1;""", close=0)
     staff_stat = operate_sql("""SELECT COUNT(staff_id) FROM staff WHERE state = 1;""", close=0)
@@ -1123,7 +1158,7 @@ def stats_dashboard():
     return customer_stat, staff_stat, equipment_stat, booking_stat
 
 
-#  instance
+# sql function to get equipment id from instance id
 def get_equipment_id(instance_id):
     sql = """SELECT e.equipment_id FROM equipment AS e
                 INNER JOIN equipment_instance AS ei ON ei.equipment_id = e.equipment_id
@@ -1132,22 +1167,20 @@ def get_equipment_id(instance_id):
     return equipment_id
 
 
-
-
-# 有疑问
+# sql function to get image priority 
 def image_priority(equipment_id):
     sql = """SELECT e.equipment_id, e.name AS e_name, ei.image_id, ei.image_url, ei.priority FROM equipment e 
                 LEFT JOIN equipment_img ei on e.equipment_id = ei.equipment_id WHERE e.equipment_id=%s;"""
     image_priority = operate_sql(sql, (equipment_id,))
     return image_priority
 
-
+# sql function to get image for a equipment
 def get_image_by_id(equipment_id):
     sql_img = """SELECT * FROM equipment_img WHERE equipment_id = %s;"""
     image = operate_sql(sql_img, (equipment_id,))
     return image
 
-
+# sql function to get every main image for an equipment
 def check_existing_main_image(equipment_id):
     sql_data = get_cursor()
     sql = """SELECT COUNT(*) FROM equipment_img WHERE equipment_id = %s AND priority = 1;"""
@@ -1157,6 +1190,7 @@ def check_existing_main_image(equipment_id):
     print(main_image_exist)
     return main_image_exist
 
+# sql function to insert a new enquiry
 def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, enquiry_details):   
     sql = ("INSERT INTO contact (contact_id, first_name, last_name, email, phone, location, enquiry_type, enquiry_details) "
            "VALUES (NULL,%s, %s, %s, %s, %s, %s, %s)")
@@ -1164,12 +1198,13 @@ def insert_enquiry(first_name, last_name, email, phone, location, enquiry_type, 
     operate_sql(sql, value)
     return True
 
+# sql function to get all enquiries
 def get_all_enquiries():
     sql = """SELECT * FROM contact"""
     enquiries = operate_sql(sql)
     return enquiries
 
-
+# sql function to get every equipment instance
 def equipment_instance():
     sql = """SELECT e.equipment_id, e.name AS e_name, i.instance_status,i.instance_id, s.name AS instance_name
             FROM equipment e
@@ -1178,7 +1213,7 @@ def equipment_instance():
     sql_list = operate_sql(sql)
     return sql_list
 
-
+# sql function to get instance status
 def instance_status():
     sql = """SELECT * FROM instance_status;"""
     sql = operate_sql (sql)

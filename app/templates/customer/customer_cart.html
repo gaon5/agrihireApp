@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+<!--Customer shopping cart page-->
 
 {% block mytitle %}
     Shopping Cart
@@ -9,13 +10,13 @@
 {% block mycss %}
     <style>
         .cart-title {
-            color: #1D1912; /* 字体颜色 */
-            font-family: 'Poppins', sans-serif; /* 字体 */
-            font-size: 24px; /* 字体大小 */
-            margin-left: 15%; /* 左侧距离 */
-            margin-right: 15%; /* 右侧距离 */
-            border-bottom: 3px solid #1D1912; /* 3px深色横线 */
-            padding-bottom: 10px; /* 为了使横线与文字之间有些间距 */
+            color: #1D1912; 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 24px; 
+            margin-left: 15%; 
+            margin-right: 15%; 
+            border-bottom: 3px solid #1D1912; 
+            padding-bottom: 10px;
         }
 
         .table-header {
@@ -71,33 +72,33 @@
         }
 
         .quantity-btn {
-            border: none; /* 移除按钮的边框 */
-            background-color: transparent; /* 透明背景 */
-            color: #1D1912; /* 修改字体颜色 */
-            cursor: pointer; /* 更改光标样式为pointer */
+            border: none; 
+            background-color: transparent; 
+            color: #1D1912; 
+            cursor: pointer; 
         }
 
         .quantity-btn:hover {
-            background-color: #eacd76; /* 设置鼠标hover时的背景颜色 */
+            background-color: #eacd76; 
         }
 
         .total-bar {
             display: flex;
-            justify-content: space-between; /* 将内容分布在两端，而不仅仅是右侧 */
+            justify-content: space-between; 
             padding: 10px 0;
             border-top: 2px solid #1D1912;
         }
 
         .total-price {
-            margin-right: 15%; /* 与页面右侧对齐 */
-            font-size: 24px; /* 字体大小 */
-            font-weight: bold; /* 粗体字 */
+            margin-right: 15%; 
+            font-size: 24px; 
+            font-weight: bold; 
             font-family: 'Poppins', sans-serif;
         }
 
         .total-amount {
-            font-size: 24px; /* 字体大小 */
-            font-weight: bold; /* 粗体字 */
+            font-size: 24px;
+            font-weight: bold; 
             font-family: 'Poppins', sans-serif;
         }
 
@@ -254,7 +255,7 @@
             let inputId = isModal ? 'Quantity' : 'quantityInput_' + cartItemId;
             let input = document.getElementById(inputId);
             
-            if(!input) return; // 如果找不到input，直接返回
+            if(!input) return;
 
             let currentValue = parseInt(input.value, 10);
             let maxCount = parseInt(input.getAttribute('data-max-count'), 10);
@@ -292,14 +293,11 @@
             let quantityInput = document.getElementById('quantityInput_' + cartItemId);
             let priceElement = document.getElementById('itemPrice_' + cartItemId);
 
-            // console.log("Quantity Input Value:", quantityInput.value);  // 调试输出
-            // console.log("Original Price:", priceElement.getAttribute('data-original-price'));  // 调试输出
-
             let originalPrice = parseFloat(priceElement.getAttribute('data-original-price'));
             let quantity = parseInt(quantityInput.value, 10);
 
             let totalPriceForItem = originalPrice * quantity;
-            priceElement.textContent = totalPriceForItem.toFixed(2);  // 显示两位小数的价格
+            priceElement.textContent = totalPriceForItem.toFixed(2); 
 
             updateTotalAmount();
         }
@@ -383,76 +381,45 @@
             document.getElementById("cart_item_id_modal").value = cart_item_id;
         }
 
-                // 此函数将遍历所有的复选框并收集已选中的ID
-        function getSelectedCartItems() {
-            // 创建一个数组来存储选中的ID
-            let selectedItems = [];
 
-            // 获取所有的复选框元素
+        function getSelectedCartItems() {
+            let selectedItems = [];
             var checkboxes = document.querySelectorAll('.equipment-checkbox');
 
-            // 遍历复选框
+
             checkboxes.forEach(function(checkbox) {
-                // 如果复选框被选中
                 if (checkbox.checked) {
-                    // 获取此复选框的data-cart-item-id属性值
                     var cartItemId = checkbox.getAttribute('data-cart-item-id');
                     let rowDiv = checkbox.closest('.row');
-
-                    // 在这个row中查找数量输入元素
                     let quantityInput = rowDiv.querySelector('input[type="number"]');
-
-                    // 获取输入的数量
                     let quantity = parseInt(quantityInput.value, 10);
-
-                    // 将ID和数量添加到数组中
                     selectedItems.push({
                         id: cartItemId,
                         quantity: quantity
                     });
                 }
             });
-
-            // 最后，返回包含所有已选中ID的数组
             return selectedItems;
         }
 
         function updateTotalAmount() {
             let total = 0.00;
-
-            // 获取所有选中的复选框
             let checkboxes = document.querySelectorAll('.equipment-checkbox:checked');
-            
-            // 遍历每个选中的复选框
             checkboxes.forEach(checkbox => {
-                // 获取复选框的价格数据
                 let price = parseFloat(checkbox.getAttribute('data-price'));
-
-                // 找到复选框所在的容器（.col-md-1），然后获取其父元素（.row）
                 let rowDiv = checkbox.closest('.row');
-
-                // 在这个row中查找数量输入元素
                 let quantityInput = rowDiv.querySelector('input[type="number"]');
-
-                if (quantityInput) {  // 如果找到数量输入元素
-                    // 获取输入的数量
+                if (quantityInput) {  
                     let quantity = parseInt(quantityInput.value, 10);
-
-                    // 计算这个项目的总价格，并累加到总金额中
                     total += price * quantity;
                 }
             });
-
-            // 更新总金额的显示
             document.querySelector('.total-amount').textContent = total.toFixed(2);
         }
 
 
         window.onload = function() {
-            // 设置初始总金额为 0
             document.querySelector('.total-amount').textContent = '0.00';
-
-            // 为每个复选框添加状态变更的监听器
             let checkboxes = document.querySelectorAll('.equipment-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', updateTotalAmount);
@@ -462,23 +429,16 @@
         document.getElementById('cartItemsForm').onsubmit = function() {
             let selectedItems = getSelectedCartItems();
             let price = document.querySelector(".total-amount").textContent;
-
-            // 获取所有选中的ID和数量
             let selectedIds = selectedItems.map(item => item.id).join(',');
             let selectedQuantities = selectedItems.map(item => item.quantity).join(',');
-
-            // 更新隐藏字段的值
             document.getElementById('selectedCartItemIds').value = selectedIds;
-            // 新增一个隐藏字段来存储数量
             let quantityInput = document.createElement('input');
             quantityInput.type = 'hidden';
             quantityInput.name = 'selectedQuantities';
             quantityInput.value = selectedQuantities;
             document.getElementById('cartItemsForm').appendChild(quantityInput);
-
             document.getElementById("totalAmountFinal").value = price;
-
-            return true; // 允许表单提交
+            return true; 
         };
 
     </script>

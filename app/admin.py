@@ -56,7 +56,7 @@ def manage_category():
     return render_template('admin/manage_category.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
 
-# route for managing categories
+# route for managing sub categories
 @app.route('/admin/manage_subcategory', methods=['GET', 'POST'])
 def manage_subcategory():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Manage Sub Category", "url": "#"}]
@@ -114,7 +114,7 @@ def manage_subcategory():
                 last_msg = "Sub category deleted"
     return render_template('admin/manage_subcategory.html', breadcrumbs=breadcrumbs, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to manage staff
 @app.route('/admin/manage_staff', methods=['GET', 'POST'])
 def manage_staff():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Manage Staff", "url": "#"}]
@@ -134,6 +134,7 @@ def manage_staff():
     else:
         page = int(page)
         sql_page = (page - 1) * 15
+    # add or update details if the method is POST
     if request.method == 'POST':
         first_name = request.form.get('first_name').capitalize()
         last_name = request.form.get('last_name').capitalize()
@@ -143,6 +144,7 @@ def manage_staff():
         phone_number = request.form.get('phone_number')
         user_id = request.form.get('user_id')
         user_detail = sql_function.get_account(email)
+        # update details if there is user_id, otherwise add a staff
         if user_id:
             if user_detail:
                 if int(user_id) != user_detail['user_id']:
@@ -160,7 +162,7 @@ def manage_staff():
     return render_template('admin/manage_staff.html', breadcrumbs=breadcrumbs, staff_list=staff_list, title_list=sql_function.title_list, count=count,
                            staff_search=search, msg=last_msg, error_msg=last_error_msg)
 
-
+# route to manage customer
 @app.route('/admin/manage_customer', methods=['GET', 'POST'])
 def manage_customer():
     breadcrumbs = [{"text": "Dashboard", "url": "/dashboard"}, {"text": "Manage Customer", "url": "#"}]
@@ -180,6 +182,7 @@ def manage_customer():
     else:
         page = int(page)
         sql_page = (page - 1) * 15
+    # do something if method is POST
     if request.method == 'POST':
         first_name = request.form.get('first_name').capitalize()
         last_name = request.form.get('last_name').capitalize()
@@ -193,6 +196,7 @@ def manage_customer():
         street_name = request.form.get('street_name')
         user_id = request.form.get('user_id')
         user_detail = sql_function.get_account(email)
+        # update details if there is user_id, otherwise add a customer
         if user_id:
             if user_detail:
                 if int(user_id) != user_detail['user_id']:
@@ -211,7 +215,7 @@ def manage_customer():
                            city_list=sql_function.city_list, region_list=sql_function.region_list, count=count, customer_search=search, msg=last_msg,
                            error_msg=last_error_msg)
 
-
+# route to delete a user
 @app.route('/admin/delete_user', methods=['GET', 'POST'])
 def delete_user():
     if 'loggedIn' not in session:
@@ -220,13 +224,16 @@ def delete_user():
     if check_permissions() != 3:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # do something if method is POST
     if request.method == 'POST':
         user_id = request.form.get('user_id')
         previous_url = str(request.referrer)
         urlList = [x for x in previous_url.split('/') if x != '']
+        # delete a staff
         if "manage_staff" in urlList[-1]:
             sql_function.delete_staff(user_id)
             return redirect(previous_url)
+        # delete a customer
         elif "manage_customer" in urlList[-1]:
             sql_function.delete_customer(user_id)
             return redirect(previous_url)
@@ -234,7 +241,7 @@ def delete_user():
         session['error_msg'] = "Sorry, we can't find the page you're looking for!."
         return redirect(url_for('dashboard'))
 
-
+# route for admin to set new password for customer and staff
 @app.route('/admin/password', methods=['GET', 'POST'])
 def admin_password():
     if 'loggedIn' not in session:
@@ -243,9 +250,11 @@ def admin_password():
     if check_permissions() != 3:
         session['error_msg'] = 'You are not authorized to access this page. Please login a different account.'
         return redirect(url_for('index'))
+    # so something is method is POST
     if request.method == 'POST':
         user_id = request.form.get('user_id')
         password = request.form.get('set_password')
+        # set new password for the user
         sql_function.set_password(password, user_id)
         previous_url = str(request.referrer)
         return redirect(previous_url)
