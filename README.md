@@ -303,7 +303,7 @@ Template: driver_license.html
 
 This route renders the page for customer to enter their driver’s license and have the option to upload a photo of their license.
 
-# COMP639_group_6_project_2
+# Account emails and passwords
 
     email:
     admin@hire.com
@@ -311,7 +311,7 @@ This route renders the page for customer to enter their driver’s license and h
     customer@hire.com
     
     password:
-    Userpassword1
+    Userpassword1 (for every account)
 
 # Credit
 
