@@ -16,10 +16,10 @@
 # dbname = "hire"      
 # dbuser = "root"
 
-dbpass = "hihihi77"
+dbpass = "12345678"
 dbhost = "127.0.0.1"
 dbport = "3306"
-dbname = "hire"
+dbname = "agrihire"
 dbuser = "root"
 
 # dbuser = "root" #PUT YOUR MySQL username here - usually root
